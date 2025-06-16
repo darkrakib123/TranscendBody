@@ -8,6 +8,7 @@ import {
   serial,
   boolean,
   date,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -52,15 +53,15 @@ export const dailyTrackers = pgTable("daily_trackers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   date: date("date").notNull(),
-  completionRate: serial("completion_rate").default(0), // percentage
+  completionRate: integer("completion_rate").notNull().default(0), // percentage
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Tracker entries table
 export const trackerEntries = pgTable("tracker_entries", {
   id: serial("id").primaryKey(),
-  trackerId: serial("tracker_id").notNull(),
-  activityId: serial("activity_id").notNull(),
+  trackerId: integer("tracker_id").notNull(),
+  activityId: integer("activity_id").notNull(),
   timeSlot: varchar("time_slot").notNull(), // 'morning', 'afternoon', 'evening'
   status: varchar("status").notNull().default("pending"), // 'pending', 'completed'
   createdAt: timestamp("created_at").defaultNow(),
