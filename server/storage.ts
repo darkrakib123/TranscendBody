@@ -21,6 +21,8 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(id: string, role: string): Promise<User>;
   
   // Activity operations
   getActivities(): Promise<Activity[]>;
@@ -69,6 +71,19 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async updateUserRole(id: string, role: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
   // Activity operations
   async getActivities(): Promise<Activity[]> {
     return await db.select().from(activities).orderBy(activities.title);
@@ -98,7 +113,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteActivity(id: number): Promise<boolean> {
     const result = await db.delete(activities).where(eq(activities.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Daily tracker operations
@@ -166,7 +181,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTrackerEntry(id: number): Promise<boolean> {
     const result = await db.delete(trackerEntries).where(eq(trackerEntries.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Statistics

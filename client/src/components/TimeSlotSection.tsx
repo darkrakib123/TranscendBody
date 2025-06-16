@@ -73,9 +73,46 @@ export default function TimeSlotSection({ timeSlot, entries, trackerId }: TimeSl
     },
   });
 
+  const deleteEntryMutation = useMutation({
+    mutationFn: async (entryId: number) => {
+      await apiRequest('DELETE', `/api/tracker/entries/${entryId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tracker/today'] });
+      toast({
+        title: "Success",
+        description: "Activity removed from tracker",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to remove activity",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleToggleActivity = (entryId: number, currentStatus: string) => {
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
     toggleStatusMutation.mutate({ entryId, status: newStatus });
+  };
+
+  const handleDeleteEntry = (entryId: number) => {
+    if (confirm('Are you sure you want to remove this activity from your tracker?')) {
+      deleteEntryMutation.mutate(entryId);
+    }
   };
 
   return (
@@ -145,8 +182,12 @@ export default function TimeSlotSection({ timeSlot, entries, trackerId }: TimeSl
                   <span className={`px-2 py-1 bg-${categoryConf.color}-100 text-${categoryConf.color}-700 text-xs font-medium rounded-full capitalize`}>
                     {entry.activity.category}
                   </span>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <i className="fas fa-ellipsis-h"></i>
+                  <button 
+                    className="text-red-400 hover:text-red-600"
+                    onClick={() => handleDeleteEntry(entry.id)}
+                    title="Delete activity"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
                   </button>
                 </div>
               </div>
