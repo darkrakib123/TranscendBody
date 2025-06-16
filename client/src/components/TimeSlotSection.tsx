@@ -183,11 +183,16 @@ export default function TimeSlotSection({ timeSlot, entries, trackerId }: TimeSl
                     {entry.activity.category}
                   </span>
                   <button 
-                    className="text-red-400 hover:text-red-600"
+                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors border border-red-200 hover:border-red-400 min-w-[32px] min-h-[32px] flex items-center justify-center"
                     onClick={() => handleDeleteEntry(entry.id)}
-                    title="Delete activity"
+                    title="Remove activity"
+                    disabled={deleteEntryMutation.isPending}
                   >
-                    <i className="fas fa-trash text-xs"></i>
+                    {deleteEntryMutation.isPending ? (
+                      <i className="fas fa-spinner fa-spin text-sm"></i>
+                    ) : (
+                      <i className="fas fa-trash text-sm"></i>
+                    )}
                   </button>
                 </div>
               </div>
