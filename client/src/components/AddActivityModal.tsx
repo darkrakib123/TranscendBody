@@ -137,7 +137,29 @@ export default function AddActivityModal({ isOpen, onClose, timeSlot = 'morning'
     });
   };
 
-  const preloadedActivities = activities?.filter(a => !a.isCustom) || [];
+  // Filter activities based on time slot for better relevance
+  const getTimeAppropriatActivities = (timeSlot: string, activities: Activity[]) => {
+    const morningActivities = ['Morning Meditation', 'Healthy Breakfast', 'Protein Shake', 'Stretching', 'Goal Visualization', 'Gratitude Journal'];
+    const afternoonActivities = ['HIIT Training', 'Push-ups', 'Squats', 'Planks', '30-min Walk', 'Meal Prep', 'Track Calories', 'Progress Photos'];
+    const eveningActivities = ['8 Hours Sleep', 'Foam Rolling', 'Hot Bath', 'Massage', 'Drink 8 Glasses Water', 'Positive Affirmations'];
+    
+    return activities.filter(a => {
+      if (a.isCustom) return true; // Always show custom activities
+      
+      switch (timeSlot) {
+        case 'morning':
+          return morningActivities.some(title => a.title.includes(title) || title.includes(a.title));
+        case 'afternoon':
+          return afternoonActivities.some(title => a.title.includes(title) || title.includes(a.title));
+        case 'evening':
+          return eveningActivities.some(title => a.title.includes(title) || title.includes(a.title));
+        default:
+          return true;
+      }
+    });
+  };
+
+  const preloadedActivities = getTimeAppropriatActivities(selectedTimeSlot, activities?.filter(a => !a.isCustom) || []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -204,7 +226,11 @@ export default function AddActivityModal({ isOpen, onClose, timeSlot = 'morning'
 
           <div>
             <Label>Time Slot</Label>
-            <Select value={selectedTimeSlot} onValueChange={(value: any) => setSelectedTimeSlot(value)}>
+            <Select value={selectedTimeSlot} onValueChange={(value: any) => {
+              setSelectedTimeSlot(value);
+              // Reset selected activity when time slot changes to show relevant activities
+              setSelectedActivity('custom');
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -214,6 +240,11 @@ export default function AddActivityModal({ isOpen, onClose, timeSlot = 'morning'
                 <SelectItem value="evening">Evening</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              {selectedTimeSlot === 'morning' && 'Best for: meditation, breakfast, stretching, goal setting'}
+              {selectedTimeSlot === 'afternoon' && 'Best for: workouts, meal prep, active tasks'}
+              {selectedTimeSlot === 'evening' && 'Best for: recovery, sleep prep, reflection'}
+            </p>
           </div>
 
           <div className="flex space-x-3 pt-4">

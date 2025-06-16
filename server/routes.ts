@@ -2,8 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertActivitySchema, insertTrackerEntrySchema } from "@shared/schema";
+import { insertActivitySchema, insertTrackerEntrySchema, trackerEntries } from "@shared/schema";
 import { z } from "zod";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -138,12 +140,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/tracker/entries/:id', isAuthenticated, async (req, res) => {
+  app.delete('/api/tracker/entries/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get the entry first to find the tracker ID for completion update
+      const entryData = await db.select().from(trackerEntries).where(eq(trackerEntries.id, id)).limit(1);
+      const trackerId = entryData[0]?.trackerId;
+      
       const success = await storage.deleteTrackerEntry(id);
       
       if (success) {
+        // Update completion rate after deletion
+        if (trackerId) {
+          await updateTrackerCompletion(trackerId);
+        }
         res.json({ message: "Entry deleted successfully" });
       } else {
         res.status(404).json({ message: "Entry not found" });
@@ -206,18 +217,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to update completion rate
   async function updateTrackerCompletion(trackerId: number) {
-    // This is a simplified calculation - you might want to fetch all entries for the tracker
-    // and calculate the actual completion percentage
-    const userId = ""; // You'd need to get this from the tracker
-    const today = new Date().toISOString().split('T')[0];
-    const tracker = await storage.getDailyTracker(userId, today);
-    
-    if (tracker) {
-      const totalEntries = tracker.entries.length;
-      const completedEntries = tracker.entries.filter(e => e.status === 'completed').length;
+    try {
+      // Get all entries for this tracker
+      const entries = await db
+        .select()
+        .from(trackerEntries)
+        .where(eq(trackerEntries.trackerId, trackerId));
+      
+      const totalEntries = entries.length;
+      const completedEntries = entries.filter(e => e.status === 'completed').length;
       const completionRate = totalEntries > 0 ? Math.round((completedEntries / totalEntries) * 100) : 0;
       
       await storage.updateTrackerCompletion(trackerId, completionRate);
+    } catch (error) {
+      console.error('Error updating tracker completion:', error);
     }
   }
 
