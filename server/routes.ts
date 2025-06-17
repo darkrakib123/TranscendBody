@@ -15,7 +15,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Main routes
   app.get('/', (req, res) => {
-    res.render('index', { title: 'Home' });
+    if (req.isAuthenticated()) {
+      return res.redirect('/dashboard');
+    }
+    res.render('landing', { title: 'Welcome' });
   });
 
   // Authentication routes
