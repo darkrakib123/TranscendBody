@@ -551,10 +551,9 @@
         function loadStats() {
             fetch('/api/stats')
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateStatsDisplay(data.stats);
-                    }
+                .then(stats => {
+                    console.log('Loaded stats:', stats); // Debug log
+                    updateStatsDisplay(stats);
                 })
                 .catch(error => console.error('Error loading stats:', error));
         }
@@ -1030,6 +1029,7 @@
 
         // Initialize everything
         loadPopularActivities();
+        loadStats();
         updateProgressDisplay();
     </script>
 </body>
