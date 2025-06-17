@@ -1,217 +1,435 @@
-<!-- Hero Section -->
-<div class="min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="text-white">
-                    <div class="mb-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                                <i class="fas fa-dumbbell text-white fa-2x"></i>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcend Your Body - Daily Fitness Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="10" cy="50" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="90" cy="30" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .cta-buttons .btn {
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .cta-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .dimension-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+        .time-slot {
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .time-slot:hover {
+            transform: scale(1.05);
+        }
+        .morning-slot { background: linear-gradient(135deg, #ffc107, #fd9621); }
+        .afternoon-slot { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .evening-slot { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .stats-item {
+            text-align: center;
+            padding: 20px;
+        }
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .auth-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .auth-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .auth-toggle button {
+            border: none;
+            background: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .auth-toggle button.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .form-floating .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .form-floating .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: none;
+            color: white;
+        }
+        .form-floating label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .form-floating .form-control::placeholder {
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section d-flex align-items-center">
+        <div class="container position-relative">
+            <div class="row align-items-center min-vh-100 py-5">
+                <!-- Left Content -->
+                <div class="col-lg-7 mb-5 mb-lg-0">
+                    <div class="text-white animate-on-scroll">
+                        <!-- Brand Header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="glass-card p-3 me-3">
+                                <i class="fas fa-dumbbell fa-2x text-white"></i>
                             </div>
-                            <h1 class="display-5 fw-bold mb-0">Transcend Your Body</h1>
+                            <div>
+                                <h1 class="display-4 fw-bold mb-0">Transcend Your Body</h1>
+                                <p class="fs-5 mb-0 opacity-75">Daily Fitness Tracker</p>
+                            </div>
                         </div>
-                        <p class="lead text-white-50 mb-0">Daily Tracker</p>
-                    </div>
-                    
-                    <p class="lead mb-4 text-white-50">
-                        Transform your fitness journey with our comprehensive daily tracking system. 
-                        Monitor workouts, nutrition, recovery, and mindset across Morning, Afternoon, and Evening time slots.
-                    </p>
-                    
-                    <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
-                        <a href="/register" class="btn btn-warning btn-lg px-4 py-3 fw-semibold rounded-3 shadow">
-                            <i class="fas fa-rocket me-2"></i>Start Your Journey
-                        </a>
-                        <a href="/login" class="btn btn-outline-light btn-lg px-4 py-3 fw-semibold rounded-3">
-                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
-                        </a>
-                    </div>
-                    
-                    <div class="d-flex align-items-center text-white-50">
-                        <i class="fas fa-users me-2"></i>
-                        <small>Join thousands transforming their bodies daily</small>
+                        
+                        <!-- Main Description -->
+                        <p class="fs-5 mb-4 opacity-90 lh-base">
+                            Your complete daily fitness tracker for fat loss and muscle building. Plan, 
+                            track, and achieve your fitness goals across workouts, nutrition, recovery, 
+                            and mindset.
+                        </p>
+                        
+                        <!-- Time Slots Preview -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-4">
+                                <div class="time-slot morning-slot">
+                                    <i class="fas fa-sun fa-2x mb-2"></i>
+                                    <h6 class="fw-bold mb-1">Morning</h6>
+                                    <small>Start Strong</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="time-slot afternoon-slot">
+                                    <i class="fas fa-sun fa-2x mb-2"></i>
+                                    <h6 class="fw-bold mb-1">Afternoon</h6>
+                                    <small>Stay Active</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="time-slot evening-slot">
+                                    <i class="fas fa-moon fa-2x mb-2"></i>
+                                    <h6 class="fw-bold mb-1">Evening</h6>
+                                    <small>Recover Well</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Proof -->
+                        <div class="d-flex align-items-center opacity-75">
+                            <div class="me-3">
+                                <div class="d-flex">
+                                    <div class="bg-warning rounded-circle me-1" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
+                                    <div class="bg-success rounded-circle me-1" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
+                                    <div class="bg-info rounded-circle" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
+                                </div>
+                            </div>
+                            <small class="fw-semibold">Perfect for Fitness Beginners • Busy Professionals • Coaching Clients</small>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="text-center mt-5 mt-lg-0">
-                    <div class="card bg-white bg-opacity-15 border-0 rounded-4 p-4 backdrop-blur shadow-lg">
-                        <div class="card-body">
-                            <h5 class="text-white fw-bold mb-4">Track Across Time Slots</h5>
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="bg-warning bg-opacity-20 rounded-3 p-3 text-center">
-                                        <i class="fas fa-sun text-warning fa-2x mb-2"></i>
-                                        <h6 class="text-white fw-semibold mb-1">Morning</h6>
-                                        <small class="text-white-50">Meditation & Breakfast</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="bg-primary bg-opacity-20 rounded-3 p-3 text-center">
-                                        <i class="fas fa-dumbbell text-primary fa-2x mb-2"></i>
-                                        <h6 class="text-white fw-semibold mb-1">Afternoon</h6>
-                                        <small class="text-white-50">Workouts & Nutrition</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="bg-dark bg-opacity-30 rounded-3 p-3 text-center">
-                                        <i class="fas fa-moon text-light fa-2x mb-2"></i>
-                                        <h6 class="text-white fw-semibold mb-1">Evening</h6>
-                                        <small class="text-white-50">Recovery & Reflection</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="bg-success bg-opacity-20 rounded-3 p-3 text-center">
-                                        <i class="fas fa-chart-line text-success fa-2x mb-2"></i>
-                                        <h6 class="text-white fw-semibold mb-1">Progress</h6>
-                                        <small class="text-white-50">Track & Analyze</small>
-                                    </div>
-                                </div>
+                
+                <!-- Right Auth Section -->
+                <div class="col-lg-5">
+                    <div class="auth-section animate-on-scroll">
+                        <!-- Auth Toggle -->
+                        <div class="auth-toggle d-flex">
+                            <button type="button" class="auth-tab active" data-tab="signin">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                            <button type="button" class="auth-tab" data-tab="signup">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                        
+                        <!-- Sign In Form -->
+                        <div id="signin-form" class="auth-form">
+                            <div class="text-center mb-4">
+                                <h4 class="text-white fw-bold">Welcome Back!</h4>
+                                <p class="text-white-50 mb-0">Continue your fitness journey</p>
                             </div>
+                            
+                            <form action="/login" method="POST">
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="signinEmail" name="email" placeholder="Email Address" required>
+                                    <label for="signinEmail">Email Address</label>
+                                </div>
+                                <div class="form-floating mb-4">
+                                    <input type="password" class="form-control" id="signinPassword" name="password" placeholder="Password" required>
+                                    <label for="signinPassword">Password</label>
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard
+                                </button>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <p class="text-white-50 mb-0">
+                                    Demo Account: <code class="text-warning">nanthekumar.2011@mitb.smu.edu.sg</code> / <code class="text-warning">password123</code>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Sign Up Form -->
+                        <div id="signup-form" class="auth-form" style="display: none;">
+                            <div class="text-center mb-4">
+                                <h4 class="text-white fw-bold">Start Your Journey!</h4>
+                                <p class="text-white-50 mb-0">Create your free account today</p>
+                            </div>
+                            
+                            <form action="/register" method="POST">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name">
+                                            <label for="firstName">First Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name">
+                                            <label for="lastName">Last Name</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="signupEmail" name="email" placeholder="Email Address" required>
+                                    <label for="signupEmail">Email Address</label>
+                                </div>
+                                <div class="form-floating mb-4">
+                                    <input type="password" class="form-control" id="signupPassword" name="password" placeholder="Password" required>
+                                    <label for="signupPassword">Password</label>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-3">
+                                    <i class="fas fa-rocket me-2"></i>Create Account & Start
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Features Section -->
-<div class="py-5 bg-white">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">Four Dimensions of Fitness</h2>
-            <p class="text-muted lead">Comprehensive tracking across all aspects of your wellness journey</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 text-center hover-lift">
-                    <div class="card-body p-4">
-                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="fas fa-dumbbell text-danger fa-2x"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Workout</h5>
-                        <p class="text-muted mb-0">Track strength training, cardio, and flexibility exercises with detailed progress monitoring</p>
-                    </div>
-                </div>
+    <!-- Features Section -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <div class="text-center mb-5 animate-on-scroll">
+                <h2 class="display-6 fw-bold mb-3">Four Dimensions of Fitness</h2>
+                <p class="lead text-muted">Comprehensive tracking across all aspects of your wellness journey</p>
             </div>
             
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 text-center hover-lift">
-                    <div class="card-body p-4">
-                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="fas fa-apple-alt text-warning fa-2x"></i>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="feature-card card h-100 text-center p-4">
+                        <div class="dimension-icon bg-danger bg-opacity-10">
+                            <i class="fas fa-dumbbell text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Workouts</h5>
+                        <p class="text-muted">Track your daily exercise routine</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="feature-card card h-100 text-center p-4">
+                        <div class="dimension-icon bg-warning bg-opacity-10">
+                            <i class="fas fa-apple-alt text-warning"></i>
                         </div>
                         <h5 class="fw-bold mb-3">Nutrition</h5>
-                        <p class="text-muted mb-0">Monitor meals, hydration, and nutritional goals to fuel your transformation</p>
+                        <p class="text-muted">Monitor your daily nutrition habits</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 text-center hover-lift">
-                    <div class="card-body p-4">
-                        <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="fas fa-bed text-info fa-2x"></i>
+                
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="feature-card card h-100 text-center p-4">
+                        <div class="dimension-icon bg-info bg-opacity-10">
+                            <i class="fas fa-bed text-info"></i>
                         </div>
                         <h5 class="fw-bold mb-3">Recovery</h5>
-                        <p class="text-muted mb-0">Focus on sleep quality, rest days, and stress management for optimal results</p>
+                        <p class="text-muted">Prioritize rest and recovery</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 text-center hover-lift">
-                    <div class="card-body p-4">
-                        <div class="bg-purple bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="fas fa-brain text-purple fa-2x"></i>
+                
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="feature-card card h-100 text-center p-4">
+                        <div class="dimension-icon bg-purple bg-opacity-10">
+                            <i class="fas fa-brain text-purple"></i>
                         </div>
                         <h5 class="fw-bold mb-3">Mindset</h5>
-                        <p class="text-muted mb-0">Develop mental resilience and positive habits for lasting transformation</p>
+                        <p class="text-muted">Build mental resilience</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- How It Works Section -->
-<div class="py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">How It Works</h2>
-            <p class="text-muted">Simple steps to transform your daily routine</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="text-center">
-                    <div class="feature-icon bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <span class="text-white fw-bold fs-4">1</span>
-                    </div>
-                    <h5 class="fw-bold mb-3">Plan Your Day</h5>
-                    <p class="text-muted">Add activities to Morning, Afternoon, and Evening time slots across all four fitness dimensions.</p>
-                </div>
+    <!-- How It Works -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5 animate-on-scroll">
+                <h2 class="display-6 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Simple steps to transform your daily routine</p>
             </div>
             
-            <div class="col-lg-4">
-                <div class="text-center">
-                    <div class="feature-icon bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <span class="text-white fw-bold fs-4">2</span>
+            <div class="row g-4">
+                <div class="col-lg-4 animate-on-scroll">
+                    <div class="text-center">
+                        <div class="dimension-icon bg-primary">
+                            <span class="text-white fw-bold fs-4">1</span>
+                        </div>
+                        <h5 class="fw-bold mb-3">Plan Your Day</h5>
+                        <p class="text-muted">Add activities to Morning, Afternoon, and Evening time slots across all four fitness dimensions.</p>
                     </div>
-                    <h5 class="fw-bold mb-3">Track Progress</h5>
-                    <p class="text-muted">Mark activities as complete throughout the day and watch your completion rate improve.</p>
                 </div>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="text-center">
-                    <div class="feature-icon bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <span class="text-white fw-bold fs-4">3</span>
+                
+                <div class="col-lg-4 animate-on-scroll">
+                    <div class="text-center">
+                        <div class="dimension-icon bg-success">
+                            <span class="text-white fw-bold fs-4">2</span>
+                        </div>
+                        <h5 class="fw-bold mb-3">Track Progress</h5>
+                        <p class="text-muted">Mark activities as complete throughout the day and watch your completion rate improve.</p>
                     </div>
-                    <h5 class="fw-bold mb-3">Analyze Results</h5>
-                    <p class="text-muted">Review detailed analytics, build streaks, and identify patterns for continuous improvement.</p>
+                </div>
+                
+                <div class="col-lg-4 animate-on-scroll">
+                    <div class="text-center">
+                        <div class="dimension-icon bg-warning">
+                            <span class="text-white fw-bold fs-4">3</span>
+                        </div>
+                        <h5 class="fw-bold mb-3">Analyze Results</h5>
+                        <p class="text-muted">Review detailed analytics, build streaks, and identify patterns for continuous improvement.</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- CTA Section -->
-<div class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    <div class="container">
-        <div class="row align-items-center text-center text-lg-start">
-            <div class="col-lg-8 mb-4 mb-lg-0">
-                <h3 class="fw-bold mb-2 text-white">Ready to Transform Your Body?</h3>
-                <p class="mb-0 text-white-50 lead">Join thousands of users who have already started their fitness transformation journey with our comprehensive tracking system.</p>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                <a href="/register" class="btn btn-warning btn-lg px-5 py-3 fw-semibold rounded-3 shadow-lg">
-                    <i class="fas fa-rocket me-2"></i>Get Started Free
-                </a>
+    <!-- Final CTA -->
+    <section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container">
+            <div class="row align-items-center text-center text-lg-start">
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <h3 class="display-6 fw-bold mb-2 text-white">Ready to Transform Your Body?</h3>
+                    <p class="lead mb-0 text-white-50">Join thousands who have started their fitness transformation journey.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="cta-buttons">
+                        <a href="/register" class="btn btn-warning btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<script>
-// Add smooth scrolling animation
-document.addEventListener('DOMContentLoaded', function() {
-    // Animate cards on scroll
-    const cards = document.querySelectorAll('.card');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-            }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auth form toggle
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+                
+                // Update active tab
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show/hide forms
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                document.getElementById(targetTab + '-form').style.display = 'block';
+            });
         });
-    });
-    
-    cards.forEach(card => {
-        observer.observe(card);
-    });
-});
-</script>
+
+        // Animate on scroll
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', animateOnScroll);
+        window.addEventListener('load', animateOnScroll);
+        
+        // Initialize animations
+        setTimeout(animateOnScroll, 100);
+    </script>
+</body>
+</html>
