@@ -95,6 +95,15 @@ body {
     color: white;
 }
 
+/* Additional Badge Styles */
+.bg-purple {
+    background-color: var(--purple-color) !important;
+}
+
+.text-purple {
+    color: var(--purple-color) !important;
+}
+
 /* Progress Chart */
 .progress-circle {
     position: relative;

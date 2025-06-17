@@ -1,79 +1,172 @@
-<div class="container-fluid">
+<div class="container-fluid p-3">
     <div class="row">
         <!-- Main Dashboard Content -->
         <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-4 px-3 pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold mb-1">Today's Tracker</h2>
-                    <p class="text-muted mb-0"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                    <p class="text-muted mb-0 small">Tuesday, June 17, 2025</p>
                 </div>
                 <div class="text-center">
                     <div class="position-relative d-inline-block">
-                        <canvas id="progressChart" width="80" height="80"></canvas>
+                        <canvas id="progressChart" width="60" height="60"></canvas>
                         <div class="position-absolute top-50 start-50 translate-middle text-center">
-                            <h4 class="mb-0 text-primary fw-bold" id="completionPercentage">0%</h4>
-                            <small class="text-muted">Complete</small>
+                            <h4 class="mb-0 text-primary fw-bold small" id="completionPercentage">43%</h4>
+                            <small class="text-muted" style="font-size: 10px;">Complete</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Time Slot Sections -->
-            <div class="px-3">
-                <!-- Morning Section -->
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
-                                <i class="fas fa-sun text-white" style="font-size: 12px;"></i>
-                            </div>
-                            <h6 class="mb-0 fw-bold">Morning</h6>
-                            <span class="badge bg-light text-dark ms-2" id="morning-count">2 of 4 completed</span>
+            <!-- Morning Section -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 20px; height: 20px;">
+                            <i class="fas fa-sun text-white" style="font-size: 10px;"></i>
                         </div>
-                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('morning')">
-                            + Add Activity
+                        <h6 class="mb-0 fw-bold">Morning</h6>
+                        <span class="badge bg-light text-dark ms-2 small">2 of 4 completed</span>
+                    </div>
+                    <button class="btn btn-link btn-sm text-primary p-0 small" onclick="showAddActivityModal('morning')">
+                        + Add Activity
+                    </button>
+                </div>
+                <div id="morning-activities">
+                    <!-- Activities will be loaded here -->
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2" checked disabled>
+                        <div class="me-2">
+                            <i class="fas fa-dumbbell text-danger"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="text-decoration-line-through text-muted fw-semibold small">Push-ups</div>
+                            <div class="text-muted" style="font-size: 12px;">Basic bodyweight chest exercise</div>
+                        </div>
+                        <span class="badge bg-danger me-2 small">Workout</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
                         </button>
                     </div>
-                    <div id="morning-activities">
-                        <!-- Activities will be loaded here -->
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2" checked disabled>
+                        <div class="me-2">
+                            <i class="fas fa-apple-alt text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="text-decoration-line-through text-muted fw-semibold small">Healthy Breakfast</div>
+                            <div class="text-muted" style="font-size: 12px;">Balanced morning meal</div>
+                        </div>
+                        <span class="badge bg-warning me-2 small">Nutrition</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2">
+                        <div class="me-2">
+                            <i class="fas fa-bed text-info"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Stretching</div>
+                            <div class="text-muted" style="font-size: 12px;">15-minute flexibility routine</div>
+                        </div>
+                        <span class="badge bg-info me-2 small">Recovery</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2">
+                        <div class="me-2">
+                            <i class="fas fa-brain text-purple"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Gratitude Journal</div>
+                            <div class="text-muted" style="font-size: 12px;">Write 3 things you are grateful for</div>
+                        </div>
+                        <span class="badge bg-purple me-2 small">Mindset</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Afternoon Section -->
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
-                                <i class="fas fa-sun text-white" style="font-size: 12px;"></i>
-                            </div>
-                            <h6 class="mb-0 fw-bold">Afternoon</h6>
-                            <span class="badge bg-light text-dark ms-2" id="afternoon-count">0 of 2 completed</span>
+            <!-- Afternoon Section -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 20px; height: 20px;">
+                            <i class="fas fa-sun text-white" style="font-size: 10px;"></i>
                         </div>
-                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('afternoon')">
-                            + Add Activity
+                        <h6 class="mb-0 fw-bold">Afternoon</h6>
+                        <span class="badge bg-light text-dark ms-2 small">0 of 2 completed</span>
+                    </div>
+                    <button class="btn btn-link btn-sm text-primary p-0 small" onclick="showAddActivityModal('afternoon')">
+                        + Add Activity
+                    </button>
+                </div>
+                <div id="afternoon-activities">
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2">
+                        <div class="me-2">
+                            <i class="fas fa-apple-alt text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Protein Shake</div>
+                            <div class="text-muted" style="font-size: 12px;">Post-workout protein supplement</div>
+                        </div>
+                        <span class="badge bg-warning me-2 small">Nutrition</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
                         </button>
                     </div>
-                    <div id="afternoon-activities">
-                        <!-- Activities will be loaded here -->
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2">
+                        <div class="me-2">
+                            <i class="fas fa-apple-alt text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Healthy Breakfast</div>
+                            <div class="text-muted" style="font-size: 12px;">Balanced morning meal</div>
+                        </div>
+                        <span class="badge bg-warning me-2 small">Nutrition</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Evening Section -->
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-dark rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
-                                <i class="fas fa-moon text-white" style="font-size: 12px;"></i>
-                            </div>
-                            <h6 class="mb-0 fw-bold">Evening</h6>
-                            <span class="badge bg-light text-dark ms-2" id="evening-count">1 of 1 completed</span>
+            <!-- Evening Section -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-dark rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 20px; height: 20px;">
+                            <i class="fas fa-moon text-white" style="font-size: 10px;"></i>
                         </div>
-                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('evening')">
-                            + Add Activity
-                        </button>
+                        <h6 class="mb-0 fw-bold">Evening</h6>
+                        <span class="badge bg-light text-dark ms-2 small">1 of 1 completed</span>
                     </div>
-                    <div id="evening-activities">
-                        <!-- Activities will be loaded here -->
+                    <button class="btn btn-link btn-sm text-primary p-0 small" onclick="showAddActivityModal('evening')">
+                        + Add Activity
+                    </button>
+                </div>
+                <div id="evening-activities">
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="checkbox" class="form-check-input me-2" checked disabled>
+                        <div class="me-2">
+                            <i class="fas fa-bed text-info"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="text-decoration-line-through text-muted fw-semibold small">8 Hours Sleep</div>
+                            <div class="text-muted" style="font-size: 12px;">Adequate rest for recovery</div>
+                        </div>
+                        <span class="badge bg-info me-2 small">Recovery</span>
+                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        </button>
                     </div>
                 </div>
             </div>
