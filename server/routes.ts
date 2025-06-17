@@ -209,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get or create today's tracker
       let tracker = await storage.getDailyTracker(userId, today);
       if (!tracker) {
-        tracker = await storage.createDailyTracker({
+        await storage.createDailyTracker({
           userId,
           date: today,
         });
