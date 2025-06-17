@@ -556,20 +556,58 @@
             const select = document.getElementById('activitySelect');
             select.innerHTML = '<option value="">Select an activity...</option>';
             
+            // Group activities by category
+            const categories = {
+                workout: [],
+                nutrition: [],
+                recovery: [],
+                mindset: []
+            };
+            
             activities.forEach(activity => {
-                const option = document.createElement('option');
-                option.value = activity.id;
-                option.textContent = activity.name;
-                option.dataset.category = activity.category;
-                option.dataset.description = activity.description;
-                select.appendChild(option);
+                if (categories[activity.category]) {
+                    categories[activity.category].push(activity);
+                }
             });
             
-            select.innerHTML += '<option value="custom">Create Custom Activity</option>';
+            // Add optgroups for each category
+            Object.keys(categories).forEach(category => {
+                if (categories[category].length > 0) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+                    
+                    categories[category].forEach(activity => {
+                        const option = document.createElement('option');
+                        option.value = activity.id;
+                        option.textContent = activity.title;
+                        option.dataset.category = activity.category;
+                        option.dataset.description = activity.description;
+                        optgroup.appendChild(option);
+                    });
+                    
+                    select.appendChild(optgroup);
+                }
+            });
+            
+            // Add custom activity option
+            const customOption = document.createElement('option');
+            customOption.value = 'custom';
+            customOption.textContent = 'Create Custom Activity';
+            select.appendChild(customOption);
         }
 
         function showAddActivityModal(timeSlot) {
             document.getElementById('timeSlot').value = timeSlot;
+            
+            // Reset form
+            document.getElementById('addActivityForm').reset();
+            document.getElementById('customActivityFields').style.display = 'none';
+            
+            // Load activities if not already loaded
+            if (document.getElementById('activitySelect').options.length <= 1) {
+                loadActivities();
+            }
+            
             const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
             modal.show();
         }
@@ -640,8 +678,13 @@
         // Activity select change handler
         document.getElementById('activitySelect').addEventListener('change', function() {
             const customFields = document.getElementById('customActivityFields');
+            const timeSlotSelect = document.getElementById('timeSlotSelect');
+            const hiddenTimeSlot = document.getElementById('timeSlot');
+            
             if (this.value === 'custom') {
                 customFields.style.display = 'block';
+                // Set the time slot in the visible select to match the hidden field
+                timeSlotSelect.value = hiddenTimeSlot.value;
             } else {
                 customFields.style.display = 'none';
             }
@@ -649,13 +692,40 @@
 
         function addActivity() {
             const form = document.getElementById('addActivityForm');
-            const formData = new FormData(form);
+            const activitySelect = document.getElementById('activitySelect');
+            const timeSlot = document.getElementById('timeSlot').value;
             
-            // Convert FormData to JSON
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
+            // Validate form
+            if (!activitySelect.value) {
+                alert('Please select an activity');
+                return;
+            }
+            
+            let data = {
+                activityId: activitySelect.value,
+                timeSlot: timeSlot
+            };
+            
+            // If custom activity, get custom fields
+            if (activitySelect.value === 'custom') {
+                const customName = document.getElementById('customActivityName').value;
+                const customCategory = document.getElementById('customActivityCategory').value;
+                const customDescription = document.getElementById('customActivityDescription').value;
+                const customTimeSlot = document.getElementById('timeSlotSelect').value;
+                
+                if (!customName || !customCategory) {
+                    alert('Please fill in activity name and category');
+                    return;
+                }
+                
+                data = {
+                    activityId: 'custom',
+                    customName: customName,
+                    customCategory: customCategory,
+                    customDescription: customDescription,
+                    timeSlot: customTimeSlot || timeSlot
+                };
+            }
             
             fetch('/api/tracker/add-activity', {
                 method: 'POST',
@@ -665,15 +735,14 @@
                 body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(result => {
+                if (result.success) {
                     bootstrap.Modal.getInstance(document.getElementById('addActivityModal')).hide();
                     loadTodayTracker();
-                    // Reset form
                     form.reset();
                     document.getElementById('customActivityFields').style.display = 'none';
                 } else {
-                    alert('Error adding activity: ' + data.message);
+                    alert('Error adding activity: ' + result.message);
                 }
             })
             .catch(error => {
