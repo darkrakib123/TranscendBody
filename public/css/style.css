@@ -358,48 +358,108 @@ footer {
     color: white;
 }
 
-/* Momentum Bubbles */
-.momentum-bubbles {
-    display: flex;
-    gap: 2px;
+/* Progress Dashboard Styles */
+.progress-dashboard {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
 }
 
-.momentum-bubble {
-    width: 6px;
-    height: 6px;
+.progress-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.progress-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.progress-icon {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 14px;
 }
 
-.momentum-bubble.fire {
-    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-    box-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
-    animation: pulse 1.5s infinite;
+.streak-icon {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
 }
 
-.momentum-bubble.strong {
-    background: linear-gradient(45deg, #26de81, #20bf6b);
-    box-shadow: 0 0 6px rgba(38, 222, 129, 0.5);
+.weekly-icon {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
 }
 
-.momentum-bubble.good {
-    background: linear-gradient(45deg, #45aaf2, #2d98da);
-    box-shadow: 0 0 4px rgba(69, 170, 242, 0.4);
+.total-icon {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: white;
 }
 
-.momentum-bubble.weak {
-    background: linear-gradient(45deg, #fed330, #f7b731);
-    box-shadow: 0 0 3px rgba(254, 211, 48, 0.3);
+.progress-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
 }
 
-.momentum-bubble.inactive {
-    background: #ddd;
-    opacity: 0.5;
+.progress-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0 4px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+    position: relative;
+}
+
+.streak-bar {
+    background: linear-gradient(90deg, #ff6b35, #f7931e);
+}
+
+.weekly-bar {
+    background: linear-gradient(90deg, #4ecdc4, #44a08d);
+}
+
+.progress-message {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+}
+
+.achievement-level {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 4px;
+}
+
+@keyframes progressGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.3); }
+    50% { box-shadow: 0 0 10px rgba(255, 107, 53, 0.6); }
 }
 
 /* Activity Library Styles */

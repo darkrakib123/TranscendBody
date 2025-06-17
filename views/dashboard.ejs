@@ -268,50 +268,56 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <div class="sidebar">
-                    <!-- Dynamic Quick Stats with Momentum -->
-                    <div class="mb-4">
+                    <!-- Progress Dashboard -->
+                    <div class="progress-dashboard mb-4">
                         <h6 class="fw-bold mb-3">Your Progress</h6>
                         
-                        <!-- Current Streak with Momentum Bubbles -->
-                        <div class="stat-item position-relative mb-3">
-                            <div class="d-flex align-items-center justify-content-between">
+                        <!-- Streak Progress -->
+                        <div class="progress-card mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center">
-                                    <div class="stat-dot bg-danger"></div>
-                                    <span class="text-muted">Current Streak</span>
+                                    <div class="progress-icon streak-icon">
+                                        <i class="fas fa-fire"></i>
+                                    </div>
+                                    <span class="progress-label">Daily Streak</span>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="fw-bold me-2" id="currentStreak">0 days</span>
-                                    <div class="momentum-bubbles" id="streakMomentum"></div>
-                                </div>
+                                <span class="progress-value" id="currentStreak">0</span>
                             </div>
-                            <div class="text-muted small mt-1" id="streakMessage">Start your journey today!</div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar streak-bar" id="streakBar"></div>
+                            </div>
+                            <div class="progress-message" id="streakMessage">Start your first day!</div>
                         </div>
                         
-                        <!-- Weekly Progress with Momentum -->
-                        <div class="stat-item position-relative mb-3">
-                            <div class="d-flex align-items-center justify-content-between">
+                        <!-- Weekly Progress -->
+                        <div class="progress-card mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center">
-                                    <div class="stat-dot bg-success"></div>
-                                    <span class="text-muted">This Week</span>
+                                    <div class="progress-icon weekly-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <span class="progress-label">This Week</span>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="fw-bold me-2" id="weeklyAverage">0%</span>
-                                    <div class="momentum-bubbles" id="weeklyMomentum"></div>
-                                </div>
+                                <span class="progress-value" id="weeklyAverage">0%</span>
                             </div>
-                            <div class="text-muted small mt-1" id="weeklyMessage">Complete more activities to boost your weekly score!</div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar weekly-bar" id="weeklyBar"></div>
+                            </div>
+                            <div class="progress-message" id="weeklyMessage">Keep going strong!</div>
                         </div>
                         
-                        <!-- Total Activities -->
-                        <div class="stat-item mb-3">
-                            <div class="d-flex align-items-center justify-content-between">
+                        <!-- Total Achievements -->
+                        <div class="progress-card">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center">
-                                    <div class="stat-dot bg-info"></div>
-                                    <span class="text-muted">Total Completed</span>
+                                    <div class="progress-icon total-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <span class="progress-label">Completed</span>
                                 </div>
-                                <span class="fw-bold" id="totalActivities">0</span>
+                                <span class="progress-value" id="totalActivities">0</span>
                             </div>
-                            <div class="text-muted small mt-1" id="totalMessage">Every activity counts towards your goals!</div>
+                            <div class="achievement-level" id="achievementLevel">Beginner</div>
                         </div>
                     </div>
 
@@ -671,99 +677,110 @@
         }
 
         function updateStatsDisplay(stats) {
-            // Update Current Streak with momentum
+            // Update Streak Progress
             const streakElement = document.getElementById('currentStreak');
-            const streakMomentum = document.getElementById('streakMomentum');
+            const streakBar = document.getElementById('streakBar');
             const streakMessage = document.getElementById('streakMessage');
             
-            streakElement.textContent = stats.currentStreak + ' days';
-            updateMomentumBubbles(streakMomentum, stats.currentStreak, 'streak');
+            streakElement.textContent = stats.currentStreak;
+            updateStreakProgress(streakBar, stats.currentStreak);
             updateStreakMessage(streakMessage, stats.currentStreak);
             
-            // Update Weekly Average with momentum
+            // Update Weekly Progress
             const weeklyElement = document.getElementById('weeklyAverage');
-            const weeklyMomentum = document.getElementById('weeklyMomentum');
+            const weeklyBar = document.getElementById('weeklyBar');
             const weeklyMessage = document.getElementById('weeklyMessage');
             
             weeklyElement.textContent = stats.weeklyAverage + '%';
-            updateMomentumBubbles(weeklyMomentum, stats.weeklyAverage, 'weekly');
+            updateWeeklyProgress(weeklyBar, stats.weeklyAverage);
             updateWeeklyMessage(weeklyMessage, stats.weeklyAverage);
             
             // Update Total Activities
             const totalElement = document.getElementById('totalActivities');
-            const totalMessage = document.getElementById('totalMessage');
+            const achievementLevel = document.getElementById('achievementLevel');
             
             totalElement.textContent = stats.totalActivities;
-            updateTotalMessage(totalMessage, stats.totalActivities);
+            updateAchievementLevel(achievementLevel, stats.totalActivities);
         }
 
-        function updateMomentumBubbles(container, value, type) {
-            container.innerHTML = '';
+        function updateStreakProgress(bar, streak) {
+            // Cap streak visualization at 30 days for the progress bar
+            const maxStreak = 30;
+            const percentage = Math.min((streak / maxStreak) * 100, 100);
+            bar.style.width = percentage + '%';
             
-            let bubbleCount = 0;
-            let bubbleClass = 'inactive';
-            
-            if (type === 'streak') {
-                bubbleCount = Math.min(5, Math.max(1, Math.floor(value / 2) + 1));
-                if (value >= 7) bubbleClass = 'fire';
-                else if (value >= 5) bubbleClass = 'strong';
-                else if (value >= 3) bubbleClass = 'good';
-                else if (value >= 1) bubbleClass = 'weak';
-            } else if (type === 'weekly') {
-                bubbleCount = Math.min(5, Math.max(1, Math.floor(value / 20) + 1));
-                if (value >= 80) bubbleClass = 'fire';
-                else if (value >= 60) bubbleClass = 'strong';
-                else if (value >= 40) bubbleClass = 'good';
-                else if (value >= 20) bubbleClass = 'weak';
+            // Add glow effect for high streaks
+            if (streak >= 7) {
+                bar.style.animation = 'progressGlow 2s infinite';
+            } else {
+                bar.style.animation = 'none';
             }
+        }
+
+        function updateWeeklyProgress(bar, percentage) {
+            bar.style.width = percentage + '%';
             
-            for (let i = 0; i < 5; i++) {
-                const bubble = document.createElement('div');
-                bubble.className = `momentum-bubble ${i < bubbleCount ? bubbleClass : 'inactive'}`;
-                container.appendChild(bubble);
+            // Add glow effect for high performance
+            if (percentage >= 80) {
+                bar.style.animation = 'progressGlow 2s infinite';
+            } else {
+                bar.style.animation = 'none';
             }
         }
 
         function updateStreakMessage(element, streak) {
             if (streak === 0) {
-                element.textContent = "Start your first day today!";
+                element.textContent = "Complete an activity to start your streak";
             } else if (streak === 1) {
-                element.textContent = "Great start! Keep it going!";
-            } else if (streak < 3) {
-                element.textContent = "Building momentum...";
+                element.textContent = "Great start! One day down";
             } else if (streak < 7) {
-                element.textContent = "You're on a roll!";
+                element.textContent = `${streak} days strong - keep building!`;
             } else if (streak < 14) {
-                element.textContent = "Incredible consistency!";
+                element.textContent = `${streak} days - you're on fire!`;
+            } else if (streak < 30) {
+                element.textContent = `${streak} days - incredible consistency!`;
             } else {
-                element.textContent = "You're unstoppable! 🔥";
+                element.textContent = `${streak} days - you're unstoppable!`;
             }
         }
 
         function updateWeeklyMessage(element, percentage) {
             if (percentage === 0) {
-                element.textContent = "Start completing activities to build your weekly score!";
-            } else if (percentage < 25) {
-                element.textContent = "Every activity counts - keep going!";
-            } else if (percentage < 50) {
-                element.textContent = "Good progress this week!";
-            } else if (percentage < 75) {
-                element.textContent = "Excellent weekly performance!";
+                element.textContent = "Start your week strong";
+            } else if (percentage < 30) {
+                element.textContent = "Building momentum this week";
+            } else if (percentage < 60) {
+                element.textContent = "Good weekly progress";
+            } else if (percentage < 85) {
+                element.textContent = "Excellent week so far!";
             } else {
-                element.textContent = "Outstanding week - you're crushing it!";
+                element.textContent = "Outstanding weekly performance!";
             }
         }
 
-        function updateTotalMessage(element, total) {
-            if (total === 0) {
-                element.textContent = "Start your journey with your first activity!";
-            } else if (total < 10) {
-                element.textContent = `${total} down, many more to go!`;
-            } else if (total < 50) {
-                element.textContent = `${total} activities completed - building great habits!`;
-            } else {
-                element.textContent = `${total} activities completed - you're a habit master!`;
+        function updateAchievementLevel(element, total) {
+            let level = 'Beginner';
+            let color = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+            
+            if (total >= 100) {
+                level = 'Master';
+                color = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+            } else if (total >= 50) {
+                level = 'Expert';
+                color = 'linear-gradient(135deg, #9b59b6, #8e44ad)';
+            } else if (total >= 25) {
+                level = 'Advanced';
+                color = 'linear-gradient(135deg, #3498db, #2980b9)';
+            } else if (total >= 10) {
+                level = 'Intermediate';
+                color = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+            } else if (total >= 1) {
+                level = 'Starter';
+                color = 'linear-gradient(135deg, #f39c12, #e67e22)';
             }
+            
+            element.textContent = level;
+            element.style.background = color;
         }
 
         // Activity select change handler
