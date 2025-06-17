@@ -1,24 +1,25 @@
 # Transcend Your Body - Daily Fitness Tracker
 
-A full-stack web application for tracking daily fitness activities across four key dimensions: workouts, nutrition, recovery, and mindset. Built with Node.js, Express, React, and PostgreSQL.
+A full-stack web application for tracking daily fitness activities across four key dimensions: workouts, nutrition, recovery, and mindset. Built with Node.js, Express, EJS, and PostgreSQL using traditional server-side rendering.
 
 ## Features
 
-- **User Authentication**: Secure login with session management
+- **User Authentication**: Secure login/registration with Passport.js and bcrypt password hashing
 - **Daily Activity Tracking**: Add and track activities across Morning, Afternoon, and Evening time slots
-- **Progress Monitoring**: Real-time completion percentages and streak tracking
+- **Progress Monitoring**: Real-time completion percentages with Chart.js visualization
 - **Activity Management**: Create custom activities or choose from 20+ preloaded activities
 - **Admin Panel**: User management and activity oversight (admin users only)
-- **Responsive Design**: Works on desktop and mobile devices
+- **Responsive Design**: Bootstrap-based responsive UI that works on all devices
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui components
+- **Frontend**: EJS templates, Bootstrap 5, Chart.js, custom CSS
 - **Backend**: Node.js, Express.js, TypeScript
+- **Authentication**: Passport.js with local strategy, bcrypt for password hashing
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Replit Auth (OpenID Connect) with session storage
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS with custom themes
+- **Session Management**: express-session with connect-pg-simple (PostgreSQL session store)
+- **Environment**: dotenv for configuration management
+- **Development**: tsx for TypeScript execution, nodemon for auto-restart
 
 ## Prerequisites
 

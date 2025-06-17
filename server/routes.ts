@@ -86,6 +86,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.render('dashboard', { title: 'Dashboard' });
   });
 
+  // Progress route
+  app.get('/progress', requireAuth, (req, res) => {
+    res.render('progress', { title: 'Progress' });
+  });
+
+  // Admin route
+  app.get('/admin', requireAdmin, (req, res) => {
+    res.render('admin', { title: 'Admin Panel' });
+  });
+
   // API Activity routes
   app.get('/api/activities', requireAuth, async (req, res) => {
     try {
