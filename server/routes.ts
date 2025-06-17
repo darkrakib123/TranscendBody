@@ -174,6 +174,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add activity to tracker route
+  app.post('/api/tracker/add-activity', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { activityId, timeSlot, customName, customDescription, customCategory } = req.body;
+      
+      if (!timeSlot || !['morning', 'afternoon', 'evening'].includes(timeSlot)) {
+        return res.status(400).json({ message: "Valid time slot is required" });
+      }
+
+      let finalActivityId = parseInt(activityId);
+
+      // If creating a custom activity
+      if (activityId === 'custom' || !activityId) {
+        if (!customName || !customCategory) {
+          return res.status(400).json({ message: "Custom activity name and category are required" });
+        }
+
+        // Create the custom activity
+        const newActivity = await storage.createActivity({
+          title: customName,
+          description: customDescription || null,
+          category: customCategory,
+          isCustom: true,
+          createdBy: userId
+        });
+        finalActivityId = newActivity.id;
+      }
+
+      // Get today's date
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Get or create today's tracker
+      let tracker = await storage.getDailyTracker(userId, today);
+      if (!tracker) {
+        tracker = await storage.createDailyTracker({
+          userId,
+          date: today,
+        });
+        // Re-fetch with entries
+        tracker = await storage.getDailyTracker(userId, today);
+      }
+
+      if (!tracker) {
+        return res.status(500).json({ message: "Failed to create tracker" });
+      }
+
+      // Create tracker entry
+      const entry = await storage.createTrackerEntry({
+        trackerId: tracker.id,
+        activityId: finalActivityId,
+        timeSlot,
+        status: 'pending'
+      });
+
+      // Update completion rate
+      await updateTrackerCompletion(tracker.id);
+
+      res.json({ success: true, entry });
+    } catch (error) {
+      console.error("Error adding activity to tracker:", error);
+      res.status(500).json({ message: "Failed to add activity" });
+    }
+  });
+
   // Tracker entry routes
   app.post('/api/tracker/entries', requireAuth, async (req: any, res) => {
     try {
