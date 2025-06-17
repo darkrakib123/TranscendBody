@@ -1,202 +1,229 @@
-# Transcend Your Body - Comprehensive Test Cases
+# Transcend Your Body - Daily Tracker Test Cases
 
-## User Test Cases
+## Test Credentials
+- **Admin User**: `admin@transcendbody.com` / `password123`
+- **Client User**: `client@transcendbody.com` / `password123`
+- **Demo User**: `nanthekumar.2011@mitb.smu.edu.sg` / `password123`
 
-### Authentication Tests
-- [ ] **Login Flow**: Click "Get Started Today" → Redirects to Replit Auth → Successfully logs in → Returns to dashboard
-- [ ] **User Profile Display**: Verify user name/email displays correctly in header
-- [ ] **Logout**: Click user dropdown → Logout → Returns to landing page
-- [ ] **Session Persistence**: Refresh page while logged in → Remains authenticated
+## 1. Authentication & Landing Page Tests
 
-### Dashboard Tests
-- [ ] **Today's Date Display**: Dashboard shows correct current date
-- [ ] **Empty State**: New user sees empty time slots with "Add your first activity" prompts
-- [ ] **Progress Circle**: Displays 0% completion initially
-- [ ] **Time Slot Sections**: Morning, Afternoon, Evening sections visible with appropriate icons
+### 1.1 Landing Page Display
+- [ ] Verify landing page loads with professional gradient design
+- [ ] Confirm auth toggle works (Sign In ↔ Create Account)
+- [ ] Test form validation on both sign-in and registration forms
+- [ ] Verify demo credentials are displayed
 
-### Activity Management Tests
-- [ ] **Add Activity Modal**: Click "Add Activity" → Modal opens with form fields
-- [ ] **Time-Appropriate Filtering**: 
-  - Morning slot shows: meditation, breakfast, stretching activities
-  - Afternoon slot shows: workouts, meal prep activities  
-  - Evening slot shows: sleep, recovery, reflection activities
-- [ ] **Create Custom Activity**: 
-  - Select "Create Custom Activity"
-  - Enter name, category, description
-  - Choose time slot
-  - Click "Add Activity" → Activity appears in chosen time slot
-- [ ] **Add Preloaded Activity**: 
-  - Select existing activity from dropdown
-  - Choose time slot
-  - Click "Add Activity" → Activity appears in tracker
+### 1.2 User Registration
+- [ ] Register new user with valid credentials
+- [ ] Test validation for required fields
+- [ ] Verify redirect to dashboard after successful registration
+- [ ] Test duplicate email validation
 
-### Activity Completion Tests
-- [ ] **Mark Complete**: Click checkbox → Activity marked as complete → Progress percentage updates
-- [ ] **Mark Incomplete**: Click completed checkbox → Activity returns to pending → Progress percentage updates
-- [ ] **Real-time Updates**: Completion percentage updates immediately without page refresh
-- [ ] **Visual States**: Completed activities show opacity change and checkmark
+### 1.3 User Authentication
+- [ ] Sign in with admin credentials
+- [ ] Sign in with client credentials
+- [ ] Test invalid credentials handling
+- [ ] Verify session persistence after login
+- [ ] Test logout functionality
 
-### Activity Deletion Tests
-- [ ] **Delete Activity**: Click trash icon → Confirmation dialog → Confirm → Activity removed from tracker
-- [ ] **Completion Update After Delete**: Delete activity → Progress percentage recalculates correctly
-- [ ] **Cancel Delete**: Click trash icon → Cancel in dialog → Activity remains
+## 2. Dashboard Core Functionality Tests
 
-### Statistics Tests
-- [ ] **Quick Stats Display**: Sidebar shows current streak, weekly average, total activities
-- [ ] **Stats Update**: Complete activities → Stats update to reflect changes
-- [ ] **Streak Calculation**: Complete activities on consecutive days → Streak increases
+### 2.1 Dashboard Loading
+- [ ] Verify dashboard loads with user's name in header
+- [ ] Confirm today's date displays correctly
+- [ ] Check circular progress indicator shows current completion percentage
+- [ ] Verify three time slots are displayed (Morning, Afternoon, Evening)
 
-### Activity Library Tests
-- [ ] **Popular Activities Display**: Sidebar shows sample of preloaded activities
-- [ ] **Create Custom from Library**: Click "Create Custom Activity" in library → Modal opens
-- [ ] **Category Icons**: Activities display with appropriate category icons (workout, nutrition, recovery, mindset)
+### 2.2 Time Slot Management
+- [ ] Confirm each time slot shows correct icon and color
+- [ ] Verify completion counters (X of Y completed) update correctly
+- [ ] Test "Add Activity" buttons for each time slot
 
-## Admin Test Cases
+### 2.3 Progress Tracking
+- [ ] Verify circular progress indicator updates when activities are completed
+- [ ] Test completion percentage calculation accuracy
+- [ ] Confirm progress persists after page refresh
 
-### Admin Access Tests
-- [ ] **Admin Login**: Admin user can access /admin route
-- [ ] **Regular User Blocked**: Regular user redirected from /admin with error message
-- [ ] **Admin Panel Button**: Dashboard shows admin panel section for admin users
+## 3. Activity Management Tests
 
-### User Management Tests
-- [ ] **View All Users**: Admin panel → Users tab → Table shows all registered users
-- [ ] **User Information Display**: Each user shows profile image, name, email, role, join date
-- [ ] **Change User Role**: 
-  - Select role dropdown for user
-  - Change from "user" to "admin" or vice versa
-  - Verify role updates immediately
-- [ ] **Role Persistence**: Changed roles persist after page refresh
+### 3.1 Add Activity Modal
+- [ ] Click "Add Activity" for morning slot
+- [ ] Verify modal opens with activity dropdown populated
+- [ ] Test dropdown contains all available activities
+- [ ] Confirm custom activity option is present
 
-### Activity Management Tests
-- [ ] **View All Activities**: Admin panel → Activities tab → Grid shows all activities
-- [ ] **Activity Categories**: Activities display with correct category badges (workout, nutrition, recovery, mindset)
-- [ ] **Custom vs Preloaded**: Activities show "Custom" or "Preloaded" labels
-- [ ] **Delete Custom Activities**: Click trash icon on custom activities → Confirmation → Activity deleted
-- [ ] **Protect Preloaded**: Preloaded activities don't show delete option
+### 3.2 Select Existing Activity
+- [ ] Select "Push-ups" from workout category
+- [ ] Verify activity is added to correct time slot
+- [ ] Confirm activity appears with proper icon and badge
+- [ ] Test adding same activity to different time slots
 
-### Analytics Tests
-- [ ] **Platform Statistics**: Admin panel → Analytics tab shows:
-  - Total users count
-  - Total activities count  
-  - Admin users count
-  - Custom activities count
-- [ ] **Real-time Data**: Stats update when users/activities are added/removed
+### 3.3 Create Custom Activity
+- [ ] Select "Create Custom Activity" option
+- [ ] Verify custom fields appear (name, description, category)
+- [ ] Create custom workout activity
+- [ ] Create custom nutrition activity
+- [ ] Create custom recovery activity
+- [ ] Create custom mindset activity
+- [ ] Confirm custom activities are saved to database
 
-## Edge Cases & Error Handling
+### 3.4 Activity Categories
+Test activities from each category:
+- [ ] **Workout**: Push-ups, Morning Jog, Strength Training
+- [ ] **Nutrition**: Healthy Breakfast, Protein Shake, Meal Prep
+- [ ] **Recovery**: 8 Hours Sleep, Stretching, Meditation
+- [ ] **Mindset**: Gratitude Journal, Goal Setting, Reading
 
-### Authentication Edge Cases
-- [ ] **Session Expiry**: Session expires → User redirected to login with appropriate message
-- [ ] **Invalid Session**: Manually edit session → Proper error handling
-- [ ] **Network Errors**: Connection issues during auth → Graceful error messages
+## 4. Activity Completion Tests
 
-### Data Validation Tests
-- [ ] **Empty Activity Name**: Try to create activity with empty name → Validation error
-- [ ] **Invalid Category**: Submit invalid category data → Server validation catches
-- [ ] **Malformed Requests**: Send invalid API requests → Proper error responses
+### 4.1 Mark Activities Complete
+- [ ] Check off pending activity and verify it becomes strikethrough
+- [ ] Confirm checkbox becomes disabled after completion
+- [ ] Verify completion counter updates immediately
+- [ ] Test progress circle updates in real-time
 
-### Performance Tests
-- [ ] **Multiple Activities**: Add 10+ activities to single time slot → Performance remains good
-- [ ] **Rapid Completion Toggles**: Quickly toggle activity completion → No race conditions
-- [ ] **Concurrent Users**: Multiple users active simultaneously → No data conflicts
+### 4.2 Activity Status Persistence
+- [ ] Complete several activities
+- [ ] Refresh page and confirm status persists
+- [ ] Test completion across different time slots
 
-### Mobile/Responsive Tests
-- [ ] **Mobile Layout**: Test on mobile device → Layout adapts properly
-- [ ] **Touch Interactions**: Checkboxes and buttons work on touch devices
-- [ ] **Modal on Mobile**: Add activity modal displays correctly on small screens
+## 5. Activity Deletion Tests
 
-## API Endpoint Tests
+### 5.1 Delete Individual Activities
+- [ ] Click trash icon on any activity
+- [ ] Confirm deletion confirmation dialog appears
+- [ ] Accept deletion and verify activity is removed
+- [ ] Cancel deletion and verify activity remains
+- [ ] Test deletion of completed vs pending activities
 
-### Activity Endpoints
-- [ ] `GET /api/activities` → Returns all activities
-- [ ] `POST /api/activities` → Creates new activity
-- [ ] `DELETE /api/activities/:id` → Deletes activity (admin only)
+### 5.2 Deletion Impact
+- [ ] Delete activity and verify completion counters update
+- [ ] Confirm progress percentage recalculates correctly
+- [ ] Test deletion from each time slot
 
-### Tracker Endpoints  
-- [ ] `GET /api/tracker/today` → Returns today's tracker with entries
-- [ ] `POST /api/tracker/entries` → Adds activity to tracker
-- [ ] `PATCH /api/tracker/entries/:id/status` → Updates completion status
-- [ ] `DELETE /api/tracker/entries/:id` → Removes activity from tracker
+## 6. Sidebar & Statistics Tests
 
-### Admin Endpoints
-- [ ] `GET /api/admin/users` → Returns all users (admin only)
-- [ ] `PATCH /api/admin/users/:id/role` → Updates user role (admin only)
+### 6.1 Quick Stats Display
+- [ ] Verify "Current Streak" shows days
+- [ ] Check "This Week" percentage displays
+- [ ] Confirm "Total Activities" count is accurate
 
-### Stats Endpoints
-- [ ] `GET /api/stats` → Returns user statistics
+### 6.2 Popular Activities Section
+- [ ] Verify popular activities list displays
+- [ ] Test "+" buttons to quickly add popular activities
+- [ ] Confirm "View All" link functionality
 
-## Database Tests
+## 7. Admin-Specific Tests
 
-### Data Persistence
-- [ ] **Activity Creation**: New activities saved to database
-- [ ] **Completion Status**: Activity completion states persist
-- [ ] **User Roles**: Role changes saved correctly
-- [ ] **Daily Trackers**: New day creates new tracker automatically
+### 7.1 Admin Panel Access
+- [ ] Sign in as admin user
+- [ ] Verify Admin Panel section appears in sidebar
+- [ ] Test "Manage Users" button functionality
+- [ ] Test "Manage Activities" button functionality
 
-### Data Integrity
-- [ ] **Foreign Key Constraints**: Deleting referenced data handles constraints properly
-- [ ] **Unique Constraints**: Duplicate data prevented where appropriate
-- [ ] **Data Types**: All fields accept and store correct data types
+### 7.2 User Management (Admin Only)
+- [ ] Access admin user management page
+- [ ] View all registered users
+- [ ] Test role change functionality (user ↔ admin)
+- [ ] Verify admin can see user activity data
 
-## Security Tests
+### 7.3 Activity Management (Admin Only)
+- [ ] Access activity management interface
+- [ ] Create new system-wide activities
+- [ ] Edit existing activity details
+- [ ] Delete activities (verify impact on user trackers)
 
-### Authorization
-- [ ] **Protected Routes**: Non-admin users can't access admin endpoints
-- [ ] **User Data Isolation**: Users only see their own tracker data
-- [ ] **Admin Actions**: Only admins can delete activities and manage users
+## 8. Client User Tests
 
-### Input Validation
-- [ ] **SQL Injection**: Malicious SQL in inputs doesn't affect database
-- [ ] **XSS Prevention**: Script tags in activity names don't execute
-- [ ] **CSRF Protection**: Cross-site requests properly handled
+### 8.1 Client Dashboard Access
+- [ ] Sign in as client user
+- [ ] Verify no Admin Panel appears
+- [ ] Confirm all user features work normally
+- [ ] Test activity creation and management
 
-## Complete User Journey Test
+### 8.2 Client Limitations
+- [ ] Verify client cannot access admin URLs
+- [ ] Confirm client gets 403 error for admin endpoints
+- [ ] Test client can only manage their own activities
 
-### New User Complete Flow
-1. [ ] Visit landing page
-2. [ ] Click "Get Started Today" 
-3. [ ] Complete Replit authentication
-4. [ ] Land on dashboard with empty tracker
-5. [ ] Add morning activity (e.g., "Morning Meditation")
-6. [ ] Add afternoon activity (e.g., "HIIT Training")  
-7. [ ] Add evening activity (e.g., "8 Hours Sleep")
-8. [ ] Mark morning activity complete → Progress updates to 33%
-9. [ ] Mark afternoon activity complete → Progress updates to 67%
-10. [ ] Mark evening activity complete → Progress updates to 100%
-11. [ ] View updated stats in sidebar
-12. [ ] Create custom activity and add to tracker
-13. [ ] Remove activity from tracker
-14. [ ] Logout and login again → Data persists
+## 9. Data Persistence Tests
 
-### Admin Complete Flow
-1. [ ] Login as admin user
-2. [ ] Navigate to admin panel
-3. [ ] View user management → See all registered users
-4. [ ] Change a user's role from user to admin
-5. [ ] View activity management → See all activities
-6. [ ] Delete a custom activity
-7. [ ] View analytics → See platform statistics
-8. [ ] Return to dashboard → Normal user features still work
+### 9.1 Cross-Session Persistence
+- [ ] Add activities and complete some
+- [ ] Log out and log back in
+- [ ] Verify all data persists correctly
+- [ ] Test with different browsers
 
-## Performance Benchmarks
-- [ ] **Page Load Time**: Dashboard loads within 2 seconds
-- [ ] **Activity Toggle Response**: Completion toggles respond within 500ms
-- [ ] **Modal Open Time**: Add activity modal opens within 300ms
-- [ ] **API Response Times**: All API calls complete within 1 second
+### 9.2 Multi-User Data Isolation
+- [ ] Add activities as admin user
+- [ ] Switch to client user
+- [ ] Verify users see only their own data
+- [ ] Test activity creation doesn't affect other users
 
-## Browser Compatibility
-- [ ] **Chrome**: All features work in latest Chrome
-- [ ] **Firefox**: All features work in latest Firefox  
-- [ ] **Safari**: All features work in latest Safari
-- [ ] **Mobile Safari**: All features work on iOS devices
-- [ ] **Mobile Chrome**: All features work on Android devices
+## 10. Edge Cases & Error Handling
 
----
+### 10.1 Form Validation
+- [ ] Submit empty activity creation form
+- [ ] Test extremely long activity names/descriptions
+- [ ] Try invalid category selections
 
-## Test Results Summary
+### 10.2 Network Error Handling
+- [ ] Test behavior when API requests fail
+- [ ] Verify error messages display appropriately
+- [ ] Confirm graceful degradation
 
-**Total Test Cases**: 80+
-**Categories Covered**: Authentication, Dashboard, Activity Management, Admin Functions, API Endpoints, Security, Performance
+### 10.3 Browser Compatibility
+- [ ] Test in Chrome, Firefox, Safari, Edge
+- [ ] Verify responsive design on mobile devices
+- [ ] Test with JavaScript disabled
 
-**Status**: ✅ All core functionality implemented and testable
-**Known Issues**: None critical - all major features working
-**Recommendations**: Regular testing of user flows and performance monitoring
+## 11. Performance Tests
+
+### 11.1 Loading Performance
+- [ ] Measure dashboard load time
+- [ ] Test with many activities (50+ entries)
+- [ ] Verify smooth animations and transitions
+
+### 11.2 Real-time Updates
+- [ ] Test rapid activity completion/deletion
+- [ ] Verify progress indicators update smoothly
+- [ ] Confirm no memory leaks during extended use
+
+## 12. Security Tests
+
+### 12.1 Authentication Security
+- [ ] Test access to dashboard without login
+- [ ] Verify admin endpoints require admin role
+- [ ] Test session timeout behavior
+
+### 12.2 Data Security
+- [ ] Verify users can only access their own data
+- [ ] Test SQL injection protection in forms
+- [ ] Confirm XSS protection on user inputs
+
+## Expected Results Summary
+
+### For All Users:
+- Smooth activity management across all time slots
+- Real-time progress tracking and persistence
+- Intuitive UI with immediate feedback
+- Proper category-based organization
+
+### For Admin Users:
+- Additional admin panel with user/activity management
+- Ability to create system-wide activities
+- User role management capabilities
+
+### For Client Users:
+- Full tracker functionality without admin features
+- Personal activity management only
+- No access to admin functions
+
+## Test Environment Setup
+1. Clear browser cache before testing
+2. Use provided test credentials
+3. Test on latest browser versions
+4. Verify database starts with sample data
+5. Check all API endpoints respond correctly
+
+Run these tests systematically to ensure all functionality works as intended for both user types.

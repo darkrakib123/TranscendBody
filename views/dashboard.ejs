@@ -362,21 +362,40 @@
                         <div class="mb-3">
                             <label for="activitySelect" class="form-label">Choose Activity</label>
                             <select class="form-select" id="activitySelect" name="activityId">
-                                <option value="">Select an activity...</option>
+                                <option value="">Loading activities...</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="customActivityFields" style="display: none;">
-                            <label for="customActivityName" class="form-label">Activity Name</label>
-                            <input type="text" class="form-control" id="customActivityName" name="customName">
-                            <label for="customActivityDescription" class="form-label mt-2">Description</label>
-                            <input type="text" class="form-control" id="customActivityDescription" name="customDescription">
-                            <label for="customActivityCategory" class="form-label mt-2">Category</label>
-                            <select class="form-select" id="customActivityCategory" name="customCategory">
-                                <option value="workout">Workout</option>
-                                <option value="nutrition">Nutrition</option>
-                                <option value="recovery">Recovery</option>
-                                <option value="mindset">Mindset</option>
-                            </select>
+                        
+                        <!-- Custom Activity Fields -->
+                        <div id="customActivityFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="customActivityName" class="form-label">Activity Name</label>
+                                <input type="text" class="form-control" id="customActivityName" name="customName" placeholder="Enter activity name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="customActivityCategory" class="form-label">Category</label>
+                                <select class="form-select" id="customActivityCategory" name="customCategory">
+                                    <option value="">Select category</option>
+                                    <option value="workout">Workout</option>
+                                    <option value="nutrition">Nutrition</option>
+                                    <option value="recovery">Recovery</option>
+                                    <option value="mindset">Mindset</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="customActivityDescription" class="form-label">Description (Optional)</label>
+                                <textarea class="form-control" id="customActivityDescription" name="customDescription" rows="2" placeholder="Add notes or details"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="timeSlotSelect" class="form-label">Time Slot</label>
+                                <select class="form-select" id="timeSlotSelect" name="timeSlot">
+                                    <option value="">Select time slot</option>
+                                    <option value="morning">Morning</option>
+                                    <option value="afternoon">Afternoon</option>
+                                    <option value="evening">Evening</option>
+                                </select>
+                                <div class="form-text">Best for: meditation, breakfast, stretching, goal setting</div>
+                            </div>
                         </div>
                         <input type="hidden" id="timeSlot" name="timeSlot">
                     </form>
@@ -516,10 +535,8 @@
         function loadActivities() {
             fetch('/api/activities')
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        populateActivitySelect(data.activities);
-                    }
+                .then(activities => {
+                    populateActivitySelect(activities);
                 })
                 .catch(error => console.error('Error loading activities:', error));
         }
