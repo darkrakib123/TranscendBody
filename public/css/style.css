@@ -357,3 +357,58 @@ footer {
     background-color: var(--primary-color);
     color: white;
 }
+
+/* Momentum Bubbles */
+.momentum-bubbles {
+    display: flex;
+    gap: 2px;
+}
+
+.momentum-bubble {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.momentum-bubble.fire {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
+    animation: pulse 1.5s infinite;
+}
+
+.momentum-bubble.strong {
+    background: linear-gradient(45deg, #26de81, #20bf6b);
+    box-shadow: 0 0 6px rgba(38, 222, 129, 0.5);
+}
+
+.momentum-bubble.good {
+    background: linear-gradient(45deg, #45aaf2, #2d98da);
+    box-shadow: 0 0 4px rgba(69, 170, 242, 0.4);
+}
+
+.momentum-bubble.weak {
+    background: linear-gradient(45deg, #fed330, #f7b731);
+    box-shadow: 0 0 3px rgba(254, 211, 48, 0.3);
+}
+
+.momentum-bubble.inactive {
+    background: #ddd;
+    opacity: 0.5;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Activity Library Styles */
+.activity-library-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.activity-library-item:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+}

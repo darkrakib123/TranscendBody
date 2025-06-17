@@ -268,29 +268,50 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <div class="sidebar">
-                    <!-- Quick Stats -->
+                    <!-- Dynamic Quick Stats with Momentum -->
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-3">Quick Stats</h6>
-                        <div class="stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-dot bg-danger"></div>
-                                <span class="text-muted">Current Streak</span>
+                        <h6 class="fw-bold mb-3">Your Progress</h6>
+                        
+                        <!-- Current Streak with Momentum Bubbles -->
+                        <div class="stat-item position-relative mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-dot bg-danger"></div>
+                                    <span class="text-muted">Current Streak</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2" id="currentStreak">0 days</span>
+                                    <div class="momentum-bubbles" id="streakMomentum"></div>
+                                </div>
                             </div>
-                            <span class="fw-bold" id="currentStreak">7 days</span>
+                            <div class="text-muted small mt-1" id="streakMessage">Start your journey today!</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-dot bg-success"></div>
-                                <span class="text-muted">This Week</span>
+                        
+                        <!-- Weekly Progress with Momentum -->
+                        <div class="stat-item position-relative mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-dot bg-success"></div>
+                                    <span class="text-muted">This Week</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2" id="weeklyAverage">0%</span>
+                                    <div class="momentum-bubbles" id="weeklyMomentum"></div>
+                                </div>
                             </div>
-                            <span class="fw-bold" id="weeklyAverage">73%</span>
+                            <div class="text-muted small mt-1" id="weeklyMessage">Complete more activities to boost your weekly score!</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-dot bg-info"></div>
-                                <span class="text-muted">Total Activities</span>
+                        
+                        <!-- Total Activities -->
+                        <div class="stat-item mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-dot bg-info"></div>
+                                    <span class="text-muted">Total Completed</span>
+                                </div>
+                                <span class="fw-bold" id="totalActivities">0</span>
                             </div>
-                            <span class="fw-bold" id="totalActivities">8</span>
+                            <div class="text-muted small mt-1" id="totalMessage">Every activity counts towards your goals!</div>
                         </div>
                     </div>
 
@@ -650,9 +671,99 @@
         }
 
         function updateStatsDisplay(stats) {
-            document.getElementById('currentStreak').textContent = stats.currentStreak + ' days';
-            document.getElementById('weeklyAverage').textContent = stats.weeklyAverage + '%';
-            document.getElementById('totalActivities').textContent = stats.totalActivities;
+            // Update Current Streak with momentum
+            const streakElement = document.getElementById('currentStreak');
+            const streakMomentum = document.getElementById('streakMomentum');
+            const streakMessage = document.getElementById('streakMessage');
+            
+            streakElement.textContent = stats.currentStreak + ' days';
+            updateMomentumBubbles(streakMomentum, stats.currentStreak, 'streak');
+            updateStreakMessage(streakMessage, stats.currentStreak);
+            
+            // Update Weekly Average with momentum
+            const weeklyElement = document.getElementById('weeklyAverage');
+            const weeklyMomentum = document.getElementById('weeklyMomentum');
+            const weeklyMessage = document.getElementById('weeklyMessage');
+            
+            weeklyElement.textContent = stats.weeklyAverage + '%';
+            updateMomentumBubbles(weeklyMomentum, stats.weeklyAverage, 'weekly');
+            updateWeeklyMessage(weeklyMessage, stats.weeklyAverage);
+            
+            // Update Total Activities
+            const totalElement = document.getElementById('totalActivities');
+            const totalMessage = document.getElementById('totalMessage');
+            
+            totalElement.textContent = stats.totalActivities;
+            updateTotalMessage(totalMessage, stats.totalActivities);
+        }
+
+        function updateMomentumBubbles(container, value, type) {
+            container.innerHTML = '';
+            
+            let bubbleCount = 0;
+            let bubbleClass = 'inactive';
+            
+            if (type === 'streak') {
+                bubbleCount = Math.min(5, Math.max(1, Math.floor(value / 2) + 1));
+                if (value >= 7) bubbleClass = 'fire';
+                else if (value >= 5) bubbleClass = 'strong';
+                else if (value >= 3) bubbleClass = 'good';
+                else if (value >= 1) bubbleClass = 'weak';
+            } else if (type === 'weekly') {
+                bubbleCount = Math.min(5, Math.max(1, Math.floor(value / 20) + 1));
+                if (value >= 80) bubbleClass = 'fire';
+                else if (value >= 60) bubbleClass = 'strong';
+                else if (value >= 40) bubbleClass = 'good';
+                else if (value >= 20) bubbleClass = 'weak';
+            }
+            
+            for (let i = 0; i < 5; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = `momentum-bubble ${i < bubbleCount ? bubbleClass : 'inactive'}`;
+                container.appendChild(bubble);
+            }
+        }
+
+        function updateStreakMessage(element, streak) {
+            if (streak === 0) {
+                element.textContent = "Start your first day today!";
+            } else if (streak === 1) {
+                element.textContent = "Great start! Keep it going!";
+            } else if (streak < 3) {
+                element.textContent = "Building momentum...";
+            } else if (streak < 7) {
+                element.textContent = "You're on a roll!";
+            } else if (streak < 14) {
+                element.textContent = "Incredible consistency!";
+            } else {
+                element.textContent = "You're unstoppable! 🔥";
+            }
+        }
+
+        function updateWeeklyMessage(element, percentage) {
+            if (percentage === 0) {
+                element.textContent = "Start completing activities to build your weekly score!";
+            } else if (percentage < 25) {
+                element.textContent = "Every activity counts - keep going!";
+            } else if (percentage < 50) {
+                element.textContent = "Good progress this week!";
+            } else if (percentage < 75) {
+                element.textContent = "Excellent weekly performance!";
+            } else {
+                element.textContent = "Outstanding week - you're crushing it!";
+            }
+        }
+
+        function updateTotalMessage(element, total) {
+            if (total === 0) {
+                element.textContent = "Start your journey with your first activity!";
+            } else if (total < 10) {
+                element.textContent = `${total} down, many more to go!`;
+            } else if (total < 50) {
+                element.textContent = `${total} activities completed - building great habits!`;
+            } else {
+                element.textContent = `${total} activities completed - you're a habit master!`;
+            }
         }
 
         // Activity select change handler
@@ -731,7 +842,177 @@
             });
         }
 
-        // Initialize progress display
+        // Load popular activities dynamically
+        function loadPopularActivities() {
+            fetch('/api/activities')
+                .then(response => response.json())
+                .then(activities => {
+                    const container = document.getElementById('popularActivities');
+                    container.innerHTML = '';
+                    
+                    // Show top 3 most popular activities
+                    const popularActivities = activities.slice(0, 3);
+                    
+                    popularActivities.forEach(activity => {
+                        const categoryColors = {
+                            workout: 'bg-danger',
+                            nutrition: 'bg-warning', 
+                            recovery: 'bg-info',
+                            mindset: 'bg-success'
+                        };
+                        
+                        const activityHtml = `
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded activity-library-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-dot ${categoryColors[activity.category]}"></div>
+                                    <span style="font-size: 12px;">${activity.title}</span>
+                                </div>
+                                <button class="btn-add" onclick="quickAddActivity(${activity.id})" title="Add to today's tracker">+</button>
+                            </div>
+                        `;
+                        container.innerHTML += activityHtml;
+                    });
+                })
+                .catch(error => console.error('Error loading popular activities:', error));
+        }
+
+        // Quick add activity from popular list
+        function quickAddActivity(activityId) {
+            const data = {
+                activityId: activityId,
+                timeSlot: 'morning' // Default to morning, user can change later
+            };
+            
+            fetch('/api/tracker/add-activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    loadTodayTracker();
+                    showAlert('Activity added to your morning schedule!', 'success');
+                } else {
+                    showAlert('Error adding activity: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding activity:', error);
+                showAlert('Error adding activity', 'error');
+            });
+        }
+
+        // Show Activity Library Modal
+        function showActivityLibrary() {
+            fetch('/api/activities')
+                .then(response => response.json())
+                .then(activities => {
+                    const modalHtml = `
+                        <div class="modal fade" id="activityLibraryModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Activity Library</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            ${generateActivityLibraryContent(activities)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Remove existing modal if any
+                    const existingModal = document.getElementById('activityLibraryModal');
+                    if (existingModal) {
+                        existingModal.remove();
+                    }
+                    
+                    // Add new modal to body
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                    
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('activityLibraryModal'));
+                    modal.show();
+                })
+                .catch(error => console.error('Error loading activity library:', error));
+        }
+
+        function generateActivityLibraryContent(activities) {
+            const categories = {
+                workout: { title: 'Workout', icon: 'fas fa-dumbbell', color: 'danger' },
+                nutrition: { title: 'Nutrition', icon: 'fas fa-apple-alt', color: 'warning' },
+                recovery: { title: 'Recovery', icon: 'fas fa-heart', color: 'info' },
+                mindset: { title: 'Mindset', icon: 'fas fa-brain', color: 'success' }
+            };
+            
+            let content = '';
+            
+            Object.keys(categories).forEach(categoryKey => {
+                const category = categories[categoryKey];
+                const categoryActivities = activities.filter(a => a.category === categoryKey);
+                
+                if (categoryActivities.length > 0) {
+                    content += `
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-${category.color} text-white">
+                                    <h6 class="mb-0">
+                                        <i class="${category.icon} me-2"></i>${category.title}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    ${categoryActivities.map(activity => `
+                                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded activity-library-item">
+                                            <div>
+                                                <div class="fw-bold" style="font-size: 14px;">${activity.title}</div>
+                                                <div class="text-muted small">${activity.description}</div>
+                                            </div>
+                                            <button class="btn btn-outline-${category.color} btn-sm" onclick="quickAddActivity(${activity.id})">
+                                                Add
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            return content;
+        }
+
+        // Simple alert function
+        function showAlert(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', alertHtml);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+
+        // Initialize everything
+        loadPopularActivities();
         updateProgressDisplay();
     </script>
 </body>
