@@ -43,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity routes
-  app.get('/api/activities', isAuthenticated, async (req, res) => {
+  app.get('/api/activities', authMiddleware, async (req, res) => {
     try {
       const activities = await storage.getActivities();
       res.json(activities);
@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/activities', isAuthenticated, async (req: any, res) => {
+  app.post('/api/activities', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const activityData = insertActivitySchema.parse({
@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/activities/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/activities/:id', authMiddleware, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -94,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily tracker routes
-  app.get('/api/tracker/today', isAuthenticated, async (req: any, res) => {
+  app.get('/api/tracker/today', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const today = new Date().toISOString().split('T')[0];
@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tracker entry routes
-  app.post('/api/tracker/entries', isAuthenticated, async (req: any, res) => {
+  app.post('/api/tracker/entries', authMiddleware, async (req: any, res) => {
     try {
       const entryData = insertTrackerEntrySchema.parse(req.body);
       const entry = await storage.createTrackerEntry(entryData);
@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/tracker/entries/:id/status', isAuthenticated, async (req, res) => {
+  app.patch('/api/tracker/entries/:id/status', authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/tracker/entries/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/tracker/entries/:id', authMiddleware, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -185,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statistics routes
-  app.get('/api/stats', isAuthenticated, async (req: any, res) => {
+  app.get('/api/stats', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const stats = await storage.getUserStats(userId);
@@ -197,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/users', authMiddleware, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -212,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:id/role', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/admin/users/:id/role', authMiddleware, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
