@@ -27,30 +27,38 @@ A full-stack web application for tracking daily fitness activities across four k
 - PostgreSQL database
 - npm or yarn package manager
 
-## Local Development Setup
+## Local Development Setup (VS Code)
 
-### 1. Clone the Repository
+### 1. Download from Replit
+
+1. In Replit, click the three dots menu (⋯) in the file tree
+2. Select "Download as zip"
+3. Extract the zip file to your desired location
+
+### 2. Open in VS Code
 
 ```bash
-git clone <your-repo-url>
 cd transcend-your-body-tracker
+code .
 ```
 
-### 2. Install Dependencies
+### 3. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Environment Configuration
+### 4. Set up PostgreSQL Database
 
-Copy the example environment file and configure your settings:
+Install PostgreSQL locally and create a database:
 
-```bash
-cp .env.example .env
+```sql
+CREATE DATABASE transcend_body_db;
 ```
 
-Edit `.env` with your actual values:
+### 5. Environment Configuration
+
+Create a `.env` file in the root directory:
 
 ```env
 # Database Configuration
@@ -69,27 +77,16 @@ NODE_ENV=development
 PORT=5000
 ```
 
-### 4. Database Setup
+### 6. Initialize Database
 
-Create your PostgreSQL database:
-
-```sql
-CREATE DATABASE transcend_body_db;
-```
-
-Push the database schema:
+Push the database schema and seed with activities:
 
 ```bash
 npm run db:push
+tsx scripts/seed.ts
 ```
 
-Seed the database with initial activities:
-
-```bash
-npm run db:seed
-```
-
-### 5. Run the Application
+### 7. Run the Application
 
 Start the development server:
 
@@ -98,6 +95,14 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:5000`
+
+### 8. Create Admin Account
+
+1. Register a new account at `http://localhost:5000/register`
+2. Update the user role in the database:
+   ```sql
+   UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
+   ```
 
 ## Available Scripts
 
@@ -111,22 +116,28 @@ The application will be available at `http://localhost:5000`
 ## Project Structure
 
 ```
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── lib/            # Utility functions
-│   │   └── App.tsx         # Main app component
-│   └── index.html          # HTML template
+├── views/                  # EJS templates
+│   ├── layout.ejs          # Base layout template
+│   ├── login.ejs           # Login page
+│   ├── register.ejs        # Registration page
+│   ├── dashboard.ejs       # Main dashboard
+│   ├── progress.ejs        # Progress tracking page
+│   └── admin.ejs           # Admin panel
+├── public/                 # Static assets
+│   ├── css/
+│   │   └── style.css       # Custom styles
+│   └── js/
+│       └── app.js          # Client-side JavaScript
 ├── server/                 # Backend Express application
 │   ├── index.ts            # Server entry point
-│   ├── routes.ts           # API routes
+│   ├── routes.ts           # Web routes and API endpoints
+│   ├── auth.ts             # Passport.js authentication
 │   ├── storage.ts          # Database operations
-│   ├── db.ts               # Database connection
-│   └── replitAuth.ts       # Authentication setup
-├── shared/                 # Shared types and schemas
-│   └── schema.ts           # Database schema and types
+│   └── db.ts               # Database connection
+├── shared/                 # Shared schemas and types
+│   └── schema.ts           # Drizzle database schema
+├── scripts/                # Utility scripts
+│   └── seed.ts             # Database seeding
 ├── package.json            # Dependencies and scripts
 └── drizzle.config.ts       # Database configuration
 ```
@@ -143,11 +154,18 @@ The application uses four main tables:
 
 ## Authentication
 
-The app uses Replit Auth for user authentication. When running locally, you'll need to:
+The application uses Passport.js with local strategy for user authentication:
 
-1. Set up authentication with your preferred provider, or
-2. Modify the auth system to use local authentication
-3. Update the `ISSUER_URL` and related auth configuration
+- **Registration**: Users can create accounts with email and password
+- **Login**: Secure login with bcrypt password hashing
+- **Sessions**: Server-side session management with PostgreSQL storage
+- **Role-based Access**: Admin users have access to user management features
+- **Password Security**: bcrypt hashing with salt rounds for secure password storage
+
+### User Roles
+
+- **User**: Can track daily activities and view personal progress
+- **Admin**: Can manage users, activities, and access admin dashboard
 
 ## Deployment
 
