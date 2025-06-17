@@ -1,163 +1,164 @@
-<div class="container-fluid py-4">
+<div class="container-fluid">
     <div class="row">
         <!-- Main Dashboard Content -->
-        <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4 px-3 pt-3">
                 <div>
-                    <h2 class="fw-bold mb-1">Today's Progress</h2>
+                    <h2 class="fw-bold mb-1">Today's Tracker</h2>
                     <p class="text-muted mb-0"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
                 </div>
                 <div class="text-center">
-                    <canvas id="progressChart" width="120" height="120" style="max-width: 120px; max-height: 120px;"></canvas>
-                    <div class="mt-2">
-                        <h4 class="mb-0" id="completionPercentage">0%</h4>
-                        <small class="text-muted">Complete</small>
+                    <div class="position-relative d-inline-block">
+                        <canvas id="progressChart" width="80" height="80"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <h4 class="mb-0 text-primary fw-bold" id="completionPercentage">0%</h4>
+                            <small class="text-muted">Complete</small>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Time Slot Sections -->
-            <div class="row g-4">
+            <div class="px-3">
                 <!-- Morning Section -->
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-warning bg-opacity-10 border-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="time-icon bg-warning rounded-circle d-inline-flex align-items-center justify-content-center me-3">
-                                        <i class="fas fa-sun text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0">Morning</h5>
-                                        <small class="text-muted">Best for: meditation, breakfast, stretching</small>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline-warning btn-sm" onclick="showAddActivityModal('morning')">
-                                    <i class="fas fa-plus me-1"></i>Add Activity
-                                </button>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
+                                <i class="fas fa-sun text-white" style="font-size: 12px;"></i>
                             </div>
+                            <h6 class="mb-0 fw-bold">Morning</h6>
+                            <span class="badge bg-light text-dark ms-2" id="morning-count">2 of 4 completed</span>
                         </div>
-                        <div class="card-body" id="morning-activities">
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                <p class="mb-0">No activities scheduled for morning</p>
-                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('morning')">
-                                    Add your first activity
-                                </button>
-                            </div>
-                        </div>
+                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('morning')">
+                            + Add Activity
+                        </button>
+                    </div>
+                    <div id="morning-activities">
+                        <!-- Activities will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Afternoon Section -->
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-primary bg-opacity-10 border-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="time-icon bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3">
-                                        <i class="fas fa-sun text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0">Afternoon</h5>
-                                        <small class="text-muted">Best for: workouts, meal prep, cardio</small>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="showAddActivityModal('afternoon')">
-                                    <i class="fas fa-plus me-1"></i>Add Activity
-                                </button>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
+                                <i class="fas fa-sun text-white" style="font-size: 12px;"></i>
                             </div>
+                            <h6 class="mb-0 fw-bold">Afternoon</h6>
+                            <span class="badge bg-light text-dark ms-2" id="afternoon-count">0 of 2 completed</span>
                         </div>
-                        <div class="card-body" id="afternoon-activities">
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                <p class="mb-0">No activities scheduled for afternoon</p>
-                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('afternoon')">
-                                    Add your first activity
-                                </button>
-                            </div>
-                        </div>
+                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('afternoon')">
+                            + Add Activity
+                        </button>
+                    </div>
+                    <div id="afternoon-activities">
+                        <!-- Activities will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Evening Section -->
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-dark bg-opacity-10 border-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="time-icon bg-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3">
-                                        <i class="fas fa-moon text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0">Evening</h5>
-                                        <small class="text-muted">Best for: recovery, sleep prep, reflection</small>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline-dark btn-sm" onclick="showAddActivityModal('evening')">
-                                    <i class="fas fa-plus me-1"></i>Add Activity
-                                </button>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-dark rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
+                                <i class="fas fa-moon text-white" style="font-size: 12px;"></i>
                             </div>
+                            <h6 class="mb-0 fw-bold">Evening</h6>
+                            <span class="badge bg-light text-dark ms-2" id="evening-count">1 of 1 completed</span>
                         </div>
-                        <div class="card-body" id="evening-activities">
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                <p class="mb-0">No activities scheduled for evening</p>
-                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('evening')">
-                                    Add your first activity
-                                </button>
-                            </div>
-                        </div>
+                        <button class="btn btn-link btn-sm text-primary p-0" onclick="showAddActivityModal('evening')">
+                            + Add Activity
+                        </button>
+                    </div>
+                    <div id="evening-activities">
+                        <!-- Activities will be loaded here -->
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar -->
-        <div class="col-lg-3">
-            <!-- Quick Stats -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-light border-0">
-                    <h6 class="mb-0 fw-bold">Quick Stats</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="stat-item">
-                                <h4 class="mb-0 text-primary" id="currentStreak">0</h4>
-                                <small class="text-muted">Streak</small>
-                            </div>
+        <div class="col-lg-4">
+            <div class="p-3">
+                <!-- Quick Stats -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Quick Stats</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-danger rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <span class="text-muted">Streak</span>
                         </div>
-                        <div class="col-4">
-                            <div class="stat-item">
-                                <h4 class="mb-0 text-success" id="weeklyAverage">0%</h4>
-                                <small class="text-muted">Weekly</small>
-                            </div>
+                        <span class="fw-bold" id="currentStreak">1 days</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <span class="text-muted">This Week</span>
                         </div>
-                        <div class="col-4">
-                            <div class="stat-item">
-                                <h4 class="mb-0 text-info" id="totalActivities">0</h4>
-                                <small class="text-muted">Total</small>
-                            </div>
+                        <span class="fw-bold" id="weeklyAverage">43%</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <span class="text-muted">Total Activities</span>
                         </div>
+                        <span class="fw-bold" id="totalActivities">3</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- Popular Activities -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light border-0">
-                    <h6 class="mb-0 fw-bold">Popular Activities</h6>
-                </div>
-                <div class="card-body">
-                    <div id="popular-activities">
-                        <div class="text-center py-3">
-                            <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                <!-- Activity Library -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Activity Library</h6>
+                        <a href="#" class="text-primary text-decoration-none small">View All</a>
+                    </div>
+                    <div id="activityLibrary">
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-danger rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                                <span class="small">30-min Walk</span>
                             </div>
+                            <button class="btn btn-link btn-sm p-0">+</button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                                <span class="small">8 Hours Sleep</span>
+                            </div>
+                            <button class="btn btn-link btn-sm p-0">+</button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                                <span class="small">Drink 8 Glasses Water</span>
+                            </div>
+                            <button class="btn btn-link btn-sm p-0">+</button>
                         </div>
                     </div>
+                    <button class="btn btn-primary w-100 mt-3" onclick="showAddActivityModal('custom')">
+                        + Create Custom Activity
+                    </button>
                 </div>
+
+                <!-- Admin Panel (if admin) -->
+                <% if (user && user.role === 'admin') { %>
+                <div class="bg-gradient text-white p-3 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h6 class="fw-bold mb-3 text-white">Admin Panel</h6>
+                    <div class="d-grid gap-2">
+                        <a href="/admin" class="btn btn-light btn-sm">
+                            <i class="fas fa-users me-1"></i> Manage Users
+                        </a>
+                        <a href="/admin" class="btn btn-light btn-sm">
+                            <i class="fas fa-cog me-1"></i> Manage Activities
+                        </a>
+                        <a href="/admin" class="btn btn-light btn-sm">
+                            <i class="fas fa-chart-line me-1"></i> View Analytics
+                        </a>
+                    </div>
+                </div>
+                <% } %>
             </div>
         </div>
     </div>
