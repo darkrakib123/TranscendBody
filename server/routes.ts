@@ -94,9 +94,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.render('progress', { title: 'Progress' });
   });
 
-  // Admin route
+  // Admin routes
   app.get('/admin', requireAdmin, (req, res) => {
     res.render('admin', { title: 'Admin Panel' });
+  });
+
+  // Admin API routes
+  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/role', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { role } = req.body;
+      
+      if (!['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
+      }
+      
+      const user = await storage.updateUserRole(id, role);
+      res.json(user);
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      res.status(500).json({ message: 'Failed to update user role' });
+    }
+  });
+
+  app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Add user deletion logic here
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
+
+  app.post('/api/admin/activities', requireAdmin, async (req, res) => {
+    try {
+      const result = insertActivitySchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: 'Invalid activity data' });
+      }
+      
+      const activity = await storage.createActivity(result.data);
+      res.json(activity);
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      res.status(500).json({ message: 'Failed to create activity' });
+    }
+  });
+
+  app.delete('/api/admin/activities/:id', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteActivity(parseInt(id));
+      
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: 'Activity not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      res.status(500).json({ message: 'Failed to delete activity' });
+    }
   });
 
   // API Activity routes
