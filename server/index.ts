@@ -45,6 +45,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Set view engine and static files
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '..', 'views'));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -56,20 +61,8 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Set view engine and static files
-  app.set('view engine', 'ejs');
-  app.set('views', path.join(__dirname, '..', 'views'));
-  app.use(express.static(path.join(__dirname, '..', 'public')));
-
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();

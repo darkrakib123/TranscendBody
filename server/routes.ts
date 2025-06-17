@@ -1,49 +1,88 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import passport from 'passport';
+import bcrypt from 'bcrypt';
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { mockAuth, setupMockAuth } from "./localAuth";
+import { setupAuthentication, requireAuth, requireAdmin, setFlash } from "./auth";
 import { insertActivitySchema, insertTrackerEntrySchema, trackerEntries } from "@shared/schema";
 import { z } from "zod";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware - use mock auth for local development
-  if (process.env.NODE_ENV === 'development' && !process.env.REPL_ID) {
-    console.log('Using mock authentication for local development');
-    setupMockAuth(app);
-  } else {
-    await setupAuth(app);
-  }
+  // Setup authentication
+  setupAuthentication(app);
 
-  // Determine auth middleware to use
-  const authMiddleware = (process.env.NODE_ENV === 'development' && !process.env.REPL_ID) ? mockAuth : isAuthenticated;
-
-  // Health check endpoint
-  app.get('/health', (req, res) => {
-    res.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV
-    });
+  // Main routes
+  app.get('/', (req, res) => {
+    res.render('index', { title: 'Home' });
   });
 
-  // Auth routes
-  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
+  // Authentication routes
+  app.get('/login', (req, res) => {
+    if (req.isAuthenticated()) {
+      return res.redirect('/dashboard');
+    }
+    res.render('login', { title: 'Login' });
+  });
+
+  app.post('/login', passport.authenticate('local', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureFlash: false
+  }));
+
+  app.get('/register', (req, res) => {
+    if (req.isAuthenticated()) {
+      return res.redirect('/dashboard');
+    }
+    res.render('register', { title: 'Register' });
+  });
+
+  app.post('/register', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const { email, password, firstName, lastName } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        setFlash(req, 'error', 'Email already registered');
+        return res.redirect('/register');
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'user'
+      });
+
+      setFlash(req, 'success', 'Registration successful! Please log in.');
+      res.redirect('/login');
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      console.error('Registration error:', error);
+      setFlash(req, 'error', 'Registration failed');
+      res.redirect('/register');
     }
   });
 
+  app.get('/logout', (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+      }
+      setFlash(req, 'success', 'Logged out successfully');
+      res.redirect('/');
+    });
+  });
+
   // Activity routes
-  app.get('/api/activities', authMiddleware, async (req, res) => {
+  app.get('/api/activities', requireAuth, async (req, res) => {
     try {
       const activities = await storage.getActivities();
       res.json(activities);
@@ -53,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/activities', authMiddleware, async (req: any, res) => {
+  app.post('/api/activities', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const activityData = insertActivitySchema.parse({
@@ -72,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/activities/:id', authMiddleware, async (req: any, res) => {
+  app.delete('/api/activities/:id', requireAuth, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -94,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily tracker routes
-  app.get('/api/tracker/today', authMiddleware, async (req: any, res) => {
+  app.get('/api/tracker/today', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const today = new Date().toISOString().split('T')[0];
@@ -118,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tracker entry routes
-  app.post('/api/tracker/entries', authMiddleware, async (req: any, res) => {
+  app.post('/api/tracker/entries', requireAuth, async (req: any, res) => {
     try {
       const entryData = insertTrackerEntrySchema.parse(req.body);
       const entry = await storage.createTrackerEntry(entryData);
@@ -138,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/tracker/entries/:id/status', authMiddleware, async (req, res) => {
+  app.patch('/api/tracker/entries/:id/status', requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -159,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/tracker/entries/:id', authMiddleware, async (req: any, res) => {
+  app.delete('/api/tracker/entries/:id', requireAuth, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -185,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statistics routes
-  app.get('/api/stats', authMiddleware, async (req: any, res) => {
+  app.get('/api/stats', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const stats = await storage.getUserStats(userId);
@@ -197,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get('/api/admin/users', authMiddleware, async (req: any, res) => {
+  app.get('/api/admin/users', requireAuth, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -212,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:id/role', authMiddleware, async (req: any, res) => {
+  app.patch('/api/admin/users/:id/role', requireAuth, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
