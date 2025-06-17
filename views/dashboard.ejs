@@ -1,0 +1,230 @@
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Main Dashboard Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Today's Progress</h2>
+                    <p class="text-muted mb-0"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                </div>
+                <div class="text-center">
+                    <canvas id="progressChart" width="120" height="120" style="max-width: 120px; max-height: 120px;"></canvas>
+                    <div class="mt-2">
+                        <h4 class="mb-0" id="completionPercentage">0%</h4>
+                        <small class="text-muted">Complete</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Slot Sections -->
+            <div class="row g-4">
+                <!-- Morning Section -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning bg-opacity-10 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="time-icon bg-warning rounded-circle d-inline-flex align-items-center justify-content-center me-3">
+                                        <i class="fas fa-sun text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Morning</h5>
+                                        <small class="text-muted">Best for: meditation, breakfast, stretching</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-warning btn-sm" onclick="showAddActivityModal('morning')">
+                                    <i class="fas fa-plus me-1"></i>Add Activity
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="morning-activities">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p class="mb-0">No activities scheduled for morning</p>
+                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('morning')">
+                                    Add your first activity
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Afternoon Section -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary bg-opacity-10 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="time-icon bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3">
+                                        <i class="fas fa-sun text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Afternoon</h5>
+                                        <small class="text-muted">Best for: workouts, meal prep, cardio</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="showAddActivityModal('afternoon')">
+                                    <i class="fas fa-plus me-1"></i>Add Activity
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="afternoon-activities">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p class="mb-0">No activities scheduled for afternoon</p>
+                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('afternoon')">
+                                    Add your first activity
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evening Section -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-dark bg-opacity-10 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="time-icon bg-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3">
+                                        <i class="fas fa-moon text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Evening</h5>
+                                        <small class="text-muted">Best for: recovery, sleep prep, reflection</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-dark btn-sm" onclick="showAddActivityModal('evening')">
+                                    <i class="fas fa-plus me-1"></i>Add Activity
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="evening-activities">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p class="mb-0">No activities scheduled for evening</p>
+                                <button class="btn btn-link btn-sm" onclick="showAddActivityModal('evening')">
+                                    Add your first activity
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light border-0">
+                    <h6 class="mb-0 fw-bold">Quick Stats</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h4 class="mb-0 text-primary" id="currentStreak">0</h4>
+                                <small class="text-muted">Streak</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h4 class="mb-0 text-success" id="weeklyAverage">0%</h4>
+                                <small class="text-muted">Weekly</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h4 class="mb-0 text-info" id="totalActivities">0</h4>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Activities -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h6 class="mb-0 fw-bold">Popular Activities</h6>
+                </div>
+                <div class="card-body">
+                    <div id="popular-activities">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Activity Modal -->
+<div class="modal fade" id="addActivityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Activity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addActivityForm">
+                    <div class="mb-3">
+                        <label for="activitySelect" class="form-label">Choose Activity</label>
+                        <select class="form-select" id="activitySelect" name="activityId">
+                            <option value="">Loading activities...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="timeSlot" class="form-label">Time Slot</label>
+                        <select class="form-select" id="timeSlot" name="timeSlot">
+                            <option value="morning">Morning</option>
+                            <option value="afternoon">Afternoon</option>
+                            <option value="evening">Evening</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="createCustom">
+                            <label class="form-check-label" for="createCustom">
+                                Create custom activity
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="customActivityFields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="customTitle" class="form-label">Activity Name</label>
+                            <input type="text" class="form-control" id="customTitle" name="customTitle">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="customDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="customDescription" name="customDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="customCategory" class="form-label">Category</label>
+                            <select class="form-select" id="customCategory" name="customCategory">
+                                <option value="workout">Workout</option>
+                                <option value="nutrition">Nutrition</option>
+                                <option value="recovery">Recovery</option>
+                                <option value="mindset">Mindset</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addActivity()">Add Activity</button>
+            </div>
+        </div>
+    </div>
+</div>

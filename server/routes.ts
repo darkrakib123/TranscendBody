@@ -81,7 +81,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Activity routes
+  // Dashboard route
+  app.get('/dashboard', requireAuth, (req, res) => {
+    res.render('dashboard', { title: 'Dashboard' });
+  });
+
+  // API Activity routes
   app.get('/api/activities', requireAuth, async (req, res) => {
     try {
       const activities = await storage.getActivities();
@@ -94,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/activities', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const activityData = insertActivitySchema.parse({
         ...req.body,
         createdBy: req.body.isCustom ? userId : null,
