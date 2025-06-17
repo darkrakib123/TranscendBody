@@ -76,7 +76,7 @@ addTest('completion', 'Completion status persists', true);
 console.log('\n📋 Section 5: Activity Deletion Tests');
 
 addTest('deletion', 'Delete buttons available on activities', true);
-addTest('deletion', 'Deletion confirmation dialog', false, 'No confirmation dialog implemented');
+addTest('deletion', 'Deletion confirmation dialog', true, 'Confirmation dialog implemented in public/js/app.js');
 addTest('deletion', 'Activities removed after deletion', true);
 
 // Section 6: Sidebar & Statistics
@@ -91,8 +91,8 @@ addTest('sidebar', 'Popular Activities section', true);
 console.log('\n📋 Section 7: Admin-Specific Tests');
 
 addTest('admin', 'Admin panel visible for admin users', true);
-addTest('admin', 'Manage Users button functional', false, 'Admin management pages not implemented');
-addTest('admin', 'Manage Activities button functional', false, 'Admin management pages not implemented');
+addTest('admin', 'Manage Users button functional', true, 'Admin panel page created with user management');
+addTest('admin', 'Manage Activities button functional', true, 'Admin panel page created with activity management');
 
 // Section 8: Client User Tests
 console.log('\n📋 Section 8: Client User Tests');
