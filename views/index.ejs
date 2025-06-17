@@ -1,0 +1,159 @@
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Transcend Your Body</h1>
+                <p class="lead mb-4">
+                    Transform your fitness journey with our comprehensive daily tracker. 
+                    Monitor workouts, nutrition, recovery, and mindset across morning, afternoon, and evening activities.
+                </p>
+                <% if (!user) { %>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="/register" class="btn btn-light btn-lg me-md-2">
+                            <i class="fas fa-user-plus me-2"></i>Get Started Today
+                        </a>
+                        <a href="/login" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    </div>
+                <% } else { %>
+                    <a href="/dashboard" class="btn btn-light btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                <% } %>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-dumbbell display-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="fw-bold">Four Pillars of Fitness Success</h2>
+                <p class="lead text-muted">Track your progress across all dimensions of health and wellness</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-dumbbell text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Workouts</h5>
+                        <p class="card-text text-muted">Track HIIT, strength training, cardio, and flexibility exercises</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-apple-alt text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Nutrition</h5>
+                        <p class="card-text text-muted">Monitor meals, calories, hydration, and supplement intake</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon bg-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-bed text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Recovery</h5>
+                        <p class="card-text text-muted">Track sleep, stretching, massage, and relaxation activities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon bg-purple rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-brain text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Mindset</h5>
+                        <p class="card-text text-muted">Practice meditation, visualization, and positive affirmations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Time Slots Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="fw-bold">Organize Your Day</h2>
+                <p class="lead text-muted">Structure your activities across three optimal time periods</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="time-icon bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-sun text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Morning</h5>
+                        <p class="card-text">Start your day with meditation, healthy breakfast, and goal visualization</p>
+                        <small class="text-muted">Best for: mindfulness, nutrition planning, light exercise</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="time-icon bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-sun text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Afternoon</h5>
+                        <p class="card-text">Peak energy time for intensive workouts and meal preparation</p>
+                        <small class="text-muted">Best for: HIIT, strength training, cardio activities</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="time-icon bg-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-moon text-white fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Evening</h5>
+                        <p class="card-text">Wind down with recovery activities and positive reflection</p>
+                        <small class="text-muted">Best for: stretching, sleep prep, gratitude practice</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<% if (!user) { %>
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Ready to Transform Your Body?</h2>
+        <p class="lead mb-4">Join thousands of users who have already started their fitness transformation journey</p>
+        <a href="/register" class="btn btn-light btn-lg">
+            <i class="fas fa-rocket me-2"></i>Start Your Journey Today
+        </a>
+    </div>
+</section>
+<% } %>
