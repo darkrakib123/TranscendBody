@@ -5,20 +5,38 @@ const testSuite = {
   // Test 1: Check if FontAwesome icons are loaded
   async testFontAwesome() {
     console.log('Testing FontAwesome icons...');
+    const faLink = document.querySelector('link[href*="font-awesome"]');
     const hasFA = document.querySelector('.fa, .fas, .far, .fab');
+    console.log('FontAwesome CSS loaded:', faLink ? 'YES' : 'NO');
     console.log('FontAwesome icons found:', hasFA ? 'YES' : 'NO');
-    return hasFA !== null;
+    
+    // Test specific icons
+    const trashIcons = document.querySelectorAll('.fa-trash');
+    console.log('Trash icons found:', trashIcons.length);
+    
+    return faLink !== null && hasFA !== null;
   },
 
-  // Test 2: Check if delete buttons are visible
+  // Test 2: Check if delete buttons are visible and functional
   async testDeleteButtons() {
-    console.log('Testing delete button visibility...');
-    const deleteButtons = document.querySelectorAll('[title="Remove activity"], .fa-trash');
+    console.log('Testing delete button visibility and functionality...');
+    const deleteButtons = document.querySelectorAll('[title="Remove activity"]');
+    const trashIcons = document.querySelectorAll('.fa-trash');
+    
     console.log('Delete buttons found:', deleteButtons.length);
+    console.log('Trash icons found:', trashIcons.length);
+    
     deleteButtons.forEach((btn, index) => {
-      console.log(`Delete button ${index + 1}:`, btn.classList.toString());
+      const rect = btn.getBoundingClientRect();
+      const isVisible = rect.width > 0 && rect.height > 0 && window.getComputedStyle(btn).visibility !== 'hidden';
+      console.log(`Delete button ${index + 1}:`, {
+        visible: isVisible,
+        classes: btn.classList.toString(),
+        styles: window.getComputedStyle(btn).color
+      });
     });
-    return deleteButtons.length > 0;
+    
+    return deleteButtons.length > 0 && trashIcons.length > 0;
   },
 
   // Test 3: Check admin panel visibility
