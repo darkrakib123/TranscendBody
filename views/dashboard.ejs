@@ -188,7 +188,17 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h2 class="mb-1">Welcome back, <%= user.firstName || 'User' %>!</h2>
-                    <p class="mb-0 opacity-75">Today's Tracker - <span id="currentDate"></span></p>
+                    <p class="mb-0 opacity-75">Your Daily Activities - <span id="currentDate"></span></p>
+                    <% if (user.role === 'admin') { %>
+                        <div class="mt-2">
+                            <a href="/admin" class="admin-link me-3" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px;">
+                                <i class="fas fa-users me-1"></i> Manage Users
+                            </a>
+                            <a href="/admin?tab=activities" class="admin-link" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px;">
+                                <i class="fas fa-list me-1"></i> Manage Activities
+                            </a>
+                        </div>
+                    <% } %>
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="progress-circle">
@@ -278,9 +288,9 @@
                         <!-- Subscription Logic Explanation -->
                         <div class="subscription-info mb-3 p-2" style="background: #f8f9fa; border-radius: 8px; font-size: 11px;">
                             <strong>Earn Premium Access:</strong><br>
-                            • <span class="badge bg-secondary" style="font-size: 9px;">Free Plan</span> Complete 3+ daily activities or maintain 1+ day streak<br>
-                            • <span class="badge bg-warning" style="font-size: 9px;">Almost Premium</span> Complete 7+ daily activities or maintain 3+ day streak<br>
-                            • <span class="badge bg-success" style="font-size: 9px;">Premium Earned</span> Complete 10+ daily activities or maintain 7+ day streak
+                            • <span class="badge bg-secondary" style="font-size: 9px;">Free Plan</span> Start completing activities<br>
+                            • <span class="badge bg-warning" style="font-size: 9px;">Almost Premium</span> 3+ day streak OR 7+ total activities<br>
+                            • <span class="badge bg-success" style="font-size: 9px;">Premium Earned</span> 7+ day streak OR 10+ total activities
                         </div>
                         
                         <!-- Streak Progress -->
