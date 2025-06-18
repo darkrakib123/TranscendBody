@@ -272,7 +272,15 @@
                     <div class="progress-dashboard mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold mb-0">Your Progress</h6>
-                            <div id="subscriptionStatus" class="badge bg-success">Premium Earned</div>
+                            <div id="subscriptionStatus" class="badge bg-secondary">Free Plan</div>
+                        </div>
+                        
+                        <!-- Subscription Logic Explanation -->
+                        <div class="subscription-info mb-3 p-2" style="background: #f8f9fa; border-radius: 8px; font-size: 11px;">
+                            <strong>Earn Premium Access:</strong><br>
+                            • <span class="badge bg-secondary" style="font-size: 9px;">Free Plan</span> Complete 3+ daily activities or maintain 1+ day streak<br>
+                            • <span class="badge bg-warning" style="font-size: 9px;">Almost Premium</span> Complete 7+ daily activities or maintain 3+ day streak<br>
+                            • <span class="badge bg-success" style="font-size: 9px;">Premium Earned</span> Complete 10+ daily activities or maintain 7+ day streak
                         </div>
                         
                         <!-- Streak Progress -->
@@ -713,13 +721,18 @@
         function updateSubscriptionStatus(streak, totalActivities) {
             const statusElement = document.getElementById('subscriptionStatus');
             
+            // Premium logic: 7+ day streak OR 10+ total activities
             if (streak >= 7 || totalActivities >= 10) {
                 statusElement.textContent = 'Premium Earned';
                 statusElement.className = 'badge bg-success';
-            } else if (streak >= 3 || totalActivities >= 5) {
+            } 
+            // Almost Premium: 3+ day streak OR 7+ total activities
+            else if (streak >= 3 || totalActivities >= 7) {
                 statusElement.textContent = 'Almost Premium';
                 statusElement.className = 'badge bg-warning';
-            } else {
+            } 
+            // Free Plan: Less than thresholds above
+            else {
                 statusElement.textContent = 'Free Plan';
                 statusElement.className = 'badge bg-secondary';
             }
