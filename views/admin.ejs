@@ -60,7 +60,7 @@
                                         <th>Email</th>
                                         <th>Name</th>
                                         <th>Role</th>
-                                        <th>Created</th>
+                                        <th>Progress</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -152,18 +152,53 @@
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
                 
-                users.forEach(user => {
+                // Load progress data for each client user
+                const usersWithProgress = await Promise.all(users.map(async user => {
+                    if (user.role === 'client') {
+                        try {
+                            const statsResponse = await fetch(`/api/admin/user-stats/${user.id}`);
+                            if (statsResponse.ok) {
+                                const stats = await statsResponse.json();
+                                return { ...user, stats };
+                            }
+                        } catch (error) {
+                            console.error(`Error loading stats for ${user.email}:`, error);
+                        }
+                    }
+                    return { ...user, stats: null };
+                }));
+
+                usersWithProgress.forEach(user => {
+                    let progressDisplay = '';
+                    if (user.stats) {
+                        const achievementLevel = getAchievementLevel(user.stats.totalActivities);
+                        const achievementColor = getAchievementColor(achievementLevel);
+                        progressDisplay = `
+                            <div class="progress-summary">
+                                <div class="badge" style="background: ${achievementColor}; color: white; font-size: 10px; margin-bottom: 2px;">
+                                    ${achievementLevel}
+                                </div>
+                                <div style="font-size: 11px; color: #666;">
+                                    ${user.stats.currentStreak} day streak<br>
+                                    ${user.stats.totalActivities} completed
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        progressDisplay = '<span class="text-muted small">Admin User</span>';
+                    }
+
                     const row = `
                         <tr>
                             <td>${user.email}</td>
                             <td>${user.firstName || ''} ${user.lastName || ''}</td>
                             <td>
                                 <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
-                                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>Client</option>
+                                    <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
                                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                                 </select>
                             </td>
-                            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                            <td>${progressDisplay}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
                                     <i class="fas fa-trash"></i>
