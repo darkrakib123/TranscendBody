@@ -33,12 +33,12 @@
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs mb-4" id="adminTabs">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#users">
+                <a class="nav-link" data-bs-toggle="tab" href="#users">
                     <i class="fas fa-users me-2"></i>Manage Users
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#activities">
+                <a class="nav-link active" data-bs-toggle="tab" href="#activities">
                     <i class="fas fa-list me-2"></i>Manage Activities
                 </a>
             </li>
@@ -47,7 +47,7 @@
         <!-- Tab Content -->
         <div class="tab-content">
             <!-- Users Tab -->
-            <div class="tab-pane fade show active" id="users">
+            <div class="tab-pane fade" id="users">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">User Management</h5>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Activities Tab -->
-            <div class="tab-pane fade" id="activities">
+            <div class="tab-pane fade show active" id="activities">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card">
@@ -173,10 +173,14 @@
                     if (user.stats) {
                         const achievementLevel = getAchievementLevel(user.stats.totalActivities);
                         const achievementColor = getAchievementColor(achievementLevel);
+                        const subscriptionStatus = getSubscriptionStatus(user.stats.currentStreak, user.stats.totalActivities);
                         progressDisplay = `
                             <div class="progress-summary">
                                 <div class="badge" style="background: ${achievementColor}; color: white; font-size: 10px; margin-bottom: 2px;">
                                     ${achievementLevel}
+                                </div>
+                                <div class="badge ${subscriptionStatus.class}" style="font-size: 9px; margin-bottom: 2px;">
+                                    ${subscriptionStatus.text}
                                 </div>
                                 <div style="font-size: 11px; color: #666;">
                                     ${user.stats.currentStreak} day streak<br>

@@ -270,7 +270,10 @@
                 <div class="sidebar">
                     <!-- Progress Dashboard -->
                     <div class="progress-dashboard mb-4">
-                        <h6 class="fw-bold mb-3">Your Progress</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">Your Progress</h6>
+                            <div id="subscriptionStatus" class="badge bg-success">Premium Earned</div>
+                        </div>
                         
                         <!-- Streak Progress -->
                         <div class="progress-card mb-3">
@@ -638,6 +641,7 @@
                     activityItem.classList.remove('completed');
                 }
                 updateProgressDisplay();
+                loadStats(); // Refresh stats when activities completed
             })
             .catch(error => {
                 console.error('Error updating activity status:', error);
@@ -654,6 +658,7 @@
                 .then(response => response.json())
                 .then(data => {
                     loadTodayTracker(); // Reload the tracker data
+                    loadStats(); // Refresh stats when activities deleted
                 })
                 .catch(error => {
                     console.error('Error deleting activity:', error);
@@ -700,6 +705,24 @@
             
             totalElement.textContent = stats.totalActivities;
             updateAchievementLevel(achievementLevel, stats.totalActivities);
+            
+            // Update subscription status
+            updateSubscriptionStatus(stats.currentStreak, stats.totalActivities);
+        }
+
+        function updateSubscriptionStatus(streak, totalActivities) {
+            const statusElement = document.getElementById('subscriptionStatus');
+            
+            if (streak >= 7 || totalActivities >= 10) {
+                statusElement.textContent = 'Premium Earned';
+                statusElement.className = 'badge bg-success';
+            } else if (streak >= 3 || totalActivities >= 5) {
+                statusElement.textContent = 'Almost Premium';
+                statusElement.className = 'badge bg-warning';
+            } else {
+                statusElement.textContent = 'Free Plan';
+                statusElement.className = 'badge bg-secondary';
+            }
         }
 
         function updateStreakProgress(bar, streak) {
