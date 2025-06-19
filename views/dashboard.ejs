@@ -48,38 +48,7 @@
             font-weight: bold;
             color: #333;
         }
-        .time-overview-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            transition: transform 0.3s ease;
-        }
-        .time-overview-card:hover {
-            transform: translateY(-5px);
-        }
-        .time-overview-card .time-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 20px;
-        }
-        .time-overview-card h6 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        .time-overview-card p {
-            font-size: 14px;
-            opacity: 0.8;
-            margin: 0;
-        }
+
         .time-slot-section {
             background: white;
             border-radius: 15px;
@@ -209,49 +178,7 @@
             color: white;
         }
         
-        /* Enhanced dot animations and responsive design */
-        @keyframes dotPulse {
-            0%, 100% { 
-                transform: scale(1) translateY(0px); 
-                opacity: 1; 
-            }
-            50% { 
-                transform: scale(1.15) translateY(-2px); 
-                opacity: 0.85; 
-            }
-        }
-        
-        .animated-dot {
-            transition: all 0.3s ease;
-        }
-        
-        .animated-dot:hover {
-            transform: scale(1.3) translateY(-3px) !important;
-            animation-play-state: paused;
-        }
-        
-        /* Responsive design for dots */
-        @media (max-width: 768px) {
-            .animated-dot {
-                height: 12px !important;
-                width: 12px !important;
-            }
-            
-            .dots-container {
-                gap: 12px !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .animated-dot {
-                height: 10px !important;
-                width: 10px !important;
-            }
-            
-            .dots-container {
-                gap: 10px !important;
-            }
-        }
+
         
         .achievement-badge, .achievement-badge-large {
             color: white !important;
@@ -308,84 +235,7 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Target Audience with Enhanced Dots -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="text-center">
-                        <!-- Centered Dots -->
-                        <div class="dots-container mb-3" style="display: flex; justify-content: center; align-items: center; gap: 16px;">
-                            <span class="animated-dot" style="
-                                height: 14px; 
-                                width: 14px; 
-                                background: linear-gradient(135deg, #ffd700, #ffed4e); 
-                                border-radius: 50%; 
-                                display: inline-block; 
-                                box-shadow: 0 3px 12px rgba(255,215,0,0.5);
-                                animation: dotPulse 2s infinite;
-                                animation-delay: 0s;
-                            "></span>
-                            <span class="animated-dot" style="
-                                height: 14px; 
-                                width: 14px; 
-                                background: linear-gradient(135deg, #4ecdc4, #44a08d); 
-                                border-radius: 50%; 
-                                display: inline-block; 
-                                box-shadow: 0 3px 12px rgba(78,205,196,0.5);
-                                animation: dotPulse 2s infinite;
-                                animation-delay: 0.4s;
-                            "></span>
-                            <span class="animated-dot" style="
-                                height: 14px; 
-                                width: 14px; 
-                                background: linear-gradient(135deg, #9b59b6, #8e44ad); 
-                                border-radius: 50%; 
-                                display: inline-block; 
-                                box-shadow: 0 3px 12px rgba(155,89,182,0.5);
-                                animation: dotPulse 2s infinite;
-                                animation-delay: 0.8s;
-                            "></span>
-                        </div>
-                        
-                        <!-- Text on separate line -->
-                        <p class="text-white-50 mb-0" style="font-size: 15px; font-weight: 300; line-height: 1.4;">
-                            Perfect for Fitness Beginners • Busy Professionals • Coaching Clients
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Time Slots Overview -->
-        <div class="row g-3 mt-3">
-            <div class="col-md-4">
-                <div class="time-overview-card morning-card">
-                    <div class="time-icon">
-                        <i class="fas fa-sun"></i>
-                    </div>
-                    <h6>Morning</h6>
-                    <p>Start Strong</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="time-overview-card afternoon-card">
-                    <div class="time-icon">
-                        <i class="fas fa-sun"></i>
-                    </div>
-                    <h6>Afternoon</h6>
-                    <p>Stay Active</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="time-overview-card evening-card">
-                    <div class="time-icon">
-                        <i class="fas fa-moon"></i>
-                    </div>
-                    <h6>Evening</h6>
-                    <p>Recover Well</p>
-                </div>
-            </div>
-        </div>
 
         <div class="row">
             <!-- Main Content -->
