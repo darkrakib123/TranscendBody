@@ -607,14 +607,21 @@
                 .catch(error => console.error('Error loading activities:', error));
         }
 
-        function loadStats() {
-            fetch('/api/stats')
-                .then(response => response.json())
-                .then(stats => {
-                    console.log('Loaded stats:', stats); // Debug log
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    console.log('Loaded stats from API:', stats);
+                    console.log('About to call updateStatsDisplay with:', stats);
                     updateStatsDisplay(stats);
-                })
-                .catch(error => console.error('Error loading stats:', error));
+                    console.log('updateStatsDisplay completed');
+                } else {
+                    console.error('Failed to load stats - HTTP status:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
         }
 
         function populateActivitySelect(activities) {
@@ -744,15 +751,14 @@
             streakElement.textContent = stats.currentStreak;
             updateStreakProgress(streakBar, stats.currentStreak);
             updateStreakMessage(streakMessage, stats.currentStreak);
-            
-            // Update Weekly Progress
-            const weeklyElement = document.getElementById('weeklyAverage');
-            const weeklyBar = document.getElementById('weeklyBar');
-            const weeklyMessage = document.getElementById('weeklyMessage');
-            
-            weeklyElement.textContent = stats.weeklyAverage + '%';
-            updateWeeklyProgress(weeklyBar, stats.weeklyAverage);
-            updateWeeklyMessage(weeklyMessage, stats.weeklyAverage);
+                // Update Weekly Progress
+                const weeklyElement = document.getElementById('weeklyAverage');
+                const weeklyBar = document.getElementById('weeklyBar');
+                const weeklyMessage = document.getElementById('weeklyMessage');
+                
+                if (weeklyElement) weeklyElement.textContent = stats.weeklyAverage + '%';
+                if (weeklyBar) updateWeeklyProgress(weeklyBar, stats.weeklyAverage);
+                if (weeklyMessage) updateWeeklyMessage(weeklyMessage, stats.weeklyAverage);
             
             // Update Total Activities
             const totalElement = document.getElementById('totalActivities');
@@ -1130,23 +1136,37 @@
         }
 
         function updateSubscriptionStatus(streak, totalActivities) {
+            console.log('updateSubscriptionStatus called with streak:', streak, 'totalActivities:', totalActivities);
+            
             const statusElement = document.getElementById('subscriptionStatus');
+            if (!statusElement) {
+                console.error('subscriptionStatus element not found');
+                return;
+            }
+            
+            let status = 'Free Plan';
+            let statusStyle = 'background: #6c757d; color: white; border: none;';
             
             // Premium logic: 7+ day streak OR 10+ total activities
             if (streak >= 7 || totalActivities >= 10) {
-                statusElement.textContent = 'Premium Earned';
-                statusElement.className = 'badge bg-success';
+                status = 'Premium Earned';
+                statusStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                console.log('Setting Premium Earned status');
             } 
             // Almost Premium: 3+ day streak OR 7+ total activities
             else if (streak >= 3 || totalActivities >= 7) {
-                statusElement.textContent = 'Almost Premium';
-                statusElement.className = 'badge bg-warning';
+                status = 'Almost Premium';
+                statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
+                console.log('Setting Almost Premium status');
             } 
             // Free Plan: Less than thresholds above
             else {
-                statusElement.textContent = 'Free Plan';
-                statusElement.className = 'badge bg-secondary';
+                console.log('Setting Free Plan status');
             }
+            
+            statusElement.textContent = status;
+            statusElement.style.cssText = statusStyle;
+            console.log('Subscription status updated to:', status);
         }
 
         function updateStreakProgress(bar, streak) {
