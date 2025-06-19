@@ -183,20 +183,20 @@
         .legend {
             top: 30px;
             right: 30px;
-            width: 220px;
+            width: 200px;
         }
         
         .relationships-box {
-            top: 300px;
+            top: 200px;
             right: 30px;
             width: 280px;
             border: 2px solid #4F46E5;
         }
         
         .progress-box {
-            top: 30px;
+            bottom: 30px;
             left: 30px;
-            max-width: 300px;
+            max-width: 350px;
             border: 2px solid #059669;
         }
         
@@ -238,11 +238,11 @@
         }
 
         /* Entity positions - strategic layout for clean arrows */
-        .users { top: 80px; left: 80px; }
-        .sessions { top: 80px; left: 800px; }
-        .activities { top: 380px; left: 800px; }
-        .daily-trackers { top: 380px; left: 80px; }
-        .tracker-entries { top: 680px; left: 440px; }
+        .users { top: 80px; left: 100px; }
+        .sessions { top: 80px; left: 700px; }
+        .activities { top: 380px; left: 700px; }
+        .daily-trackers { top: 380px; left: 100px; }
+        .tracker-entries { top: 680px; left: 400px; }
         
         .business-logic {
             margin-top: 40px;
@@ -329,14 +329,6 @@
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #2563EB;"></div>
                 Foreign Key
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #059669;"></div>
-                Progress Field
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #D97706;"></div>
-                Subscription Field
             </div>
         </div>
 
@@ -543,32 +535,32 @@
                 </defs>
                 
                 <!-- Users to Daily Trackers (straight down) -->
-                <path d="M 200 300 L 200 380" class="relationship" />
+                <path d="M 220 300 L 220 380" class="relationship" />
                 
                 <!-- Users to Activities (across top, then down) -->
-                <path d="M 360 180 L 800 180 L 800 380" class="relationship" />
+                <path d="M 380 180 L 720 180 L 720 380" class="relationship" />
                 
                 <!-- Daily Trackers to Tracker Entries (down and right) -->
-                <path d="M 360 480 L 440 480 L 440 680" class="relationship" />
+                <path d="M 380 480 L 400 480 L 400 680" class="relationship" />
                 
                 <!-- Activities to Tracker Entries (down and left) -->
-                <path d="M 800 600 L 800 640 L 720 640 L 720 680" class="relationship" />
+                <path d="M 720 600 L 720 640 L 680 640 L 680 680" class="relationship" />
             </svg>
             
             <!-- Relationship labels with explanations -->
-            <div class="relationship-label" style="top: 330px; left: 210px;">
+            <div class="relationship-label" style="top: 330px; left: 230px;">
                 <strong>1:N</strong><br>
                 User → Daily Trackers
             </div>
-            <div class="relationship-label" style="top: 160px; left: 570px;">
+            <div class="relationship-label" style="top: 160px; left: 520px;">
                 <strong>1:N (Optional)</strong><br>
                 User → Custom Activities
             </div>
-            <div class="relationship-label" style="top: 460px; left: 380px;">
+            <div class="relationship-label" style="top: 460px; left: 300px;">
                 <strong>1:N</strong><br>
                 Daily Tracker → Entries
             </div>
-            <div class="relationship-label" style="top: 620px; left: 740px;">
+            <div class="relationship-label" style="top: 620px; left: 680px;">
                 <strong>1:N</strong><br>
                 Activity → Entries
             </div>
