@@ -48,6 +48,38 @@
             font-weight: bold;
             color: #333;
         }
+        .time-overview-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+        .time-overview-card:hover {
+            transform: translateY(-5px);
+        }
+        .time-overview-card .time-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 20px;
+        }
+        .time-overview-card h6 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .time-overview-card p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 0;
+        }
         .time-slot-section {
             background: white;
             border-radius: 15px;
@@ -320,6 +352,37 @@
                             Perfect for Fitness Beginners • Busy Professionals • Coaching Clients
                         </p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Slots Overview -->
+        <div class="row g-3 mt-3">
+            <div class="col-md-4">
+                <div class="time-overview-card morning-card">
+                    <div class="time-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <h6>Morning</h6>
+                    <p>Start Strong</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="time-overview-card afternoon-card">
+                    <div class="time-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <h6>Afternoon</h6>
+                    <p>Stay Active</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="time-overview-card evening-card">
+                    <div class="time-icon">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h6>Evening</h6>
+                    <p>Recover Well</p>
                 </div>
             </div>
         </div>
