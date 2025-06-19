@@ -146,8 +146,15 @@
         // Load users with their progress stats
         async function loadUsers() {
             try {
+                console.log('Loading users...');
                 const response = await fetch('/api/admin/users');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const users = await response.json();
+                console.log('Loaded users:', users.length, users);
                 
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
