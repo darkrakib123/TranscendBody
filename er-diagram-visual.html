@@ -58,9 +58,9 @@
             position: relative;
             background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
             border-radius: 16px;
-            padding: 60px;
+            padding: 80px;
             margin: 30px 0;
-            min-height: 1000px;
+            min-height: 1200px;
             border: 1px solid #E2E8F0;
         }
         
@@ -183,13 +183,20 @@
         .legend {
             top: 30px;
             right: 30px;
-            width: 200px;
+            width: 220px;
+        }
+        
+        .relationships-box {
+            top: 300px;
+            right: 30px;
+            width: 280px;
+            border: 2px solid #4F46E5;
         }
         
         .progress-box {
             top: 30px;
             left: 30px;
-            max-width: 350px;
+            max-width: 300px;
             border: 2px solid #059669;
         }
         
@@ -230,12 +237,12 @@
             font-weight: 500;
         }
 
-        /* Entity positions - better spacing */
-        .users { top: 150px; left: 100px; }
-        .sessions { top: 150px; left: 420px; }
-        .activities { top: 150px; left: 740px; }
-        .daily-trackers { top: 480px; left: 320px; }
-        .tracker-entries { top: 780px; left: 640px; }
+        /* Entity positions - strategic layout for clean arrows */
+        .users { top: 80px; left: 80px; }
+        .sessions { top: 80px; left: 800px; }
+        .activities { top: 380px; left: 800px; }
+        .daily-trackers { top: 380px; left: 80px; }
+        .tracker-entries { top: 680px; left: 440px; }
         
         .business-logic {
             margin-top: 40px;
@@ -330,6 +337,28 @@
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #D97706;"></div>
                 Subscription Field
+            </div>
+        </div>
+
+        <div class="info-panel relationships-box">
+            <h3 style="color: #4F46E5;">Table Relationships</h3>
+            <div style="font-size: 11px; line-height: 1.6;">
+                <div style="margin: 8px 0; padding: 6px; background: #F8FAFC; border-radius: 4px;">
+                    <strong>users → daily_trackers</strong><br>
+                    Each user has many daily tracker records (one per date)
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: #F8FAFC; border-radius: 4px;">
+                    <strong>users → activities</strong><br>
+                    Admins can create custom activities (optional relationship)
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: #F8FAFC; border-radius: 4px;">
+                    <strong>daily_trackers → tracker_entries</strong><br>
+                    Each daily tracker contains multiple activity entries
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: #F8FAFC; border-radius: 4px;">
+                    <strong>activities → tracker_entries</strong><br>
+                    Each activity can be assigned to multiple entries
+                </div>
             </div>
         </div>
         
@@ -513,72 +542,138 @@
                     </marker>
                 </defs>
                 
-                <!-- Users to Daily Trackers -->
-                <path d="M 220 420 L 220 450 L 380 450 L 380 480" class="relationship" />
+                <!-- Users to Daily Trackers (straight down) -->
+                <path d="M 200 300 L 200 380" class="relationship" />
                 
-                <!-- Users to Activities (created_by) -->
-                <path d="M 380 230 L 740 230" class="relationship" />
+                <!-- Users to Activities (across top, then down) -->
+                <path d="M 360 180 L 800 180 L 800 380" class="relationship" />
                 
-                <!-- Daily Trackers to Tracker Entries -->
-                <path d="M 480 560 L 480 720 L 700 720 L 700 780" class="relationship" />
+                <!-- Daily Trackers to Tracker Entries (down and right) -->
+                <path d="M 360 480 L 440 480 L 440 680" class="relationship" />
                 
-                <!-- Activities to Tracker Entries -->
-                <path d="M 840 330 L 840 700 L 800 700 L 800 780" class="relationship" />
+                <!-- Activities to Tracker Entries (down and left) -->
+                <path d="M 800 600 L 800 640 L 720 640 L 720 680" class="relationship" />
             </svg>
             
-            <!-- Relationship labels -->
-            <div class="relationship-label" style="top: 430px; left: 300px;">One-to-Many</div>
-            <div class="relationship-label" style="top: 210px; left: 550px;">One-to-Many (Optional)</div>
-            <div class="relationship-label" style="top: 640px; left: 580px;">One-to-Many</div>
-            <div class="relationship-label" style="top: 680px; left: 810px;">One-to-Many</div>
+            <!-- Relationship labels with explanations -->
+            <div class="relationship-label" style="top: 330px; left: 210px;">
+                <strong>1:N</strong><br>
+                User → Daily Trackers
+            </div>
+            <div class="relationship-label" style="top: 160px; left: 570px;">
+                <strong>1:N (Optional)</strong><br>
+                User → Custom Activities
+            </div>
+            <div class="relationship-label" style="top: 460px; left: 380px;">
+                <strong>1:N</strong><br>
+                Daily Tracker → Entries
+            </div>
+            <div class="relationship-label" style="top: 620px; left: 740px;">
+                <strong>1:N</strong><br>
+                Activity → Entries
+            </div>
         </div>
         
+        <!-- Key Features Section -->
+        <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #EEF2FF, #E0E7FF); border-radius: 16px; border: 1px solid #C7D2FE;">
+            <h3 style="color: #3730A3; margin-bottom: 20px; font-size: 24px; font-weight: 600; text-align: center;">Key Features & Core Functionality</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; font-size: 13px;">
+                <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #E5E7EB; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <h4 style="color: #4F46E5; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">🎯 Daily Activity Tracking</h4>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                        <li><strong>Time-Based Organization:</strong> Morning, Afternoon, Evening slots</li>
+                        <li><strong>4 Wellness Categories:</strong> Workout, Nutrition, Recovery, Mindset</li>
+                        <li><strong>Status Management:</strong> Pending → Completed/Skipped lifecycle</li>
+                        <li><strong>Progress Calculation:</strong> Real-time completion percentage</li>
+                    </ul>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #E5E7EB; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <h4 style="color: #059669; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">📈 Progress & Gamification</h4>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                        <li><strong>Streak Tracking:</strong> Consecutive days with completed activities</li>
+                        <li><strong>Achievement Levels:</strong> Beginner → Master progression (6 levels)</li>
+                        <li><strong>Weekly Analytics:</strong> 7-day completion rate averaging</li>
+                        <li><strong>Total Activity Count:</strong> Lifetime completion tracking</li>
+                    </ul>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #E5E7EB; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <h4 style="color: #D97706; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">💎 Engagement-Based Premium</h4>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                        <li><strong>Free Plan:</strong> Default starting tier for all users</li>
+                        <li><strong>Almost Premium:</strong> 3+ day streak OR 7+ total activities</li>
+                        <li><strong>Premium Earned:</strong> 7+ day streak OR 10+ total activities</li>
+                        <li><strong>No Payment Required:</strong> Earn through consistent engagement</li>
+                    </ul>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #E5E7EB; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <h4 style="color: #7C2D12; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">👨‍💼 Admin Management</h4>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                        <li><strong>User Management:</strong> Role assignment and progress monitoring</li>
+                        <li><strong>Activity Management:</strong> Create, edit, delete activity templates</li>
+                        <li><strong>Analytics Dashboard:</strong> User engagement and completion metrics</li>
+                        <li><strong>Custom Activities:</strong> Admin-created activities for users</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic Section -->
         <div class="business-logic">
             <h3>Business Logic & Progress Calculations</h3>
             <div class="logic-grid">
                 <div class="logic-section">
-                    <h4>Achievement System</h4>
-                    <ul>
-                        <li><strong>Beginner:</strong> 0 activities completed</li>
-                        <li><strong>Starter:</strong> 1+ activities completed</li>
-                        <li><strong>Intermediate:</strong> 10+ activities completed</li>
-                        <li><strong>Advanced:</strong> 25+ activities completed</li>
-                        <li><strong>Expert:</strong> 50+ activities completed</li>
-                        <li><strong>Master:</strong> 100+ activities completed</li>
-                    </ul>
-                </div>
-                
-                <div class="logic-section">
-                    <h4>Engagement-Based Subscription</h4>
-                    <ul>
-                        <li><strong>Free Plan:</strong> Default starting tier</li>
-                        <li><strong>Almost Premium:</strong> 3+ day streak OR 7+ total activities</li>
-                        <li><strong>Premium Earned:</strong> 7+ day streak OR 10+ total activities</li>
-                    </ul>
-                    <div class="formula">
-                        completion_rate = (completed_entries / total_entries) × 100
+                    <h4>Achievement Progression Algorithm</h4>
+                    <div style="background: #F3F4F6; padding: 12px; border-radius: 6px; margin: 10px 0; font-family: 'Monaco', monospace; font-size: 11px;">
+                        function getAchievementLevel(totalActivities) {<br>
+                        &nbsp;&nbsp;if (totalActivities >= 100) return 'Master';<br>
+                        &nbsp;&nbsp;if (totalActivities >= 50) return 'Expert';<br>
+                        &nbsp;&nbsp;if (totalActivities >= 25) return 'Advanced';<br>
+                        &nbsp;&nbsp;if (totalActivities >= 10) return 'Intermediate';<br>
+                        &nbsp;&nbsp;if (totalActivities >= 1) return 'Starter';<br>
+                        &nbsp;&nbsp;return 'Beginner';<br>
+                        }
                     </div>
                 </div>
                 
                 <div class="logic-section">
-                    <h4>Streak Calculation Logic</h4>
-                    <p>Calculates consecutive days with completed activities by counting backwards from today where daily_trackers.completion_rate > 0.</p>
-                    <div class="formula">
-                        SELECT COUNT(*) FROM consecutive_days<br>
-                        WHERE completion_rate > 0<br>
-                        ORDER BY date DESC
+                    <h4>Subscription Status Logic</h4>
+                    <div style="background: #F3F4F6; padding: 12px; border-radius: 6px; margin: 10px 0; font-family: 'Monaco', monospace; font-size: 11px;">
+                        function getSubscriptionStatus(streak, total) {<br>
+                        &nbsp;&nbsp;if (streak >= 7 || total >= 10)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return 'premium_earned';<br>
+                        &nbsp;&nbsp;if (streak >= 3 || total >= 7)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return 'almost_premium';<br>
+                        &nbsp;&nbsp;return 'free';<br>
+                        }
                     </div>
                 </div>
                 
                 <div class="logic-section">
-                    <h4>Daily Progress Workflow</h4>
-                    <ul>
-                        <li>User selects activities for morning/afternoon/evening slots</li>
-                        <li>System creates tracker_entries with "pending" status</li>
-                        <li>User completes activities (status → "completed")</li>
-                        <li>Daily completion_rate automatically recalculated</li>
-                        <li>Streaks and subscription status updated in real-time</li>
-                    </ul>
+                    <h4>Daily Completion Rate Formula</h4>
+                    <p>Automatically calculated and stored in daily_trackers table:</p>
+                    <div class="formula">
+                        completion_rate = (completed_entries / total_planned_entries) × 100
+                    </div>
+                    <p style="font-size: 11px; color: #6B7280; margin-top: 8px;">
+                        Updates in real-time as users mark activities as completed or skipped.
+                    </p>
+                </div>
+                
+                <div class="logic-section">
+                    <h4>Streak Calculation Process</h4>
+                    <p>Counts consecutive days working backwards from today:</p>
+                    <div style="background: #F3F4F6; padding: 12px; border-radius: 6px; margin: 10px 0; font-family: 'Monaco', monospace; font-size: 11px;">
+                        WITH consecutive_days AS (<br>
+                        &nbsp;&nbsp;SELECT date, completion_rate<br>
+                        &nbsp;&nbsp;FROM daily_trackers<br>
+                        &nbsp;&nbsp;WHERE user_id = ? AND completion_rate > 0<br>
+                        &nbsp;&nbsp;ORDER BY date DESC<br>
+                        )<br>
+                        SELECT COUNT(*) as current_streak
+                    </div>
                 </div>
             </div>
         </div>
