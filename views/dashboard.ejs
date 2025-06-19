@@ -787,17 +787,17 @@
                 let achievementLevel = 'Beginner';
                 let badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
                 
-                if (total >= 100) {
+                if (total >= 50) {
                     achievementLevel = 'Master';
                     badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
                     // Apply master theme to entire dashboard
                     applyMasterTheme();
-                } else if (total >= 50) {
+                } else if (total >= 25) {
                     achievementLevel = 'Intermediate';
                     badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
                     // Apply intermediate theme to entire dashboard
                     applyIntermediateTheme();
-                } else if (total >= 25) {
+                } else {
                     achievementLevel = 'Beginner';
                     badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
                     // Apply beginner theme to entire dashboard
@@ -913,9 +913,9 @@
 
         function getAchievementLevel(totalActivities) {
             console.log('getAchievementLevel called with:', totalActivities);
-            if (totalActivities >= 100) return 'Master';
-            if (totalActivities >= 50) return 'Intermediate';
-            if (totalActivities >= 25) return 'Beginner';
+            if (totalActivities >= 50) return 'Master';
+            if (totalActivities >= 25) return 'Intermediate';
+            if (totalActivities >= 0) return 'Beginner';
             return 'Beginner';
         }
 
