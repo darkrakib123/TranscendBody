@@ -454,8 +454,12 @@ function updateStatsDisplay(stats) {
     const streakValue = document.getElementById('currentStreak');
     const streakProgress = document.getElementById('streakBar');
     const streakMessage = document.getElementById('streakMessage');
+    const streakCard = document.querySelector('.streak-card');
+    
+    console.log('Updating streak display - Current streak:', stats.currentStreak);
     
     if (streakValue) {
+        streakValue.innerHTML = '';
         streakValue.textContent = stats.currentStreak || 0;
     }
     
@@ -469,12 +473,26 @@ function updateStatsDisplay(stats) {
         if (streak === 0) {
             streakMessage.textContent = 'Start your streak today!';
         } else if (streak < 7) {
-            streakMessage.textContent = `${streak} days - keep going!`;
+            streakMessage.textContent = `${streak} days strong - keep building!`;
         } else if (streak >= 21) {
             streakMessage.textContent = `${streak} days - you're unstoppable!`;
         } else {
             streakMessage.textContent = `${streak} days - incredible consistency!`;
         }
+    }
+    
+    // Update streak card color based on achievement level
+    if (streakCard) {
+        const total = stats.totalActivities || 0;
+        let cardStyle = '';
+        if (total >= 100) {
+            cardStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);';
+        } else if (total >= 25) {
+            cardStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);';
+        } else {
+            cardStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%);';
+        }
+        streakCard.style.cssText = `${streakCard.style.cssText.replace(/background:[^;]+;?/g, '')} ${cardStyle} color: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(40,167,69,0.3);`;
     }
     
     // Update weekly average - using correct ID
