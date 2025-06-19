@@ -290,16 +290,25 @@
                             <h6 class="fw-bold mb-2" style="color: #495057;">🎯 Earn Premium Access</h6>
                             <div class="subscription-tiers">
                                 <div class="tier-item mb-2 p-2" style="background: white; border-radius: 8px; border-left: 3px solid #6c757d;">
-                                    <span class="badge bg-secondary me-2" style="font-size: 10px;">Free Plan</span>
-                                    <small class="text-muted">Start your journey</small>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="badge bg-secondary me-2" style="font-size: 10px;">Free Plan</span>
+                                        <span class="fw-medium" style="font-size: 12px;">Start your journey</span>
+                                    </div>
+                                    <small class="text-muted d-block">Default starting tier</small>
                                 </div>
                                 <div class="tier-item mb-2 p-2" style="background: white; border-radius: 8px; border-left: 3px solid #ffc107;">
-                                    <span class="badge bg-warning me-2" style="font-size: 10px;">Almost Premium</span>
-                                    <small class="text-muted">3+ day streak OR 7+ activities</small>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="badge bg-warning me-2" style="font-size: 10px;">Almost Premium</span>
+                                        <span class="fw-medium" style="font-size: 12px;">Getting close!</span>
+                                    </div>
+                                    <small class="text-muted d-block">3+ day streak OR 7+ activities</small>
                                 </div>
                                 <div class="tier-item p-2" style="background: white; border-radius: 8px; border-left: 3px solid #28a745;">
-                                    <span class="badge bg-success me-2" style="font-size: 10px;">Premium Earned</span>
-                                    <small class="text-muted">7+ day streak OR 10+ activities</small>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="badge bg-success me-2" style="font-size: 10px;">Premium Earned</span>
+                                        <span class="fw-medium" style="font-size: 12px;">Congratulations!</span>
+                                    </div>
+                                    <small class="text-muted d-block">7+ day streak OR 10+ activities</small>
                                 </div>
                             </div>
                         </div>
@@ -360,20 +369,16 @@
                                         </div>
                                         <span class="progress-value" id="totalActivities">0</span>
                             </div>
-                            <!-- Achievement Badge -->
-                            <div class="col-12 mt-3">
-                                <div class="progress-card">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress-icon achievement-icon me-2">
-                                                <i class="fas fa-medal"></i>
-                                            </div>
-                                            <div>
-                                                <span class="progress-label d-block">Achievement Level</span>
-                                                <small class="text-muted">Your current progress tier</small>
-                                            </div>
+                            <!-- Achievement Badge - Featured prominently -->
+                            <div class="col-12">
+                                <div class="achievement-featured-card mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #dee2e6; border-radius: 16px; padding: 20px;">
+                                    <div class="text-center">
+                                        <div class="achievement-icon-large mb-3" style="width: 60px; height: 60px; margin: 0 auto; background: linear-gradient(135deg, #9c27b0, #673ab7); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-medal" style="font-size: 24px; color: white;"></i>
                                         </div>
-                                        <span class="badge achievement-badge" id="achievementBadge">Beginner</span>
+                                        <h6 class="fw-bold mb-2" style="color: #495057;">Achievement Level</h6>
+                                        <span class="badge achievement-badge-large" id="achievementBadge" style="font-size: 16px; padding: 10px 20px;">Beginner</span>
+                                        <p class="text-muted mt-2 mb-0" style="font-size: 12px;">Keep completing activities to level up!</p>
                                     </div>
                                 </div>
                             </div>
