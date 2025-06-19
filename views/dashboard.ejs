@@ -223,10 +223,33 @@
                     <% } %>
                 </div>
                 <div class="col-md-4 text-end">
-                    <div class="progress-circle">
-                        <div class="progress-text">
-                            <div style="font-size: 18px;" id="completionPercentage">43%</div>
-                            <div style="font-size: 10px;">Complete</div>
+                    <div class="progress-circle-container" style="position: relative; width: 100px; height: 100px; margin: 0 auto;">
+                        <svg class="progress-circle-svg" width="100" height="100" style="transform: rotate(-90deg);">
+                            <circle cx="50" cy="50" r="45" 
+                                    fill="none" 
+                                    stroke="rgba(255,255,255,0.2)" 
+                                    stroke-width="4">
+                            </circle>
+                            <circle cx="50" cy="50" r="45" 
+                                    fill="none" 
+                                    stroke="url(#dailyProgressGradient)" 
+                                    stroke-width="4"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="283"
+                                    stroke-dashoffset="283"
+                                    id="dailyProgressCircle"
+                                    style="transition: stroke-dashoffset 0.6s ease;">
+                            </circle>
+                            <defs>
+                                <linearGradient id="dailyProgressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#cd7f32;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#b8722c;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="progress-text-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 2px;" id="completionPercentage">43%</div>
+                            <div style="font-size: 10px; opacity: 0.9;">Complete</div>
                         </div>
                     </div>
                 </div>
@@ -742,10 +765,14 @@
             
             document.getElementById('completionPercentage').textContent = percentage + '%';
             
-            // Update progress circle
-            const progressCircle = document.querySelector('.progress-circle');
-            const degrees = (percentage / 100) * 360;
-            progressCircle.style.background = `conic-gradient(#28a745 0deg ${degrees}deg, #e9ecef ${degrees}deg 360deg)`;
+            // Update progress circle with SVG
+            const dailyProgressCircle = document.getElementById('dailyProgressCircle');
+            if (dailyProgressCircle) {
+                const circumference = 2 * Math.PI * 45; // radius = 45
+                const offset = circumference - (percentage / 100) * circumference;
+                dailyProgressCircle.style.strokeDashoffset = offset;
+                console.log(`Updated daily circular progress: ${percentage}% (offset: ${offset})`);
+            }
         }
 
         function updateStatsDisplay(stats) {
@@ -877,10 +904,16 @@
                 circle.style.setProperty('border-color', '#ffd700', 'important');
             });
             
-            // Update SVG gradient to gold
+            // Update SVG gradients to gold
             const progressGradient = document.getElementById('progressGradient');
+            const dailyProgressGradient = document.getElementById('dailyProgressGradient');
             if (progressGradient) {
                 const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#ffd700';
+                if (stops[1]) stops[1].style.stopColor = '#ffcc00';
+            }
+            if (dailyProgressGradient) {
+                const stops = dailyProgressGradient.querySelectorAll('stop');
                 if (stops[0]) stops[0].style.stopColor = '#ffd700';
                 if (stops[1]) stops[1].style.stopColor = '#ffcc00';
             }
@@ -922,10 +955,16 @@
                 circle.style.setProperty('border-color', '#c0c0c0', 'important');
             });
             
-            // Update SVG gradient to silver
+            // Update SVG gradients to silver
             const progressGradient = document.getElementById('progressGradient');
+            const dailyProgressGradient = document.getElementById('dailyProgressGradient');
             if (progressGradient) {
                 const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#c0c0c0';
+                if (stops[1]) stops[1].style.stopColor = '#a8a8a8';
+            }
+            if (dailyProgressGradient) {
+                const stops = dailyProgressGradient.querySelectorAll('stop');
                 if (stops[0]) stops[0].style.stopColor = '#c0c0c0';
                 if (stops[1]) stops[1].style.stopColor = '#a8a8a8';
             }
@@ -961,10 +1000,16 @@
                 circle.style.setProperty('border-color', '#cd7f32', 'important');
             });
             
-            // Update SVG gradient to bronze (default)
+            // Update SVG gradients to bronze (default)
             const progressGradient = document.getElementById('progressGradient');
+            const dailyProgressGradient = document.getElementById('dailyProgressGradient');
             if (progressGradient) {
                 const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#cd7f32';
+                if (stops[1]) stops[1].style.stopColor = '#b8722c';
+            }
+            if (dailyProgressGradient) {
+                const stops = dailyProgressGradient.querySelectorAll('stop');
                 if (stops[0]) stops[0].style.stopColor = '#cd7f32';
                 if (stops[1]) stops[1].style.stopColor = '#b8722c';
             }
