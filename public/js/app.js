@@ -505,25 +505,25 @@ function updateAchievementLevel(stats) {
     const total = stats.totalActivities || 0;
     
     let level = 'Beginner';
-    let badgeClass = 'bg-secondary';
+    let badgeStyle = '';
     
     if (streak >= 21 || total >= 100) {
         level = 'Master';
-        badgeClass = 'text-white';
-        achievementBadge.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100)';
-        achievementBadge.style.border = 'none';
+        badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
     } else if (streak >= 14 || total >= 50) {
         level = 'Advanced';
-        badgeClass = 'bg-info';
+        badgeStyle = 'background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none;';
     } else if (streak >= 7 || total >= 25) {
         level = 'Intermediate';
-        badgeClass = 'bg-success';
+        badgeStyle = 'background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border: none;';
+    } else {
+        level = 'Beginner';
+        badgeStyle = 'background: #6c757d; color: white; border: none;';
     }
     
     achievementBadge.textContent = level;
-    achievementBadge.className = `badge achievement-badge-large ${badgeClass}`;
-    achievementBadge.style.fontSize = '18px';
-    achievementBadge.style.padding = '12px 24px';
+    achievementBadge.className = 'badge achievement-badge-large';
+    achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
 }
 
 // Update subscription status based on stats
