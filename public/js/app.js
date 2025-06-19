@@ -130,9 +130,23 @@ function renderTrackerEntries() {
         } else {
             container.innerHTML = entries.map(entry => createActivityHTML(entry)).join('');
         }
+        
+        // Update progress badge for this time slot
+        updateTimeSlotProgress(timeSlot, entries);
     });
     
     updateProgressDisplay();
+}
+
+// Update time slot progress indicators
+function updateTimeSlotProgress(timeSlot, entries) {
+    const progressElement = document.getElementById(`${timeSlot}-progress`);
+    if (!progressElement) return;
+    
+    const total = entries.length;
+    const completed = entries.filter(e => e.status === 'completed').length;
+    
+    progressElement.textContent = `${completed} of ${total} completed`;
 }
 
 // Create activity HTML
