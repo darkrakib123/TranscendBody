@@ -793,8 +793,13 @@
                 console.error('achievementBadge element not found!');
             }
             
-            // Update subscription status
-            updateSubscriptionStatus(stats.currentStreak, stats.totalActivities);
+                // Update subscription status
+                updateSubscriptionStatus(stats.currentStreak, stats.totalActivities);
+                
+                console.log('All stats display updates completed successfully');
+            } catch (error) {
+                console.error('Error in updateStatsDisplay:', error);
+            }
         }
 
         function getAchievementLevel(totalActivities) {
