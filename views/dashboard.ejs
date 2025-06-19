@@ -331,29 +331,37 @@
                         
                         <!-- This Week & Total Stats in Single Row -->
                         <div class="stat-card p-3 mb-3" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e3e6ea; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                            <div class="row g-0">
+                            <div class="row g-0" style="min-height: 80px;">
                                 <div class="col-6">
-                                    <div class="d-flex align-items-center p-2">
-                                        <div class="stat-icon me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-chart-line text-white"></i>
+                                    <div class="d-flex align-items-center justify-content-between p-3 h-100">
+                                        <div class="d-flex align-items-center flex-shrink-0">
+                                            <div class="stat-icon me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-chart-line text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px; line-height: 1.2;">This Week</h6>
+                                                <p class="mb-0 text-muted" style="font-size: 11px; line-height: 1.2;">Average completion</p>
+                                            </div>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px;">This Week</h6>
-                                            <p class="mb-0 text-muted" style="font-size: 11px;">Average completion</p>
+                                        <div class="text-end flex-shrink-0">
+                                            <div class="h4 fw-bold mb-0" id="weeklyAverage" style="color: #11998e; font-size: 1.8rem; line-height: 1;">100%</div>
                                         </div>
-                                        <div class="h4 fw-bold mb-0" id="weeklyAverage" style="color: #11998e; font-size: 2rem;">0%</div>
                                     </div>
                                 </div>
                                 <div class="col-6" style="border-left: 1px solid #e9ecef;">
-                                    <div class="d-flex align-items-center p-2">
-                                        <div class="stat-icon me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #dc3545 0%, #ff9aa8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-trophy text-white"></i>
+                                    <div class="d-flex align-items-center justify-content-between p-3 h-100">
+                                        <div class="d-flex align-items-center flex-shrink-0">
+                                            <div class="stat-icon me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #dc3545 0%, #ff9aa8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-trophy text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px; line-height: 1.2;">Completed</h6>
+                                                <p class="mb-0 text-muted" style="font-size: 11px; line-height: 1.2;">Total activities</p>
+                                            </div>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px;">Completed</h6>
-                                            <p class="mb-0 text-muted" style="font-size: 11px;">Total activities</p>
+                                        <div class="text-end flex-shrink-0">
+                                            <div class="h4 fw-bold mb-0" id="totalActivities" style="color: #dc3545; font-size: 1.8rem; line-height: 1;">105</div>
                                         </div>
-                                        <div class="h4 fw-bold mb-0" id="totalActivities" style="color: #dc3545; font-size: 2rem;">0</div>
                                     </div>
                                 </div>
                             </div>
