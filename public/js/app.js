@@ -537,18 +537,22 @@ function updateSubscriptionStatus(stats) {
     let status = 'Free Plan';
     let badgeClass = 'bg-secondary';
     
+    let statusStyle = '';
+    
     if (streak >= 7 || total >= 10) {
         status = 'Premium Earned';
-        badgeClass = 'text-white';
-        subscriptionStatus.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        subscriptionStatus.style.border = 'none';
+        statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
     } else if (streak >= 3 || total >= 7) {
         status = 'Almost Premium';
-        badgeClass = 'bg-success';
+        statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
+    } else {
+        status = 'Free Plan';
+        statusStyle = 'background: #6c757d; color: white; border: none;';
     }
     
     subscriptionStatus.textContent = status;
-    subscriptionStatus.className = `badge ${badgeClass} px-3 py-2`;
+    subscriptionStatus.className = 'badge px-3 py-2';
+    subscriptionStatus.style.cssText = statusStyle;
 }
 
 // Load popular activities
