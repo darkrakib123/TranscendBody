@@ -460,7 +460,7 @@ function updateStatsDisplay(stats) {
     }
     
     if (streakProgress) {
-        const progressPercent = Math.min((stats.currentStreak || 0) * 4.7, 100); // 21 days = 100%
+        const progressPercent = Math.min((stats.currentStreak || 0) / 21 * 100, 100); // 21 days = 100%
         streakProgress.style.width = `${progressPercent}%`;
     }
     
