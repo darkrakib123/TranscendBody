@@ -743,14 +743,18 @@
         }
 
         function updateStatsDisplay(stats) {
-            // Update Streak Progress
-            const streakElement = document.getElementById('currentStreak');
-            const streakBar = document.getElementById('streakBar');
-            const streakMessage = document.getElementById('streakMessage');
+            console.log('Dashboard updateStatsDisplay called with:', stats);
             
-            streakElement.textContent = stats.currentStreak;
-            updateStreakProgress(streakBar, stats.currentStreak);
-            updateStreakMessage(streakMessage, stats.currentStreak);
+            try {
+                // Update Streak Progress
+                const streakElement = document.getElementById('currentStreak');
+                const streakBar = document.getElementById('streakBar');
+                const streakMessage = document.getElementById('streakMessage');
+                
+                if (streakElement) streakElement.textContent = stats.currentStreak;
+                if (streakBar) updateStreakProgress(streakBar, stats.currentStreak);
+                if (streakMessage) updateStreakMessage(streakMessage, stats.currentStreak);
+                
                 // Update Weekly Progress
                 const weeklyElement = document.getElementById('weeklyAverage');
                 const weeklyBar = document.getElementById('weeklyBar');
@@ -759,46 +763,46 @@
                 if (weeklyElement) weeklyElement.textContent = stats.weeklyAverage + '%';
                 if (weeklyBar) updateWeeklyProgress(weeklyBar, stats.weeklyAverage);
                 if (weeklyMessage) updateWeeklyMessage(weeklyMessage, stats.weeklyAverage);
-            
-            // Update Total Activities
-            const totalElement = document.getElementById('totalActivities');
-            console.log('Updating totalActivities element with value:', stats.totalActivities);
-            if (totalElement) {
-                totalElement.textContent = stats.totalActivities;
-                console.log('Total activities element updated to:', stats.totalActivities);
-            } else {
-                console.error('totalActivities element not found!');
-            }
-            
-            // Update Achievement Badge (prominently featured)
-            const total = stats.totalActivities || 0;
-            console.log('Processing achievement level for total activities:', total);
-            
-            let achievementLevel = 'Beginner';
-            let badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-            
-            if (total >= 100) {
-                achievementLevel = 'Master';
-                badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-            } else if (total >= 50) {
-                achievementLevel = 'Intermediate';
-                badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
-            } else if (total >= 25) {
-                achievementLevel = 'Beginner';
-                badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-            }
-            
-            console.log('Setting achievement level:', achievementLevel, 'for total:', total);
-            
-            const achievementBadge = document.getElementById('achievementBadge');
-            if (achievementBadge) {
-                achievementBadge.textContent = achievementLevel;
-                achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
-                console.log('Achievement badge updated to:', achievementLevel);
-            } else {
-                console.error('achievementBadge element not found!');
-            }
-            
+                
+                // Update Total Activities
+                const totalElement = document.getElementById('totalActivities');
+                console.log('Updating totalActivities element with value:', stats.totalActivities);
+                if (totalElement) {
+                    totalElement.textContent = stats.totalActivities;
+                    console.log('Total activities element updated to:', stats.totalActivities);
+                } else {
+                    console.error('totalActivities element not found!');
+                }
+                
+                // Update Achievement Badge (prominently featured)
+                const total = stats.totalActivities || 0;
+                console.log('Processing achievement level for total activities:', total);
+                
+                let achievementLevel = 'Beginner';
+                let badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                
+                if (total >= 100) {
+                    achievementLevel = 'Master';
+                    badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+                } else if (total >= 50) {
+                    achievementLevel = 'Intermediate';
+                    badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
+                } else if (total >= 25) {
+                    achievementLevel = 'Beginner';
+                    badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                }
+                
+                console.log('Setting achievement level:', achievementLevel, 'for total:', total);
+                
+                const achievementBadge = document.getElementById('achievementBadge');
+                if (achievementBadge) {
+                    achievementBadge.textContent = achievementLevel;
+                    achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
+                    console.log('Achievement badge updated to:', achievementLevel);
+                } else {
+                    console.error('achievementBadge element not found!');
+                }
+                
                 // Update subscription status
                 updateSubscriptionStatus(stats.currentStreak, stats.totalActivities);
                 
