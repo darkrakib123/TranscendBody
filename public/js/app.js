@@ -677,7 +677,7 @@ function updateSubscriptionStatus(stats) {
         console.log('NEW VERSION - ALMOST PREMIUM - streak:', userStreak, 'total:', userTotal);
     } else {
         planStatus = 'Free Plan';
-        badgeStyle = 'background: #6c757d; color: white; border: none;';
+        badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
         console.log('NEW VERSION - FREE PLAN - streak:', userStreak, 'total:', userTotal);
     }
     
