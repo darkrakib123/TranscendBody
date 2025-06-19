@@ -15,6 +15,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Main routes
   app.get('/', (req, res) => {
+    // Prevent caching of landing page
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    
     if (req.isAuthenticated()) {
       return res.redirect('/dashboard');
     }
@@ -23,6 +29,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Authentication routes
   app.get('/login', (req, res) => {
+    // Prevent caching of login page
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    
     if (req.isAuthenticated()) {
       return res.redirect('/dashboard');
     }
@@ -36,6 +48,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   app.get('/register', (req, res) => {
+    // Prevent caching of register page
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    
     if (req.isAuthenticated()) {
       return res.redirect('/dashboard');
     }
