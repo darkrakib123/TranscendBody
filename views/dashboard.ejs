@@ -840,15 +840,19 @@
                 console.log('Updated streak card', index, 'to purple');
             });
             
-            // Force update any elements with green gradient
-            const greenElements = document.querySelectorAll('*');
-            greenElements.forEach(element => {
-                const computedStyle = window.getComputedStyle(element);
-                if (computedStyle.background && computedStyle.background.includes('#28a745')) {
-                    element.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
-                    console.log('Converted green element to purple');
-                }
-            });
+            // Force update any elements with green gradient using DOM mutation
+            setTimeout(() => {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    const style = element.getAttribute('style');
+                    if (style && style.includes('#28a745')) {
+                        const newStyle = style.replace(/background:\s*linear-gradient\([^)]*#28a745[^)]*\)/g, 
+                            'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+                        element.setAttribute('style', newStyle);
+                        console.log('Converted green background to purple via attribute');
+                    }
+                });
+            }, 100);
             
             // Update achievement icon
             const achievementIcon = document.querySelector('.achievement-icon-large');
