@@ -509,7 +509,9 @@ function updateAchievementLevel(stats) {
     
     if (streak >= 21 || total >= 100) {
         level = 'Master';
-        badgeClass = 'bg-warning text-dark';
+        badgeClass = 'text-white';
+        achievementBadge.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100)';
+        achievementBadge.style.border = 'none';
     } else if (streak >= 14 || total >= 50) {
         level = 'Advanced';
         badgeClass = 'bg-info';
@@ -537,7 +539,9 @@ function updateSubscriptionStatus(stats) {
     
     if (streak >= 7 || total >= 10) {
         status = 'Premium Earned';
-        badgeClass = 'bg-warning text-dark';
+        badgeClass = 'text-white';
+        subscriptionStatus.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        subscriptionStatus.style.border = 'none';
     } else if (streak >= 3 || total >= 7) {
         status = 'Almost Premium';
         badgeClass = 'bg-success';
