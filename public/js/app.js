@@ -518,12 +518,23 @@ function updateAchievementLevel(stats) {
     if (total >= 100) {
         level = 'Master';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+        // Apply purple theme to entire dashboard
+        applyMasterTheme();
+    } else if (total >= 50) {
+        level = 'Advanced';
+        badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+        // Apply purple theme to entire dashboard
+        applyMasterTheme();
     } else if (total >= 25) {
         level = 'Intermediate';
         badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
+        // Apply red theme to entire dashboard
+        applyIntermediateTheme();
     } else {
         level = 'Beginner';
         badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+        // Apply green theme to entire dashboard
+        applyBeginnerTheme();
     }
     
     console.log('Setting achievement level to:', level, 'for total:', total);
@@ -532,6 +543,60 @@ function updateAchievementLevel(stats) {
     achievementBadge.textContent = level;
     achievementBadge.className = 'badge achievement-badge-large';
     achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
+}
+
+// Apply Master/Advanced theme (Purple)
+function applyMasterTheme() {
+    console.log('Applying Master theme (purple)');
+    
+    // Update streak card
+    const streakCard = document.querySelector('.card:has(#currentStreak)');
+    if (streakCard) {
+        streakCard.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        streakCard.style.color = 'white';
+    }
+    
+    // Update achievement icon
+    const achievementIcon = document.querySelector('.achievement-icon-large');
+    if (achievementIcon) {
+        achievementIcon.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+}
+
+// Apply Intermediate theme (Red)
+function applyIntermediateTheme() {
+    console.log('Applying Intermediate theme (red)');
+    
+    // Update streak card
+    const streakCard = document.querySelector('.card:has(#currentStreak)');
+    if (streakCard) {
+        streakCard.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
+        streakCard.style.color = 'white';
+    }
+    
+    // Update achievement icon
+    const achievementIcon = document.querySelector('.achievement-icon-large');
+    if (achievementIcon) {
+        achievementIcon.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
+    }
+}
+
+// Apply Beginner theme (Green)
+function applyBeginnerTheme() {
+    console.log('Applying Beginner theme (green)');
+    
+    // Update streak card
+    const streakCard = document.querySelector('.card:has(#currentStreak)');
+    if (streakCard) {
+        streakCard.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+        streakCard.style.color = 'white';
+    }
+    
+    // Update achievement icon
+    const achievementIcon = document.querySelector('.achievement-icon-large');
+    if (achievementIcon) {
+        achievementIcon.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+    }
 }
 
 // Update subscription status based on stats
