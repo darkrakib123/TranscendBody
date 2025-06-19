@@ -481,19 +481,7 @@ function updateStatsDisplay(stats) {
         }
     }
     
-    // Update streak card color based on achievement level
-    if (streakCard) {
-        const total = stats.totalActivities || 0;
-        let cardStyle = '';
-        if (total >= 100) {
-            cardStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);';
-        } else if (total >= 25) {
-            cardStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);';
-        } else {
-            cardStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%);';
-        }
-        streakCard.style.cssText = `${streakCard.style.cssText.replace(/background:[^;]+;?/g, '')} ${cardStyle} color: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(40,167,69,0.3);`;
-    }
+    // Streak card color is now handled by updateDashboardTheme function
     
     // Update weekly average - using correct ID
     const weeklyValue = document.getElementById('weeklyAverage');
