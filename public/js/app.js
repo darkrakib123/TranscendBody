@@ -535,6 +535,7 @@ function updateStatsDisplay(stats) {
     updateAchievementLevel(stats);
     
     // Update subscription status
+    console.log('About to call updateSubscriptionStatus with streak:', stats.currentStreak, 'totalActivities:', stats.totalActivities);
     updateSubscriptionStatus(stats);
 }
 
@@ -658,7 +659,7 @@ function updateSubscriptionStatus(stats) {
     const streak = stats.currentStreak || 0;
     const total = stats.totalActivities || 0;
     
-    console.log('UpdateSubscriptionStatus - streak:', streak, 'total:', total);
+    console.log('UpdateSubscriptionStatus called - streak:', streak, 'total:', total);
     
     let status = 'Free Plan';
     let statusStyle = '';
