@@ -822,16 +822,26 @@
         function applyMasterTheme() {
             console.log('Applying Master theme (purple) to dashboard');
             
-            // Update main streak card
+            // Update the main streak card specifically by ID
+            const mainStreakCard = document.getElementById('mainStreakCard');
+            if (mainStreakCard) {
+                mainStreakCard.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                mainStreakCard.style.boxShadow = '0 8px 25px rgba(102,126,234,0.3)';
+                console.log('Updated main streak card to purple');
+            }
+            
+            // Update all streak cards by class
             const streakCards = document.querySelectorAll('.streak-featured-card');
             streakCards.forEach(card => {
                 card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                card.style.boxShadow = '0 8px 25px rgba(102,126,234,0.3)';
+                console.log('Updated streak card background to purple');
             });
             
             // Update progress bars
-            const progressBars = document.querySelectorAll('.progress-bar');
+            const progressBars = document.querySelectorAll('.progress-bar, #streakBar');
             progressBars.forEach(bar => {
-                bar.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                bar.style.background = 'rgba(255,255,255,0.8)';
             });
             
             // Update achievement icon
