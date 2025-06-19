@@ -239,55 +239,58 @@
                                     const status = getSubscriptionStatus(stats.currentStreak, stats.totalActivities);
                                     console.log(`Level for ${user.email}: ${level}`);
                                     
-                                    progressDisplay = `
-                                        <div style="font-size: 11px;">
-                                            <div class="badge bg-primary" style="font-size: 9px;">${level}</div>
-                                            <div class="badge ${status.class}" style="font-size: 9px;">${status.text}</div>
-                                            <div class="text-muted">${stats.currentStreak} day streak, ${stats.totalActivities} total</div>
-                                        </div>
-                                    `;
+                                    progressDisplay = {
+                                        progress: `
+                                            <div style="font-size: 11px;">
+                                                <div class="badge bg-primary" style="font-size: 9px;">${level}</div>
+                                                <div class="text-muted">${stats.currentStreak} day streak, ${stats.totalActivities} total</div>
+                                            </div>
+                                        `,
+                                        status: `<div class="badge ${status.class}" style="font-size: 9px;">${status.text}</div>`
+                                    };
                                 } else {
                                     console.warn(`Stats API error for ${user.email}: ${statsResponse.status}`);
-                                    progressDisplay = '<span class="text-muted small">Stats unavailable</span>';
+                                    progressDisplay = {
+                                        progress: '<span class="text-muted small">Stats unavailable</span>',
+                                        status: '<span class="text-muted small">-</span>'
+                                    };
                                 }
                             } catch (statsError) {
                                 console.warn(`Stats error for ${user.email}:`, statsError);
-                                progressDisplay = '<span class="text-muted small">Stats unavailable</span>';
+                                progressDisplay = {
+                                    progress: '<span class="text-muted small">Stats unavailable</span>',
+                                    status: '<span class="text-muted small">-</span>'
+                                };
                             }
                         } else {
-                            progressDisplay = '<span class="text-muted small">Admin User</span>';
+                            progressDisplay = {
+                                progress: '<span class="text-muted small">Admin User</span>',
+                                status: '<span class="text-muted small">Admin</span>'
+                            };
                         }
                         
-                        // For demo users, show lastName in progress, firstName only in name
+                        // Set display name based on user
                         let displayName = user.firstName || '';
-                        let progressContent = progressDisplay;
+                        let progressContent = progressDisplay.progress;
+                        let statusContent = progressDisplay.status;
                         
-                        // Special handling for m@demo.com to show Casey and Master
+                        // Special handling for demo accounts
                         if (user.email === 'm@demo.com') {
                             displayName = 'Casey';
-                            // Hardcode Master level for Casey if stats are unavailable
-                            if (progressDisplay.includes('Stats unavailable')) {
+                            // Ensure Casey shows Master level
+                            if (progressDisplay.progress.includes('Stats unavailable')) {
                                 progressContent = `
                                     <div style="font-size: 11px;">
                                         <div class="badge bg-primary" style="font-size: 9px;">Master</div>
-                                        <div class="badge bg-success" style="font-size: 9px;">Premium Earned</div>
                                         <div class="text-muted">22 day streak, 110 total</div>
                                     </div>
                                 `;
+                                statusContent = `<div class="badge bg-success" style="font-size: 9px;">Premium Earned</div>`;
                             }
-                        } else if (user.role === 'client' && user.lastName) {
-                            // For other client users, if there's stats and lastName, combine them in progress
-                            if (progressDisplay.includes('Error loading stats') || progressDisplay.includes('Stats unavailable')) {
-                                progressContent = `<span class="text-muted small">${user.lastName}</span>`;
-                            } else if (progressDisplay.includes('badge')) {
-                                // Extract the progress part and add lastName
-                                progressContent = progressDisplay.replace(
-                                    '<div class="text-muted">',
-                                    `<div class="text-muted"><strong>${user.lastName}</strong><br>`
-                                );
-                            } else {
-                                progressContent = `<span class="text-muted small">${user.lastName}</span>`;
-                            }
+                        } else if (user.email === 'b@demo.com') {
+                            displayName = 'Alex';
+                        } else if (user.email === 'i@demo.com') {
+                            displayName = 'Jordan';
                         }
 
                         tableHTML += `
@@ -301,6 +304,7 @@
                                     </select>
                                 </td>
                                 <td>${progressContent}</td>
+                                <td>${statusContent}</td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
                                         <i class="fas fa-trash"></i>
@@ -313,7 +317,7 @@
                         tableHTML += `
                             <tr>
                                 <td>${user.email || 'Error'}</td>
-                                <td colspan="4" class="text-danger">Error rendering user data</td>
+                                <td colspan="5" class="text-danger">Error rendering user data</td>
                             </tr>
                         `;
                     }
@@ -327,7 +331,7 @@
                 console.error('Critical error in loadUsers:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center text-danger">
+                        <td colspan="6" class="text-center text-danger">
                             Failed to load users: ${error.message}
                             <br><button class="btn btn-sm btn-primary mt-2" onclick="loadUsers()">Retry</button>
                         </td>
