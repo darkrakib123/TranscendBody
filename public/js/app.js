@@ -439,6 +439,17 @@ function updateProgressChart(percentage) {
 function updateStatsDisplay(stats) {
     console.log('Updating stats display:', stats);
     
+    // Handle error case where stats fetch failed
+    if (stats.message) {
+        console.error('Stats error:', stats.message);
+        // Set default values
+        stats = {
+            currentStreak: 0,
+            weeklyAverage: 0,
+            totalActivities: 0
+        };
+    }
+    
     // Update streak value and progress
     const streakValue = document.getElementById('streakValue');
     const streakProgress = document.getElementById('streakProgress');
@@ -449,7 +460,7 @@ function updateStatsDisplay(stats) {
     }
     
     if (streakProgress) {
-        const progressPercent = Math.min((stats.currentStreak || 0) * 10, 100);
+        const progressPercent = Math.min((stats.currentStreak || 0) * 4.7, 100); // 21 days = 100%
         streakProgress.style.width = `${progressPercent}%`;
     }
     
@@ -459,6 +470,8 @@ function updateStatsDisplay(stats) {
             streakMessage.textContent = 'Start your streak today!';
         } else if (streak < 7) {
             streakMessage.textContent = `${streak} days - keep going!`;
+        } else if (streak >= 21) {
+            streakMessage.textContent = `${streak} days - you're unstoppable!`;
         } else {
             streakMessage.textContent = `${streak} days - incredible consistency!`;
         }
