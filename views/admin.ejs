@@ -258,7 +258,7 @@
                         
                         if (user.role === 'client' && user.lastName) {
                             // For client users, if there's stats and lastName, combine them in progress
-                            if (progressDisplay.includes('Error loading stats')) {
+                            if (progressDisplay.includes('Error loading stats') || progressDisplay.includes('Stats unavailable')) {
                                 progressContent = `<span class="text-muted small">${user.lastName}</span>`;
                             } else if (progressDisplay.includes('badge')) {
                                 // Extract the progress part and add lastName
