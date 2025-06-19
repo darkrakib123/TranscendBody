@@ -1257,18 +1257,18 @@
             let status = 'Free Plan';
             let statusStyle = 'background: #6c757d; color: white; border: none;';
             
-            console.log('Checking conditions:');
-            console.log('  Premium: streak>=7 && total>=15 =', streak >= 7, '&&', totalActivities >= 15, '=', streak >= 7 && totalActivities >= 15);
-            console.log('  Almost: streak>=5 && total>=10 =', streak >= 5, '&&', totalActivities >= 10, '=', streak >= 5 && totalActivities >= 10);
+            console.log('Checking realistic progression conditions:');
+            console.log('  Premium: streak>=14 && total>=40 =', streak >= 14, '&&', totalActivities >= 40, '=', streak >= 14 && totalActivities >= 40);
+            console.log('  Almost: streak>=7 && total>=20 =', streak >= 7, '&&', totalActivities >= 20, '=', streak >= 7 && totalActivities >= 20);
             
-            // Premium logic: BOTH 7+ day streak AND 50+ total activities (Master level)
-            if (streak >= 7 && totalActivities >= 50) {
+            // Premium Earned: Consistent long-term engagement (14+ day streak AND 40+ activities)
+            if (streak >= 14 && totalActivities >= 40) {
                 status = 'Premium Earned';
                 statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
                 console.log('TAKING Premium Earned path - streak:', streak, 'total:', totalActivities);
             } 
-            // Almost Premium: BOTH 5+ day streak AND 25+ total activities (Intermediate level)
-            else if (streak >= 5 && totalActivities >= 25) {
+            // Almost Premium: Good progress (7+ day streak AND 20+ activities)
+            else if (streak >= 7 && totalActivities >= 20) {
                 status = 'Almost Premium';
                 statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
                 console.log('TAKING Almost Premium path - streak:', streak, 'total:', totalActivities);
