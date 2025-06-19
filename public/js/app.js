@@ -673,7 +673,7 @@ function updateSubscriptionStatus(stats) {
         console.log('NEW VERSION - PREMIUM EARNED - streak:', userStreak, 'total:', userTotal);
     } else if (userStreak >= 7 && userTotal >= 20) {
         planStatus = 'Almost Premium';
-        badgeStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
+        badgeStyle = 'background: linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%); color: white; border: none;';
         console.log('NEW VERSION - ALMOST PREMIUM - streak:', userStreak, 'total:', userTotal);
     } else {
         planStatus = 'Free Plan';
