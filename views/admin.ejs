@@ -239,33 +239,34 @@
                                     const status = getSubscriptionStatus(stats.currentStreak, stats.totalActivities);
                                     console.log(`Level for ${user.email}: ${level}`);
                                     
+                                    // Simplified values
+                                    const progressValue = level.toLowerCase();
+                                    let statusValue = 'free';
+                                    if (status.text === 'Premium Earned') statusValue = 'earned';
+                                    else if (status.text === 'Almost Premium') statusValue = 'almost';
+                                    
                                     progressDisplay = {
-                                        progress: `
-                                            <div style="font-size: 11px;">
-                                                <div class="badge bg-primary" style="font-size: 9px;">${level}</div>
-                                                <div class="text-muted">${stats.currentStreak} day streak, ${stats.totalActivities} total</div>
-                                            </div>
-                                        `,
-                                        status: `<div class="badge ${status.class}" style="font-size: 9px;">${status.text}</div>`
+                                        progress: progressValue,
+                                        status: statusValue
                                     };
                                 } else {
                                     console.warn(`Stats API error for ${user.email}: ${statsResponse.status}`);
                                     progressDisplay = {
-                                        progress: '<span class="text-muted small">Stats unavailable</span>',
-                                        status: '<span class="text-muted small">-</span>'
+                                        progress: 'beginner',
+                                        status: 'free'
                                     };
                                 }
                             } catch (statsError) {
                                 console.warn(`Stats error for ${user.email}:`, statsError);
                                 progressDisplay = {
-                                    progress: '<span class="text-muted small">Stats unavailable</span>',
-                                    status: '<span class="text-muted small">-</span>'
+                                    progress: 'beginner',
+                                    status: 'free'
                                 };
                             }
                         } else {
                             progressDisplay = {
-                                progress: '<span class="text-muted small">Admin User</span>',
-                                status: '<span class="text-muted small">Admin</span>'
+                                progress: 'admin',
+                                status: 'admin'
                             };
                         }
                         
@@ -277,16 +278,8 @@
                         // Special handling for demo accounts
                         if (user.email === 'm@demo.com') {
                             displayName = 'Casey';
-                            // Ensure Casey shows Master level
-                            if (progressDisplay.progress.includes('Stats unavailable')) {
-                                progressContent = `
-                                    <div style="font-size: 11px;">
-                                        <div class="badge bg-primary" style="font-size: 9px;">Master</div>
-                                        <div class="text-muted">22 day streak, 110 total</div>
-                                    </div>
-                                `;
-                                statusContent = `<div class="badge bg-success" style="font-size: 9px;">Premium Earned</div>`;
-                            }
+                            progressContent = 'master';
+                            statusContent = 'earned';
                         } else if (user.email === 'b@demo.com') {
                             displayName = 'Alex';
                         } else if (user.email === 'i@demo.com') {
@@ -297,19 +290,9 @@
                             <tr>
                                 <td>${user.email || 'No email'}</td>
                                 <td>${displayName}</td>
-                                <td>
-                                    <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
-                                        <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
-                                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                                    </select>
-                                </td>
                                 <td>${progressContent}</td>
                                 <td>${statusContent}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
+                                <td>${user.role}</td>
                             </tr>
                         `;
                     } catch (renderError) {
@@ -317,7 +300,7 @@
                         tableHTML += `
                             <tr>
                                 <td>${user.email || 'Error'}</td>
-                                <td colspan="5" class="text-danger">Error rendering user data</td>
+                                <td colspan="4" class="text-danger">Error rendering user data</td>
                             </tr>
                         `;
                     }
@@ -331,7 +314,7 @@
                 console.error('Critical error in loadUsers:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="text-center text-danger">
+                        <td colspan="5" class="text-center text-danger">
                             Failed to load users: ${error.message}
                             <br><button class="btn btn-sm btn-primary mt-2" onclick="loadUsers()">Retry</button>
                         </td>
