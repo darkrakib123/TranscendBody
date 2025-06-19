@@ -31,23 +31,19 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <ul class="nav nav-tabs mb-4" id="adminTabs">
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#users">
-                    <i class="fas fa-users me-2"></i>Manage Users
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#activities">
-                    <i class="fas fa-list me-2"></i>Manage Activities
-                </a>
-            </li>
-        </ul>
+        <div class="mb-4">
+            <button id="usersTab" class="btn btn-outline-primary me-3" onclick="showUsersTab()">
+                <i class="fas fa-users me-2"></i>Manage Users
+            </button>
+            <button id="activitiesTab" class="btn btn-outline-secondary" onclick="showActivitiesTab()">
+                <i class="fas fa-list me-2"></i>Manage Activities
+            </button>
+        </div>
 
         <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Users Tab -->
-            <div class="tab-pane fade" id="users">
+        <div>
+            <!-- Users Section -->
+            <div id="usersSection" style="display: none;">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">User Management</h5>
@@ -75,8 +71,8 @@
                 </div>
             </div>
 
-            <!-- Activities Tab -->
-            <div class="tab-pane fade show active" id="activities">
+            <!-- Activities Section -->
+            <div id="activitiesSection" style="display: none;">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card">
@@ -143,6 +139,53 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Handle tab switching and URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL parameters for tab
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            
+            if (tab === 'activities') {
+                showActivitiesTab();
+            } else {
+                showUsersTab(); // Default to users tab
+            }
+        });
+
+        function showUsersTab() {
+            document.getElementById('usersTab').classList.remove('btn-outline-primary');
+            document.getElementById('usersTab').classList.add('btn-primary');
+            document.getElementById('activitiesTab').classList.remove('btn-secondary');
+            document.getElementById('activitiesTab').classList.add('btn-outline-secondary');
+            
+            document.getElementById('usersSection').style.display = 'block';
+            document.getElementById('activitiesSection').style.display = 'none';
+            
+            // Update URL without page reload
+            const url = new URL(window.location);
+            url.searchParams.set('tab', 'users');
+            window.history.replaceState({}, '', url);
+            
+            loadUsers();
+        }
+
+        function showActivitiesTab() {
+            document.getElementById('activitiesTab').classList.remove('btn-outline-secondary');
+            document.getElementById('activitiesTab').classList.add('btn-secondary');
+            document.getElementById('usersTab').classList.remove('btn-primary');
+            document.getElementById('usersTab').classList.add('btn-outline-primary');
+            
+            document.getElementById('activitiesSection').style.display = 'block';
+            document.getElementById('usersSection').style.display = 'none';
+            
+            // Update URL without page reload
+            const url = new URL(window.location);
+            url.searchParams.set('tab', 'activities');
+            window.history.replaceState({}, '', url);
+            
+            loadActivities();
+        }
+
         // Load users with their progress stats
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
