@@ -176,6 +176,29 @@
             background: rgba(255,255,255,0.3);
             color: white;
         }
+        
+        .achievement-badge, .achievement-badge-large {
+            color: white !important;
+            border: none !important;
+        }
+        
+        .achievement-badge {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        
+        .achievement-badge-large {
+            font-size: 16px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .achievement-badge.beginner, .achievement-badge-large.beginner { background: #6c757d !important; }
+        .achievement-badge.starter, .achievement-badge-large.starter { background: #fd7e14 !important; }
+        .achievement-badge.intermediate, .achievement-badge-large.intermediate { background: #198754 !important; }
+        .achievement-badge.advanced, .achievement-badge-large.advanced { background: #0d6efd !important; }
+        .achievement-badge.expert, .achievement-badge-large.expert { background: #6f42c1 !important; }
+        .achievement-badge.master, .achievement-badge-large.master { background: #dc3545 !important; }
     </style>
 </head>
 <body>
@@ -761,13 +784,27 @@
             
             // Update Total Activities
             const totalElement = document.getElementById('totalActivities');
-            const achievementLevel = document.getElementById('achievementLevel');
-            
             totalElement.textContent = stats.totalActivities;
-            updateAchievementLevel(achievementLevel, stats.totalActivities);
+            
+            // Update Achievement Badge (prominently featured)
+            const achievementLevel = getAchievementLevel(stats.totalActivities || 0);
+            const achievementBadge = document.getElementById('achievementBadge');
+            if (achievementBadge) {
+                achievementBadge.textContent = achievementLevel;
+                achievementBadge.className = `badge achievement-badge-large ${achievementLevel.toLowerCase()}`;
+            }
             
             // Update subscription status
             updateSubscriptionStatus(stats.currentStreak, stats.totalActivities);
+        }
+
+        function getAchievementLevel(totalActivities) {
+            if (totalActivities >= 100) return 'Master';
+            if (totalActivities >= 50) return 'Expert';
+            if (totalActivities >= 25) return 'Advanced';
+            if (totalActivities >= 10) return 'Intermediate';
+            if (totalActivities >= 1) return 'Starter';
+            return 'Beginner';
         }
 
         function updateSubscriptionStatus(streak, totalActivities) {
