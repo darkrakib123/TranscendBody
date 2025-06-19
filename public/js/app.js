@@ -664,11 +664,11 @@ function updateSubscriptionStatus(stats) {
     let statusStyle = '';
     
     // Determine subscription status
-    if (streak >= 7 || total >= 10) {
+    if (streak >= 7 && total >= 15) {
         status = 'Premium Earned';
         statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
         console.log('Setting Premium Earned status');
-    } else if (streak >= 3 || total >= 7) {
+    } else if (streak >= 5 && total >= 10) {
         status = 'Almost Premium';
         statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
         console.log('Setting Almost Premium status');
