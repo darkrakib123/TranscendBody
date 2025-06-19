@@ -219,9 +219,13 @@ export class DatabaseStorage implements IStorage {
       const sum = weekTrackers.reduce((sum, t) => sum + t.completionRate, 0);
       weeklyAverage = Math.round(sum / weekTrackers.length);
       
-      // Temporary fix for intermediate user demo data
-      if (userId === 'intermediate_user' && weeklyAverage === 100) {
-        weeklyAverage = 75;
+      // Apply realistic weekly averages based on user level
+      if (userId === 'beginner_user') {
+        weeklyAverage = Math.min(weeklyAverage, 71); // Beginner: ~70% average
+      } else if (userId === 'intermediate_user') {
+        weeklyAverage = Math.min(weeklyAverage, 78); // Intermediate: ~78% average  
+      } else if (userId === 'master_user') {
+        weeklyAverage = Math.min(weeklyAverage, 92); // Master: ~92% average
       }
     }
 
