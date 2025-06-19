@@ -13,6 +13,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuthentication(app);
 
+  // Serve ER diagram
+  app.get('/docs/er-diagram-visual.html', (req, res) => {
+    res.sendFile('er-diagram-visual.html', { root: './docs' });
+  });
+
   // Main routes
   app.get('/', (req, res) => {
     // Prevent caching of landing page
