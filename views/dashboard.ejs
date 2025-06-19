@@ -307,80 +307,72 @@
                             <div id="subscriptionStatus" class="badge bg-warning text-dark px-3 py-2">Premium Earned</div>
                         </div>
                         
-                        <!-- Stats Stack -->
-                        <div class="stats-stack">
-                            <!-- Daily Streak -->
-                            <div class="stat-item mb-3 p-3" style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(255,107,53,0.3);">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="stat-icon me-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-fire"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Daily Streak</h6>
-                                            <small class="opacity-90" id="streakMessage">21 days - you're unstoppable!</small>
-                                        </div>
+                        <!-- Daily Streak -->
+                        <div class="stat-card streak-card p-4 mb-3" style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(255,107,53,0.3);">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon me-3" style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-fire fa-lg"></i>
                                     </div>
-                                    <div class="h4 fw-bold mb-0" id="currentStreak">21</div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Daily Streak</h6>
+                                        <p class="mb-1 opacity-90" style="font-size: 14px;">Consecutive active days</p>
+                                    </div>
                                 </div>
-                                <div class="progress mt-2" style="height: 4px; background: rgba(255,255,255,0.2);">
-                                    <div class="progress-bar" id="streakBar" style="background: rgba(255,255,255,0.8); width: 100%;"></div>
+                                <div class="text-end">
+                                    <div class="display-6 fw-bold" id="currentStreak">21</div>
                                 </div>
                             </div>
-                            
-                            <!-- Weekly Average -->
-                            <div class="stat-item mb-3 p-3" style="background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(78,205,196,0.3);">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="stat-icon me-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-chart-line"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">This Week Average</h6>
-                                            <small class="opacity-90">Completion rate</small>
-                                        </div>
+                            <div class="progress mt-3" style="height: 6px; background: rgba(255,255,255,0.2);">
+                                <div class="progress-bar" id="streakBar" style="background: rgba(255,255,255,0.8); width: 100%;"></div>
+                            </div>
+                            <small class="d-block mt-2 opacity-90" id="streakMessage">21 days - you're unstoppable!</small>
+                        </div>
+                        
+                        <!-- This Week & Total Stats in Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="stat-card p-3" style="background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border-radius: 12px; height: 140px; box-shadow: 0 6px 20px rgba(78,205,196,0.3);">
+                                    <div class="stat-icon mb-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-chart-line"></i>
                                     </div>
+                                    <h6 class="fw-bold mb-1">This Week</h6>
+                                    <p class="mb-2 opacity-90" style="font-size: 12px;">Average completion</p>
                                     <div class="h4 fw-bold mb-0" id="weeklyAverage">100%</div>
                                 </div>
                             </div>
                             
-                            <!-- Total Activities -->
-                            <div class="stat-item mb-3 p-3" style="background: linear-gradient(135deg, #ffd700, #ffb347); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(255,215,0,0.3);">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="stat-icon me-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-trophy"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Total Completed</h6>
-                                            <small class="opacity-90">Activities finished</small>
-                                        </div>
+                            <div class="col-6">
+                                <div class="stat-card p-3" style="background: linear-gradient(135deg, #ffd700, #ffb347); color: white; border-radius: 12px; height: 140px; box-shadow: 0 6px 20px rgba(255,215,0,0.3);">
+                                    <div class="stat-icon mb-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-trophy"></i>
                                     </div>
+                                    <h6 class="fw-bold mb-1">Completed</h6>
+                                    <p class="mb-2 opacity-90" style="font-size: 12px;">Total activities</p>
                                     <div class="h4 fw-bold mb-0" id="totalActivities">105</div>
                                 </div>
                             </div>
-                            
-                            <!-- Achievement Level -->
-                            <div class="stat-item mb-3 p-3" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(156,39,176,0.3);">
-                                <div class="text-center">
-                                    <div class="stat-icon mx-auto mb-2" style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-medal" style="font-size: 20px;"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-2">Achievement Level</h6>
-                                    <span class="badge bg-warning text-dark" id="achievementBadge" style="font-size: 14px; padding: 8px 16px;">Master</span>
+                        </div>
+                        
+                        <!-- Achievement Level -->
+                        <div class="achievement-featured-card mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #dee2e6; border-radius: 16px; padding: 20px;">
+                            <div class="text-center">
+                                <div class="achievement-icon-large mb-3" style="width: 60px; height: 60px; margin: 0 auto; background: linear-gradient(135deg, #9c27b0, #673ab7); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-medal" style="font-size: 24px; color: white;"></i>
                                 </div>
-                            </div>
-                            
-                            <!-- Performance Snapshot -->
-                            <div class="stat-item">
-                                <button class="btn btn-primary w-100 p-3" onclick="generatePerformanceSnapshot()" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,123,255,0.3);">
-                                    <i class="fas fa-camera me-2"></i>
-                                    <span class="fw-bold">Create Performance Snapshot</span>
-                                    <br>
-                                    <small class="opacity-75">Share your progress with friends</small>
-                                </button>
+                                <h6 class="fw-bold mb-2" style="color: #495057;">Achievement Level</h6>
+                                <span class="badge achievement-badge-large bg-warning text-dark" id="achievementBadge" style="font-size: 16px; padding: 10px 20px;">Master</span>
+                                <p class="text-muted mt-2 mb-0" style="font-size: 12px;">Keep completing activities to level up!</p>
                             </div>
                         </div>
+                        
+                        <!-- Performance Snapshot Button -->
+                        <button class="btn btn-primary w-100 mb-3" onclick="generatePerformanceSnapshot()" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,123,255,0.3);">
+                            <i class="fas fa-camera me-2"></i>
+                            <span class="fw-bold">Create Performance Snapshot</span>
+                            <br>
+                            <small class="opacity-75">Share your progress with friends</small>
+                        </button>
                     </div>
 
                     <!-- Popular Activities -->
