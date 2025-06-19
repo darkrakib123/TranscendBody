@@ -756,14 +756,41 @@
             
             // Update Total Activities
             const totalElement = document.getElementById('totalActivities');
-            totalElement.textContent = stats.totalActivities;
+            console.log('Updating totalActivities element with value:', stats.totalActivities);
+            if (totalElement) {
+                totalElement.textContent = stats.totalActivities;
+                console.log('Total activities element updated to:', stats.totalActivities);
+            } else {
+                console.error('totalActivities element not found!');
+            }
             
             // Update Achievement Badge (prominently featured)
-            const achievementLevel = getAchievementLevel(stats.totalActivities || 0);
+            const total = stats.totalActivities || 0;
+            console.log('Processing achievement level for total activities:', total);
+            
+            let achievementLevel = 'Beginner';
+            let badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+            
+            if (total >= 100) {
+                achievementLevel = 'Master';
+                badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+            } else if (total >= 50) {
+                achievementLevel = 'Intermediate';
+                badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
+            } else if (total >= 25) {
+                achievementLevel = 'Beginner';
+                badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+            }
+            
+            console.log('Setting achievement level:', achievementLevel, 'for total:', total);
+            
             const achievementBadge = document.getElementById('achievementBadge');
             if (achievementBadge) {
                 achievementBadge.textContent = achievementLevel;
-                achievementBadge.className = `badge achievement-badge-large ${achievementLevel.toLowerCase()}`;
+                achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
+                console.log('Achievement badge updated to:', achievementLevel);
+            } else {
+                console.error('achievementBadge element not found!');
             }
             
             // Update subscription status
@@ -773,8 +800,8 @@
         function getAchievementLevel(totalActivities) {
             console.log('getAchievementLevel called with:', totalActivities);
             if (totalActivities >= 100) return 'Master';
-            if (totalActivities >= 50) return 'Advanced';
-            if (totalActivities >= 25) return 'Intermediate';
+            if (totalActivities >= 50) return 'Intermediate';
+            if (totalActivities >= 25) return 'Beginner';
             return 'Beginner';
         }
 
