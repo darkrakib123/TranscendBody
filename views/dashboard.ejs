@@ -784,12 +784,18 @@
                 if (total >= 100) {
                     achievementLevel = 'Master';
                     badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+                    // Apply master theme to entire dashboard
+                    applyMasterTheme();
                 } else if (total >= 50) {
                     achievementLevel = 'Intermediate';
                     badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
+                    // Apply intermediate theme to entire dashboard
+                    applyIntermediateTheme();
                 } else if (total >= 25) {
                     achievementLevel = 'Beginner';
                     badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                    // Apply beginner theme to entire dashboard
+                    applyBeginnerTheme();
                 }
                 
                 console.log('Setting achievement level:', achievementLevel, 'for total:', total);
@@ -809,6 +815,73 @@
                 console.log('All stats display updates completed successfully');
             } catch (error) {
                 console.error('Error in updateStatsDisplay:', error);
+            }
+        }
+
+        // Theme application functions for dashboard
+        function applyMasterTheme() {
+            console.log('Applying Master theme (purple) to dashboard');
+            
+            // Update main streak card
+            const streakCards = document.querySelectorAll('.streak-featured-card');
+            streakCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            });
+            
+            // Update progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                bar.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            });
+            
+            // Update achievement icon
+            const achievementIcon = document.querySelector('.achievement-icon-large');
+            if (achievementIcon) {
+                achievementIcon.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+        }
+
+        function applyIntermediateTheme() {
+            console.log('Applying Intermediate theme (red) to dashboard');
+            
+            // Update main streak card
+            const streakCards = document.querySelectorAll('.streak-featured-card');
+            streakCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+            });
+            
+            // Update progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                bar.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+            });
+            
+            // Update achievement icon
+            const achievementIcon = document.querySelector('.achievement-icon-large');
+            if (achievementIcon) {
+                achievementIcon.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+            }
+        }
+
+        function applyBeginnerTheme() {
+            console.log('Applying Beginner theme (green) to dashboard');
+            
+            // Update main streak card
+            const streakCards = document.querySelectorAll('.streak-featured-card');
+            streakCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            });
+            
+            // Update progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                bar.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            });
+            
+            // Update achievement icon
+            const achievementIcon = document.querySelector('.achievement-icon-large');
+            if (achievementIcon) {
+                achievementIcon.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
             }
         }
 
