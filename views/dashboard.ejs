@@ -771,11 +771,10 @@
         }
 
         function getAchievementLevel(totalActivities) {
+            console.log('getAchievementLevel called with:', totalActivities);
             if (totalActivities >= 100) return 'Master';
-            if (totalActivities >= 50) return 'Expert';
-            if (totalActivities >= 25) return 'Advanced';
-            if (totalActivities >= 10) return 'Intermediate';
-            if (totalActivities >= 1) return 'Starter';
+            if (totalActivities >= 50) return 'Advanced';
+            if (totalActivities >= 25) return 'Intermediate';
             return 'Beginner';
         }
 

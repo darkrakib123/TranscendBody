@@ -94,7 +94,11 @@ async function loadStats() {
         const response = await fetch('/api/stats');
         if (response.ok) {
             const stats = await response.json();
+            console.log('Loaded stats:', stats);
+            console.log('Stats breakdown - streak:', stats.currentStreak, 'weekly:', stats.weeklyAverage, 'total:', stats.totalActivities);
             updateStatsDisplay(stats);
+        } else {
+            console.error('Failed to load stats:', response.status);
         }
     } catch (error) {
         console.error('Error loading stats:', error);
