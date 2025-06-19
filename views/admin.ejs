@@ -175,8 +175,11 @@
                     return { ...user, stats: null };
                 }));
 
+                // Build all rows at once using innerHTML for better performance
+                let allRowsHTML = '';
+                
                 usersWithProgress.forEach((user, index) => {
-                    console.log(`Rendering user ${index + 1}:`, user.email, user.role);
+                    console.log(`Processing user ${index + 1}:`, user.email, user.role);
                     
                     let progressDisplay = '';
                     if (user.stats) {
@@ -201,25 +204,28 @@
                         progressDisplay = '<span class="text-muted small">Admin User</span>';
                     }
 
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${user.email}</td>
-                        <td>${user.firstName || ''} ${user.lastName || ''}</td>
-                        <td>
-                            <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
-                                <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
-                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                            </select>
-                        </td>
-                        <td>${progressDisplay}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
+                    allRowsHTML += `
+                        <tr>
+                            <td>${user.email}</td>
+                            <td>${user.firstName || ''} ${user.lastName || ''}</td>
+                            <td>
+                                <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
+                                    <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
+                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </td>
+                            <td>${progressDisplay}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
                     `;
-                    tbody.appendChild(row);
                 });
+                
+                console.log('Setting innerHTML for', usersWithProgress.length, 'users');
+                tbody.innerHTML = allRowsHTML;
             } catch (error) {
                 console.error('Error loading users:', error);
                 const tbody = document.getElementById('usersTableBody');
