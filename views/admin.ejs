@@ -189,23 +189,42 @@
                                 }
                             } catch (statsError) {
                                 console.warn(`Stats error for ${user.email}:`, statsError);
-                                progressDisplay = '<span class="text-muted small">Error loading stats</span>';
+                                progressDisplay = '<span class="text-muted small">Stats unavailable</span>';
                             }
                         } else {
                             progressDisplay = '<span class="text-muted small">Admin User</span>';
                         }
                         
+                        // For demo users, show lastName in progress, firstName only in name
+                        let displayName = user.firstName || '';
+                        let progressContent = progressDisplay;
+                        
+                        if (user.role === 'client' && user.lastName) {
+                            // For client users, if there's stats and lastName, combine them in progress
+                            if (progressDisplay.includes('Error loading stats')) {
+                                progressContent = `<span class="text-muted small">${user.lastName}</span>`;
+                            } else if (progressDisplay.includes('badge')) {
+                                // Extract the progress part and add lastName
+                                progressContent = progressDisplay.replace(
+                                    '<div class="text-muted">',
+                                    `<div class="text-muted"><strong>${user.lastName}</strong><br>`
+                                );
+                            } else {
+                                progressContent = `<span class="text-muted small">${user.lastName}</span>`;
+                            }
+                        }
+
                         tableHTML += `
                             <tr>
                                 <td>${user.email || 'No email'}</td>
-                                <td>${(user.firstName || '') + ' ' + (user.lastName || '')}</td>
+                                <td>${displayName}</td>
                                 <td>
                                     <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
                                         <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
                                         <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                                     </select>
                                 </td>
-                                <td>${progressDisplay}</td>
+                                <td>${progressContent}</td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
                                         <i class="fas fa-trash"></i>
