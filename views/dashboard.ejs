@@ -789,17 +789,17 @@
                 
                 if (total >= 50) {
                     achievementLevel = 'Master';
-                    badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+                    badgeStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%); color: white; border: none;';
                     // Apply master theme to entire dashboard
                     applyMasterTheme();
                 } else if (total >= 25) {
                     achievementLevel = 'Intermediate';
-                    badgeStyle = 'background: linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%); color: white; border: none;';
+                    badgeStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%); color: white; border: none;';
                     // Apply intermediate theme to entire dashboard
                     applyIntermediateTheme();
                 } else {
                     achievementLevel = 'Beginner';
-                    badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                    badgeStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
                     // Apply beginner theme to entire dashboard
                     applyBeginnerTheme();
                 }
@@ -826,12 +826,12 @@
 
         // Theme application functions for dashboard
         function applyMasterTheme() {
-            console.log('Applying Master theme (purple) to dashboard');
+            console.log('Applying Master theme (gold) to dashboard');
             
             // Force update the main streak card by ID with !important
             const mainStreakCard = document.getElementById('mainStreakCard');
             if (mainStreakCard) {
-                mainStreakCard.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
+                mainStreakCard.style.setProperty('background', 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)', 'important');
                 mainStreakCard.style.setProperty('box-shadow', '0 8px 25px rgba(102,126,234,0.3)', 'important');
                 console.log('Updated main streak card to purple with !important');
             } else {
@@ -841,9 +841,9 @@
             // Also try to target by class and force update
             const streakCards = document.querySelectorAll('.streak-featured-card');
             streakCards.forEach((card, index) => {
-                card.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
-                card.style.setProperty('box-shadow', '0 8px 25px rgba(102,126,234,0.3)', 'important');
-                console.log('Updated streak card', index, 'to purple');
+                card.style.setProperty('background', 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)', 'important');
+                card.style.setProperty('box-shadow', '0 8px 25px rgba(255,215,0,0.3)', 'important');
+                console.log('Updated streak card', index, 'to gold');
             });
             
             // Force update any elements with green gradient using DOM mutation
@@ -853,9 +853,9 @@
                     const style = element.getAttribute('style');
                     if (style && style.includes('#28a745')) {
                         const newStyle = style.replace(/background:\s*linear-gradient\([^)]*#28a745[^)]*\)/g, 
-                            'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+                            'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)');
                         element.setAttribute('style', newStyle);
-                        console.log('Converted green background to purple via attribute');
+                        console.log('Converted background to gold via attribute');
                     }
                 });
             }, 100);
@@ -863,36 +863,36 @@
             // Update achievement icon
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
-                achievementIcon.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                achievementIcon.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)';
             }
         }
 
         function applyIntermediateTheme() {
-            console.log('Applying Intermediate theme (light pink) to dashboard');
+            console.log('Applying Intermediate theme (silver) to dashboard');
             
             // Update main streak card
             const streakCards = document.querySelectorAll('.streak-featured-card, .streak-card');
             streakCards.forEach(card => {
-                card.style.setProperty('background', 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)', 'important');
-                card.style.setProperty('box-shadow', '0 8px 24px rgba(255,107,150,0.3)', 'important');
+                card.style.setProperty('background', 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)', 'important');
+                card.style.setProperty('box-shadow', '0 8px 24px rgba(192,192,192,0.3)', 'important');
             });
             
             // Also update by specific ID
             const mainStreakCard = document.getElementById('mainStreakCard');
             if (mainStreakCard) {
-                mainStreakCard.style.setProperty('background', 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)', 'important');
+                mainStreakCard.style.setProperty('background', 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)', 'important');
             }
             
             // Update progress bars
             const progressBars = document.querySelectorAll('.progress-bar');
             progressBars.forEach(bar => {
-                bar.style.background = 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)';
+                bar.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
             });
             
             // Update achievement icon
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
-                achievementIcon.style.background = 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)';
+                achievementIcon.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
             }
         }
 
@@ -1264,19 +1264,19 @@
             // Premium Earned: Consistent long-term engagement (14+ day streak AND 40+ activities)
             if (streak >= 14 && totalActivities >= 40) {
                 status = 'Premium Earned';
-                statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+                statusStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%); color: white; border: none;';
                 console.log('TAKING Premium Earned path - streak:', streak, 'total:', totalActivities);
             } 
             // Almost Premium: Good progress (7+ day streak AND 20+ activities)
             else if (streak >= 7 && totalActivities >= 20) {
                 status = 'Almost Premium';
-                statusStyle = 'background: linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%); color: white; border: none;';
+                statusStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%); color: white; border: none;';
                 console.log('TAKING Almost Premium path - streak:', streak, 'total:', totalActivities);
             } 
             // Free Plan: Less than thresholds above
             else {
                 status = 'Free Plan';
-                statusStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                statusStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
                 console.log('TAKING Free Plan path - streak:', streak, 'total:', totalActivities);
             }
             
