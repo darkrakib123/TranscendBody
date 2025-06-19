@@ -329,35 +329,37 @@
                             <small class="d-block mt-2 opacity-90" id="streakMessage">Start your streak today!</small>
                         </div>
                         
-                        <!-- This Week & Total Stats in Single Row -->
-                        <div class="stat-card p-3 mb-3" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e3e6ea; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                            <div class="row g-0" style="min-height: 80px;">
-                                <div class="col-6">
-                                    <div style="display: grid; grid-template-columns: 40px 1fr 60px; gap: 12px; align-items: center; padding: 20px 16px; height: 100%;">
-                                        <div class="stat-icon" style="width: 40px; height: 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-chart-line text-white"></i>
+                        <!-- This Week & Total Stats - Separate Cards for Better Alignment -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="stat-card h-100" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e3e6ea; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px;">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stat-icon me-3" style="width: 45px; height: 45px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-chart-line text-white fa-lg"></i>
                                         </div>
                                         <div>
-                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px; line-height: 1.2;">This Week</h6>
-                                            <p class="mb-0 text-muted" style="font-size: 11px; line-height: 1.2;">Average completion</p>
-                                        </div>
-                                        <div style="text-align: right;">
-                                            <div class="h4 fw-bold mb-0" id="weeklyAverage" style="color: #11998e; font-size: 1.6rem; line-height: 1;">100%</div>
+                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px;">This Week</h6>
+                                            <p class="mb-0 text-muted" style="font-size: 12px;">Average completion</p>
                                         </div>
                                     </div>
+                                    <div class="text-center mt-3">
+                                        <div class="display-4 fw-bold" id="weeklyAverage" style="color: #11998e; font-size: 2.5rem; line-height: 1;">100%</div>
+                                    </div>
                                 </div>
-                                <div class="col-6" style="border-left: 1px solid #e9ecef;">
-                                    <div style="display: grid; grid-template-columns: 40px 1fr 60px; gap: 12px; align-items: center; padding: 20px 16px; height: 100%;">
-                                        <div class="stat-icon" style="width: 40px; height: 40px; background: linear-gradient(135deg, #dc3545 0%, #ff9aa8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-trophy text-white"></i>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card h-100" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e3e6ea; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px;">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stat-icon me-3" style="width: 45px; height: 45px; background: linear-gradient(135deg, #dc3545 0%, #ff9aa8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-trophy text-white fa-lg"></i>
                                         </div>
                                         <div>
-                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px; line-height: 1.2;">Completed</h6>
-                                            <p class="mb-0 text-muted" style="font-size: 11px; line-height: 1.2;">Total activities</p>
+                                            <h6 class="fw-bold mb-1" style="color: #495057; font-size: 14px;">Completed</h6>
+                                            <p class="mb-0 text-muted" style="font-size: 12px;">Total activities</p>
                                         </div>
-                                        <div style="text-align: right;">
-                                            <div class="h4 fw-bold mb-0" id="totalActivities" style="color: #dc3545; font-size: 1.6rem; line-height: 1;">105</div>
-                                        </div>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <div class="display-4 fw-bold" id="totalActivities" style="color: #dc3545; font-size: 2.5rem; line-height: 1;">105</div>
                                     </div>
                                 </div>
                             </div>
