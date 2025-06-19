@@ -666,19 +666,21 @@ function updateSubscriptionStatus(stats) {
     let planStatus = 'Free Plan';
     let badgeStyle = 'background: #6c757d; color: white; border: none;';
     
-    // Bronze, Silver, Gold progression thresholds
-    if (userStreak >= 14 && userTotal >= 40) {
+    // Dynamic subscription status calculation using configuration constants
+    if (userStreak >= SUBSCRIPTION_THRESHOLDS.PREMIUM_EARNED.streak && 
+        userTotal >= SUBSCRIPTION_THRESHOLDS.PREMIUM_EARNED.activities) {
         planStatus = 'Premium Earned';
-        badgeStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%); color: white; border: none;';
-        console.log('NEW VERSION - PREMIUM EARNED - streak:', userStreak, 'total:', userTotal);
-    } else if (userStreak >= 7 && userTotal >= 20) {
+        badgeStyle = `background: ${COLORS.GOLD.gradient}; color: white; border: none;`;
+        console.log('SUBSCRIPTION: Premium Earned -', { streak: userStreak, total: userTotal });
+    } else if (userStreak >= SUBSCRIPTION_THRESHOLDS.ALMOST_PREMIUM.streak && 
+               userTotal >= SUBSCRIPTION_THRESHOLDS.ALMOST_PREMIUM.activities) {
         planStatus = 'Almost Premium';
-        badgeStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%); color: white; border: none;';
-        console.log('NEW VERSION - ALMOST PREMIUM - streak:', userStreak, 'total:', userTotal);
+        badgeStyle = `background: ${COLORS.SILVER.gradient}; color: white; border: none;`;
+        console.log('SUBSCRIPTION: Almost Premium -', { streak: userStreak, total: userTotal });
     } else {
         planStatus = 'Free Plan';
-        badgeStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
-        console.log('NEW VERSION - FREE PLAN - streak:', userStreak, 'total:', userTotal);
+        badgeStyle = `background: ${COLORS.BRONZE.gradient}; color: white; border: none;`;
+        console.log('SUBSCRIPTION: Free Plan -', { streak: userStreak, total: userTotal });
     }
     
     console.log('NEW VERSION - Final result:', planStatus);

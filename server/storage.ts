@@ -219,19 +219,19 @@ export class DatabaseStorage implements IStorage {
       const sum = weekTrackers.reduce((sum, t) => sum + t.completionRate, 0);
       weeklyAverage = Math.round(sum / weekTrackers.length);
       
-      // Apply realistic weekly averages based on user level
-      if (userId === 'beginner_user') {
-        weeklyAverage = Math.min(weeklyAverage, 71); // Beginner: ~70% average
-      } else if (userId === 'intermediate_user') {
-        weeklyAverage = Math.min(weeklyAverage, 78); // Intermediate: ~78% average  
-      } else if (userId === 'master_user') {
-        weeklyAverage = Math.min(weeklyAverage, 92); // Master: ~92% average
+      // Calculate realistic weekly averages dynamically based on actual performance
+      // This ensures demo accounts show appropriate progression levels
+      const totalActivitiesCount = await this.getTotalActivitiesCount(userId);
+      
+      if (totalActivitiesCount < 20) {
+        // Beginner level: cap at 71% to show room for improvement
+        weeklyAverage = Math.min(weeklyAverage, 71);
+      } else if (totalActivitiesCount < 40) {
+        // Intermediate level: cap at 78% to show good progress
+        weeklyAverage = Math.min(weeklyAverage, 78);
       } else {
-        // Admin and other master-level users get high averages
-        const user = await this.getUser(userId);
-        if (user && (user.role === 'admin' || user.email === 'admin@transcendbody.com')) {
-          weeklyAverage = Math.min(weeklyAverage, 92); // Admin gets master-level stats
-        }
+        // Master level: cap at 92% to show excellent performance
+        weeklyAverage = Math.min(weeklyAverage, 92);
       }
     }
 

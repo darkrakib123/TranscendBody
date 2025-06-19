@@ -1,0 +1,177 @@
+/**
+ * Theme System for Transcend Your Body Daily Tracker
+ * 
+ * This file defines the dynamic theming system that adapts based on user
+ * achievement levels and subscription status. Uses CSS custom properties
+ * for easy runtime manipulation and consistent color application.
+ * 
+ * Theme Hierarchy:
+ * - Bronze: Beginner users, Free plan
+ * - Silver: Intermediate users, Almost Premium
+ * - Gold: Master users, Premium Earned
+ */
+
+/* ==================== CSS CUSTOM PROPERTIES ==================== */
+
+:root {
+  /* Bronze Theme (Beginner/Free Plan) */
+  --bronze-primary: #cd7f32;
+  --bronze-secondary: #b8722c;
+  --bronze-gradient: linear-gradient(135deg, var(--bronze-primary) 0%, var(--bronze-secondary) 100%);
+  --bronze-shadow: rgba(205, 127, 50, 0.3);
+  --bronze-light: rgba(205, 127, 50, 0.1);
+  
+  /* Silver Theme (Intermediate/Almost Premium) */
+  --silver-primary: #c0c0c0;
+  --silver-secondary: #a8a8a8;
+  --silver-gradient: linear-gradient(135deg, var(--silver-primary) 0%, var(--silver-secondary) 100%);
+  --silver-shadow: rgba(192, 192, 192, 0.3);
+  --silver-light: rgba(192, 192, 192, 0.1);
+  
+  /* Gold Theme (Master/Premium Earned) */
+  --gold-primary: #ffd700;
+  --gold-secondary: #ffcc00;
+  --gold-gradient: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-secondary) 100%);
+  --gold-shadow: rgba(255, 215, 0, 0.3);
+  --gold-light: rgba(255, 215, 0, 0.1);
+  
+  /* Dynamic theme variables (changed via JavaScript) */
+  --theme-gradient: var(--bronze-gradient);
+  --theme-shadow: var(--bronze-shadow);
+  --theme-light: var(--bronze-light);
+}
+
+/* ==================== THEME-AWARE COMPONENTS ==================== */
+
+/**
+ * Streak cards that adapt to user level
+ */
+.streak-featured-card,
+.streak-card {
+  background: var(--theme-gradient) !important;
+  box-shadow: 0 8px 24px var(--theme-shadow) !important;
+  transition: all 0.3s ease;
+}
+
+/**
+ * Progress bars with dynamic theming
+ */
+.progress-bar {
+  background: var(--theme-gradient) !important;
+}
+
+/**
+ * Achievement icons
+ */
+.achievement-icon-large,
+.achievement-icon {
+  background: var(--theme-gradient) !important;
+  border-radius: 50%;
+}
+
+/**
+ * Subscription badges
+ */
+.subscription-badge {
+  background: var(--theme-gradient) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/**
+ * Achievement level badges
+ */
+.achievement-badge {
+  background: var(--theme-gradient) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* ==================== THEME UTILITY CLASSES ==================== */
+
+/**
+ * Bronze theme utilities
+ */
+.theme-bronze {
+  --theme-gradient: var(--bronze-gradient);
+  --theme-shadow: var(--bronze-shadow);
+  --theme-light: var(--bronze-light);
+}
+
+/**
+ * Silver theme utilities
+ */
+.theme-silver {
+  --theme-gradient: var(--silver-gradient);
+  --theme-shadow: var(--silver-shadow);
+  --theme-light: var(--silver-light);
+}
+
+/**
+ * Gold theme utilities
+ */
+.theme-gold {
+  --theme-gradient: var(--gold-gradient);
+  --theme-shadow: var(--gold-shadow);
+  --theme-light: var(--gold-light);
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/**
+ * Ensure themes work well on all screen sizes
+ */
+@media (max-width: 768px) {
+  .streak-featured-card,
+  .streak-card {
+    box-shadow: 0 4px 12px var(--theme-shadow) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .streak-featured-card,
+  .streak-card {
+    box-shadow: 0 2px 8px var(--theme-shadow) !important;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+
+/**
+ * Ensure sufficient contrast for all themes
+ */
+.theme-bronze .text-contrast,
+.theme-silver .text-contrast,
+.theme-gold .text-contrast {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/**
+ * Focus states for keyboard navigation
+ */
+.streak-featured-card:focus,
+.streak-card:focus,
+.subscription-badge:focus,
+.achievement-badge:focus {
+  outline: 2px solid var(--theme-shadow);
+  outline-offset: 2px;
+}
+
+/* ==================== ANIMATION ENHANCEMENTS ==================== */
+
+/**
+ * Smooth transitions when themes change
+ */
+.theme-transition {
+  transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+/**
+ * Hover effects that respect current theme
+ */
+.streak-featured-card:hover,
+.streak-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--theme-shadow) !important;
+}
