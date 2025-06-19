@@ -876,6 +876,14 @@
                 circle.style.setProperty('background', 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)', 'important');
                 circle.style.setProperty('border-color', '#ffd700', 'important');
             });
+            
+            // Update SVG gradient to gold
+            const progressGradient = document.getElementById('progressGradient');
+            if (progressGradient) {
+                const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#ffd700';
+                if (stops[1]) stops[1].style.stopColor = '#ffcc00';
+            }
         }
 
         function applyIntermediateTheme() {
@@ -913,6 +921,14 @@
                 circle.style.setProperty('background', 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)', 'important');
                 circle.style.setProperty('border-color', '#c0c0c0', 'important');
             });
+            
+            // Update SVG gradient to silver
+            const progressGradient = document.getElementById('progressGradient');
+            if (progressGradient) {
+                const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#c0c0c0';
+                if (stops[1]) stops[1].style.stopColor = '#a8a8a8';
+            }
         }
 
         function applyBeginnerTheme() {
@@ -944,6 +960,14 @@
                 circle.style.setProperty('background', 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)', 'important');
                 circle.style.setProperty('border-color', '#cd7f32', 'important');
             });
+            
+            // Update SVG gradient to bronze (default)
+            const progressGradient = document.getElementById('progressGradient');
+            if (progressGradient) {
+                const stops = progressGradient.querySelectorAll('stop');
+                if (stops[0]) stops[0].style.stopColor = '#cd7f32';
+                if (stops[1]) stops[1].style.stopColor = '#b8722c';
+            }
         }
 
         function getAchievementLevel(totalActivities) {
