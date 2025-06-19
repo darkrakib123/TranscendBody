@@ -507,13 +507,13 @@ function updateAchievementLevel(stats) {
     let level = 'Beginner';
     let badgeStyle = '';
     
-    if (streak >= 21 || total >= 100) {
+    if (total >= 100) {
         level = 'Master';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-    } else if (streak >= 14 || total >= 50) {
+    } else if (total >= 50) {
         level = 'Advanced';
         badgeStyle = 'background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none;';
-    } else if (streak >= 7 || total >= 25) {
+    } else if (total >= 25) {
         level = 'Intermediate';
         badgeStyle = 'background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border: none;';
     } else {
