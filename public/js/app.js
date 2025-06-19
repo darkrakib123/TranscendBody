@@ -454,7 +454,6 @@ function updateStatsDisplay(stats) {
     const streakValue = document.getElementById('currentStreak');
     const streakProgress = document.getElementById('streakBar');
     const streakMessage = document.getElementById('streakMessage');
-    const streakCard = document.querySelector('.streak-card');
     
     console.log('Updating streak display - Current streak:', stats.currentStreak);
     
@@ -480,8 +479,6 @@ function updateStatsDisplay(stats) {
             streakMessage.textContent = `${streak} days - incredible consistency!`;
         }
     }
-    
-    // Streak card color is now handled by updateDashboardTheme function
     
     // Update weekly average - using correct ID
     const weeklyValue = document.getElementById('weeklyAverage');
