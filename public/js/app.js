@@ -652,7 +652,7 @@ function updateSubscriptionStatus(stats) {
     // Determine subscription status
     if (streak >= 7 || total >= 10) {
         status = 'Premium Earned';
-        statusStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+        statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
         console.log('Setting Premium Earned status');
     } else if (streak >= 3 || total >= 7) {
         status = 'Almost Premium';
