@@ -785,7 +785,7 @@
                 console.log('Processing achievement level for total activities:', total);
                 
                 let achievementLevel = 'Beginner';
-                let badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+                let badgeStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
                 
                 if (total >= 50) {
                     achievementLevel = 'Master';
@@ -900,21 +900,22 @@
             console.log('Applying Beginner theme (bronze) to dashboard');
             
             // Update main streak card
-            const streakCards = document.querySelectorAll('.streak-featured-card');
+            const streakCards = document.querySelectorAll('.streak-featured-card, .streak-card');
             streakCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                card.style.setProperty('background', 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)', 'important');
+                card.style.setProperty('box-shadow', '0 8px 24px rgba(205,127,50,0.3)', 'important');
             });
             
             // Update progress bars
             const progressBars = document.querySelectorAll('.progress-bar');
             progressBars.forEach(bar => {
-                bar.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                bar.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
             });
             
             // Update achievement icon
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
-                achievementIcon.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                achievementIcon.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
             }
         }
 
