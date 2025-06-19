@@ -437,12 +437,21 @@ function updateProgressChart(percentage) {
 
 // Update stats display
 function updateStatsDisplay(stats) {
-    console.log('Updating stats display:', stats);
+    console.log('Updating stats display with data:', stats);
+    
+    // Ensure we have valid stats object
+    if (!stats || typeof stats !== 'object') {
+        console.error('Invalid stats object:', stats);
+        stats = {
+            currentStreak: 0,
+            weeklyAverage: 0,
+            totalActivities: 0
+        };
+    }
     
     // Handle error case where stats fetch failed
     if (stats.message) {
         console.error('Stats error:', stats.message);
-        // Set default values
         stats = {
             currentStreak: 0,
             weeklyAverage: 0,
@@ -489,13 +498,22 @@ function updateStatsDisplay(stats) {
     // Update total activities - using correct ID with forced refresh
     const totalValue = document.getElementById('totalActivities');
     if (totalValue) {
-        console.log('Forcing update of totalActivities to:', stats.totalActivities);
+        const totalActivities = stats.totalActivities || 0;
+        console.log('Updating totalActivities element with value:', totalActivities);
         totalValue.innerHTML = '';
-        totalValue.textContent = stats.totalActivities || 0;
-        totalValue.setAttribute('data-value', stats.totalActivities || 0);
+        totalValue.textContent = totalActivities;
+        totalValue.setAttribute('data-value', totalActivities);
+        
+        // Force DOM update
+        totalValue.style.display = 'none';
+        totalValue.offsetHeight; // trigger reflow
+        totalValue.style.display = '';
+    } else {
+        console.error('totalActivities element not found');
     }
     
-    // Update achievement level
+    // Update achievement level with correct total
+    console.log('About to call updateAchievementLevel with total:', stats.totalActivities);
     updateAchievementLevel(stats);
     
     // Update subscription status
@@ -504,45 +522,57 @@ function updateStatsDisplay(stats) {
 
 // Update achievement level based on stats
 function updateAchievementLevel(stats) {
+    console.log('updateAchievementLevel called with stats:', stats);
+    
     const achievementBadge = document.getElementById('achievementBadge');
-    if (!achievementBadge) return;
+    if (!achievementBadge) {
+        console.error('achievementBadge element not found');
+        return;
+    }
     
     const streak = stats.currentStreak || 0;
     const total = stats.totalActivities || 0;
     
-    console.log('UpdateAchievementLevel - Total activities:', total, 'Streak:', streak);
+    console.log('UpdateAchievementLevel - Processing total activities:', total, 'streak:', streak);
     
     let level = 'Beginner';
     let badgeStyle = '';
     
+    // Determine level based on total activities
     if (total >= 100) {
         level = 'Master';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        // Apply purple theme to entire dashboard
+        console.log('Setting Master level for', total, 'activities');
         applyMasterTheme();
     } else if (total >= 50) {
         level = 'Advanced';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        // Apply purple theme to entire dashboard
+        console.log('Setting Advanced level for', total, 'activities');
         applyMasterTheme();
     } else if (total >= 25) {
         level = 'Intermediate';
         badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
-        // Apply red theme to entire dashboard
+        console.log('Setting Intermediate level for', total, 'activities');
         applyIntermediateTheme();
     } else {
         level = 'Beginner';
         badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-        // Apply green theme to entire dashboard
+        console.log('Setting Beginner level for', total, 'activities');
         applyBeginnerTheme();
     }
     
-    console.log('Setting achievement level to:', level, 'for total:', total);
+    console.log('Final level decision:', level, 'for total activities:', total);
     
+    // Update the badge
     achievementBadge.innerHTML = '';
     achievementBadge.textContent = level;
     achievementBadge.className = 'badge achievement-badge-large';
     achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
+    
+    // Force visual update
+    achievementBadge.style.display = 'none';
+    achievementBadge.offsetHeight; // trigger reflow
+    achievementBadge.style.display = 'inline-block';
 }
 
 // Apply Master/Advanced theme (Purple)
@@ -602,30 +632,46 @@ function applyBeginnerTheme() {
 // Update subscription status based on stats
 function updateSubscriptionStatus(stats) {
     const subscriptionStatus = document.getElementById('subscriptionStatus');
-    if (!subscriptionStatus) return;
+    if (!subscriptionStatus) {
+        console.error('subscriptionStatus element not found');
+        return;
+    }
     
     const streak = stats.currentStreak || 0;
     const total = stats.totalActivities || 0;
     
-    let status = 'Free Plan';
-    let badgeClass = 'bg-secondary';
+    console.log('UpdateSubscriptionStatus - streak:', streak, 'total:', total);
     
+    let status = 'Free Plan';
     let statusStyle = '';
     
+    // Determine subscription status
     if (streak >= 7 || total >= 10) {
         status = 'Premium Earned';
-        statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+        statusStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
+        console.log('Setting Premium Earned status');
     } else if (streak >= 3 || total >= 7) {
         status = 'Almost Premium';
         statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
+        console.log('Setting Almost Premium status');
     } else {
         status = 'Free Plan';
         statusStyle = 'background: #6c757d; color: white; border: none;';
+        console.log('Setting Free Plan status');
     }
     
+    console.log('Final subscription status:', status);
+    
+    // Update the subscription status badge
+    subscriptionStatus.innerHTML = '';
     subscriptionStatus.textContent = status;
     subscriptionStatus.className = 'badge px-3 py-2';
     subscriptionStatus.style.cssText = statusStyle;
+    
+    // Force visual update
+    subscriptionStatus.style.display = 'none';
+    subscriptionStatus.offsetHeight; // trigger reflow
+    subscriptionStatus.style.display = 'inline-block';
 }
 
 // Load popular activities
