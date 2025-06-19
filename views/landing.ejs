@@ -131,6 +131,18 @@
         .form-floating .form-control::placeholder {
             color: transparent;
         }
+        
+        /* Dot animations for landing page */
+        @keyframes dotPulse {
+            0%, 100% { 
+                transform: scale(1) translateY(0px); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.15) translateY(-2px); 
+                opacity: 0.85; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -184,16 +196,39 @@
                             </div>
                         </div>
                         
-                        <!-- Social Proof -->
-                        <div class="d-flex align-items-center opacity-75">
-                            <div class="me-3">
-                                <div class="d-flex">
-                                    <div class="bg-warning rounded-circle me-1" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
-                                    <div class="bg-success rounded-circle me-1" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
-                                    <div class="bg-info rounded-circle" style="width: 8px; height: 8px; transform: translateY(8px);"></div>
-                                </div>
+                        <!-- Target Audience with Centered Dots -->
+                        <div class="text-center opacity-90">
+                            <!-- Centered Dots Above Text -->
+                            <div class="d-flex justify-content-center align-items-center mb-3" style="gap: 16px;">
+                                <div class="rounded-circle" style="
+                                    width: 14px; 
+                                    height: 14px; 
+                                    background: linear-gradient(135deg, #ffd700, #ffed4e); 
+                                    box-shadow: 0 3px 12px rgba(255,215,0,0.5);
+                                    animation: dotPulse 2s infinite;
+                                    animation-delay: 0s;
+                                "></div>
+                                <div class="rounded-circle" style="
+                                    width: 14px; 
+                                    height: 14px; 
+                                    background: linear-gradient(135deg, #4ecdc4, #44a08d); 
+                                    box-shadow: 0 3px 12px rgba(78,205,196,0.5);
+                                    animation: dotPulse 2s infinite;
+                                    animation-delay: 0.4s;
+                                "></div>
+                                <div class="rounded-circle" style="
+                                    width: 14px; 
+                                    height: 14px; 
+                                    background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+                                    box-shadow: 0 3px 12px rgba(155,89,182,0.5);
+                                    animation: dotPulse 2s infinite;
+                                    animation-delay: 0.8s;
+                                "></div>
                             </div>
-                            <small class="fw-semibold">Perfect for Fitness Beginners • Busy Professionals • Coaching Clients</small>
+                            <!-- Text Below Dots -->
+                            <p class="fw-semibold mb-0" style="font-size: 15px;">
+                                Perfect for Fitness Beginners • Busy Professionals • Coaching Clients
+                            </p>
                         </div>
                     </div>
                 </div>
