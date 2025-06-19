@@ -175,7 +175,9 @@
                     return { ...user, stats: null };
                 }));
 
-                usersWithProgress.forEach(user => {
+                usersWithProgress.forEach((user, index) => {
+                    console.log(`Rendering user ${index + 1}:`, user.email, user.role);
+                    
                     let progressDisplay = '';
                     if (user.stats) {
                         const achievementLevel = getAchievementLevel(user.stats.totalActivities);
@@ -199,28 +201,29 @@
                         progressDisplay = '<span class="text-muted small">Admin User</span>';
                     }
 
-                    const row = `
-                        <tr>
-                            <td>${user.email}</td>
-                            <td>${user.firstName || ''} ${user.lastName || ''}</td>
-                            <td>
-                                <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
-                                    <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
-                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                                </select>
-                            </td>
-                            <td>${progressDisplay}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.email}</td>
+                        <td>${user.firstName || ''} ${user.lastName || ''}</td>
+                        <td>
+                            <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
+                                <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
+                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </td>
+                        <td>${progressDisplay}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     `;
-                    tbody.innerHTML += row;
+                    tbody.appendChild(row);
                 });
             } catch (error) {
                 console.error('Error loading users:', error);
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading users. Please refresh the page.</td></tr>';
             }
         }
 
