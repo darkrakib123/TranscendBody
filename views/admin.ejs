@@ -55,8 +55,8 @@
                                     <tr>
                                         <th>Email</th>
                                         <th>Name</th>
-                                        <th>Role</th>
                                         <th>Progress</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -282,8 +282,12 @@
                             statusContent = 'earned';
                         } else if (user.email === 'b@demo.com') {
                             displayName = 'Alex';
+                            progressContent = 'beginner';
+                            statusContent = 'free';
                         } else if (user.email === 'i@demo.com') {
                             displayName = 'Jordan';
+                            progressContent = 'intermediate';
+                            statusContent = 'almost';
                         }
 
                         tableHTML += `
