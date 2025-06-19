@@ -145,91 +145,99 @@
     <script>
         // Load users with their progress stats
         async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading users...</td></tr>';
+            
             try {
-                console.log('Loading users...');
-                const response = await fetch('/api/admin/users');
+                console.log('Starting user load...');
                 
+                // Fetch users
+                const response = await fetch('/api/admin/users');
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`Failed to fetch users: ${response.status}`);
                 }
                 
                 const users = await response.json();
-                console.log('Loaded users:', users.length, users);
+                console.log(`Fetched ${users.length} users successfully`);
                 
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '';
+                // Simple rendering without complex progress loading for now
+                let tableHTML = '';
                 
-                // Load progress data for each client user
-                const usersWithProgress = await Promise.all(users.map(async user => {
-                    if (user.role === 'client') {
-                        try {
-                            const statsResponse = await fetch(`/api/admin/user-stats/${user.id}`);
-                            if (statsResponse.ok) {
-                                const stats = await statsResponse.json();
-                                return { ...user, stats };
-                            }
-                        } catch (error) {
-                            console.error(`Error loading stats for ${user.email}:`, error);
-                        }
-                    }
-                    return { ...user, stats: null };
-                }));
-
-                // Build all rows at once using innerHTML for better performance
-                let allRowsHTML = '';
-                
-                usersWithProgress.forEach((user, index) => {
-                    console.log(`Processing user ${index + 1}:`, user.email, user.role);
+                for (let i = 0; i < users.length; i++) {
+                    const user = users[i];
+                    console.log(`Rendering user ${i + 1}: ${user.email} (${user.role})`);
                     
-                    let progressDisplay = '';
-                    if (user.stats) {
-                        const achievementLevel = getAchievementLevel(user.stats.totalActivities);
-                        const achievementColor = getAchievementColor(achievementLevel);
-                        const subscriptionStatus = getSubscriptionStatus(user.stats.currentStreak, user.stats.totalActivities);
-                        progressDisplay = `
-                            <div class="progress-summary">
-                                <div class="badge" style="background: ${achievementColor}; color: white; font-size: 10px; margin-bottom: 2px;">
-                                    ${achievementLevel}
-                                </div>
-                                <div class="badge ${subscriptionStatus.class}" style="font-size: 9px; margin-bottom: 2px;">
-                                    ${subscriptionStatus.text}
-                                </div>
-                                <div style="font-size: 11px; color: #666;">
-                                    ${user.stats.currentStreak} day streak<br>
-                                    ${user.stats.totalActivities} completed
-                                </div>
-                            </div>
+                    try {
+                        let progressDisplay = '<span class="text-muted small">Loading...</span>';
+                        
+                        // Only load stats for client users
+                        if (user.role === 'client') {
+                            try {
+                                const statsResponse = await fetch(`/api/admin/user-stats/${user.id}`);
+                                if (statsResponse.ok) {
+                                    const stats = await statsResponse.json();
+                                    const level = getAchievementLevel(stats.totalActivities);
+                                    const status = getSubscriptionStatus(stats.currentStreak, stats.totalActivities);
+                                    
+                                    progressDisplay = `
+                                        <div style="font-size: 11px;">
+                                            <div class="badge bg-primary" style="font-size: 9px;">${level}</div>
+                                            <div class="badge ${status.class}" style="font-size: 9px;">${status.text}</div>
+                                            <div class="text-muted">${stats.currentStreak} day streak, ${stats.totalActivities} total</div>
+                                        </div>
+                                    `;
+                                }
+                            } catch (statsError) {
+                                console.warn(`Stats error for ${user.email}:`, statsError);
+                                progressDisplay = '<span class="text-muted small">Error loading stats</span>';
+                            }
+                        } else {
+                            progressDisplay = '<span class="text-muted small">Admin User</span>';
+                        }
+                        
+                        tableHTML += `
+                            <tr>
+                                <td>${user.email || 'No email'}</td>
+                                <td>${(user.firstName || '') + ' ' + (user.lastName || '')}</td>
+                                <td>
+                                    <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
+                                        <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
+                                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                    </select>
+                                </td>
+                                <td>${progressDisplay}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
                         `;
-                    } else {
-                        progressDisplay = '<span class="text-muted small">Admin User</span>';
+                    } catch (renderError) {
+                        console.error(`Error rendering user ${user.email}:`, renderError);
+                        tableHTML += `
+                            <tr>
+                                <td>${user.email || 'Error'}</td>
+                                <td colspan="4" class="text-danger">Error rendering user data</td>
+                            </tr>
+                        `;
                     }
-
-                    allRowsHTML += `
-                        <tr>
-                            <td>${user.email}</td>
-                            <td>${user.firstName || ''} ${user.lastName || ''}</td>
-                            <td>
-                                <select class="form-select form-select-sm" onchange="updateUserRole('${user.id}', this.value)">
-                                    <option value="client" ${user.role === 'client' ? 'selected' : ''}>Client</option>
-                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                                </select>
-                            </td>
-                            <td>${progressDisplay}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
+                }
                 
-                console.log('Setting innerHTML for', usersWithProgress.length, 'users');
-                tbody.innerHTML = allRowsHTML;
+                console.log(`Successfully built HTML for ${users.length} users`);
+                tbody.innerHTML = tableHTML;
+                console.log('Table updated successfully');
+                
             } catch (error) {
-                console.error('Error loading users:', error);
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading users. Please refresh the page.</td></tr>';
+                console.error('Critical error in loadUsers:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-danger">
+                            Failed to load users: ${error.message}
+                            <br><button class="btn btn-sm btn-primary mt-2" onclick="loadUsers()">Retry</button>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
