@@ -648,49 +648,47 @@ function applyBeginnerTheme() {
     }
 }
 
-// Update subscription status based on stats
+// Update subscription status based on stats - FIXED VERSION
 function updateSubscriptionStatus(stats) {
-    const subscriptionStatus = document.getElementById('subscriptionStatus');
-    if (!subscriptionStatus) {
+    console.log('NEW VERSION - updateSubscriptionStatus called with:', stats);
+    
+    const subscriptionBadge = document.getElementById('subscriptionStatus');
+    if (!subscriptionBadge) {
         console.error('subscriptionStatus element not found');
         return;
     }
     
-    const streak = stats.currentStreak || 0;
-    const total = stats.totalActivities || 0;
+    const userStreak = stats.currentStreak || 0;
+    const userTotal = stats.totalActivities || 0;
     
-    console.log('UpdateSubscriptionStatus called - streak:', streak, 'total:', total);
+    console.log('NEW VERSION - Processing subscription - streak:', userStreak, 'total:', userTotal);
     
-    let status = 'Free Plan';
-    let statusStyle = '';
+    let planStatus = 'Free Plan';
+    let badgeStyle = 'background: #6c757d; color: white; border: none;';
     
-    // Determine subscription status - must meet BOTH criteria for each tier
-    if (streak >= 7 && total >= 15) {
-        status = 'Premium Earned';
-        statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        console.log('Setting Premium Earned status - streak:', streak, 'total:', total);
-    } else if (streak >= 5 && total >= 10) {
-        status = 'Almost Premium';
-        statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
-        console.log('Setting Almost Premium status - streak:', streak, 'total:', total);
+    // Fixed logic: Must meet BOTH conditions for each tier
+    if (userStreak >= 7 && userTotal >= 15) {
+        planStatus = 'Premium Earned';
+        badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
+        console.log('NEW VERSION - PREMIUM EARNED - streak:', userStreak, 'total:', userTotal);
+    } else if (userStreak >= 5 && userTotal >= 10) {
+        planStatus = 'Almost Premium';
+        badgeStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
+        console.log('NEW VERSION - ALMOST PREMIUM - streak:', userStreak, 'total:', userTotal);
     } else {
-        status = 'Free Plan';
-        statusStyle = 'background: #6c757d; color: white; border: none;';
-        console.log('Setting Free Plan status - streak:', streak, 'total:', total);
+        planStatus = 'Free Plan';
+        badgeStyle = 'background: #6c757d; color: white; border: none;';
+        console.log('NEW VERSION - FREE PLAN - streak:', userStreak, 'total:', userTotal);
     }
     
-    console.log('Final subscription status:', status);
+    console.log('NEW VERSION - Final result:', planStatus);
     
-    // Update the subscription status badge
-    subscriptionStatus.innerHTML = '';
-    subscriptionStatus.textContent = status;
-    subscriptionStatus.className = 'badge px-3 py-2';
-    subscriptionStatus.style.cssText = statusStyle;
+    // Update the subscription badge
+    subscriptionBadge.textContent = planStatus;
+    subscriptionBadge.className = 'badge px-3 py-2';
+    subscriptionBadge.style.cssText = badgeStyle;
     
-    // Force visual update
-    subscriptionStatus.style.display = 'none';
-    subscriptionStatus.offsetHeight; // trigger reflow
-    subscriptionStatus.style.display = 'inline-block';
+    console.log('NEW VERSION - Subscription status updated to:', planStatus);
 }
 
 // Load popular activities
@@ -756,4 +754,5 @@ function initializeFormValidation() {
             }
         });
     }
-}
+}// Cache buster: 
+Thu Jun 19 06:26:33 AM UTC 2025
