@@ -863,11 +863,19 @@
                 });
             }, 100);
             
-            // Update achievement icon
+            // Update achievement icon with gold colors
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
                 achievementIcon.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)';
+                achievementIcon.style.border = '4px solid #ffcc00';
             }
+            
+            // Update circular progress indicators to gold
+            const circularProgress = document.querySelectorAll('.circular-progress, .progress-circle');
+            circularProgress.forEach(circle => {
+                circle.style.setProperty('background', 'linear-gradient(135deg, #ffd700 0%, #ffcc00 100%)', 'important');
+                circle.style.setProperty('border-color', '#ffd700', 'important');
+            });
         }
 
         function applyIntermediateTheme() {
@@ -902,8 +910,8 @@
             // Update circular progress indicators to silver
             const circularProgress = document.querySelectorAll('.circular-progress, .progress-circle');
             circularProgress.forEach(circle => {
-                circle.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
-                circle.style.borderColor = '#c0c0c0';
+                circle.style.setProperty('background', 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)', 'important');
+                circle.style.setProperty('border-color', '#c0c0c0', 'important');
             });
         }
 
@@ -933,8 +941,8 @@
             // Update circular progress indicators to bronze
             const circularProgress = document.querySelectorAll('.circular-progress, .progress-circle');
             circularProgress.forEach(circle => {
-                circle.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
-                circle.style.borderColor = '#cd7f32';
+                circle.style.setProperty('background', 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)', 'important');
+                circle.style.setProperty('border-color', '#cd7f32', 'important');
             });
         }
 
