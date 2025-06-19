@@ -892,11 +892,19 @@
                 bar.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
             });
             
-            // Update achievement icon
+            // Update achievement icon with silver colors
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
                 achievementIcon.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
+                achievementIcon.style.border = '4px solid #a8a8a8';
             }
+            
+            // Update circular progress indicators to silver
+            const circularProgress = document.querySelectorAll('.circular-progress, .progress-circle');
+            circularProgress.forEach(circle => {
+                circle.style.background = 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)';
+                circle.style.borderColor = '#c0c0c0';
+            });
         }
 
         function applyBeginnerTheme() {
@@ -915,11 +923,19 @@
                 bar.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
             });
             
-            // Update achievement icon
+            // Update achievement icon with bronze colors
             const achievementIcon = document.querySelector('.achievement-icon-large');
             if (achievementIcon) {
                 achievementIcon.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
+                achievementIcon.style.border = '4px solid #b8722c';
             }
+            
+            // Update circular progress indicators to bronze
+            const circularProgress = document.querySelectorAll('.circular-progress, .progress-circle');
+            circularProgress.forEach(circle => {
+                circle.style.background = 'linear-gradient(135deg, #cd7f32 0%, #b8722c 100%)';
+                circle.style.borderColor = '#cd7f32';
+            });
         }
 
         function getAchievementLevel(totalActivities) {
