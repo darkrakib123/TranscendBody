@@ -1261,14 +1261,14 @@
             console.log('  Premium: streak>=7 && total>=15 =', streak >= 7, '&&', totalActivities >= 15, '=', streak >= 7 && totalActivities >= 15);
             console.log('  Almost: streak>=5 && total>=10 =', streak >= 5, '&&', totalActivities >= 10, '=', streak >= 5 && totalActivities >= 10);
             
-            // Premium logic: BOTH 7+ day streak AND 15+ total activities  
-            if (streak >= 7 && totalActivities >= 15) {
+            // Premium logic: BOTH 7+ day streak AND 50+ total activities (Master level)
+            if (streak >= 7 && totalActivities >= 50) {
                 status = 'Premium Earned';
                 statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
                 console.log('TAKING Premium Earned path - streak:', streak, 'total:', totalActivities);
             } 
-            // Almost Premium: BOTH 5+ day streak AND 10+ total activities
-            else if (streak >= 5 && totalActivities >= 10) {
+            // Almost Premium: BOTH 5+ day streak AND 25+ total activities (Intermediate level)
+            else if (streak >= 5 && totalActivities >= 25) {
                 status = 'Almost Premium';
                 statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
                 console.log('TAKING Almost Premium path - streak:', streak, 'total:', totalActivities);

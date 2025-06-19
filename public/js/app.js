@@ -667,11 +667,11 @@ function updateSubscriptionStatus(stats) {
     let badgeStyle = 'background: #6c757d; color: white; border: none;';
     
     // Fixed logic: Must meet BOTH conditions for each tier
-    if (userStreak >= 7 && userTotal >= 15) {
+    if (userStreak >= 7 && userTotal >= 50) {
         planStatus = 'Premium Earned';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
         console.log('NEW VERSION - PREMIUM EARNED - streak:', userStreak, 'total:', userTotal);
-    } else if (userStreak >= 5 && userTotal >= 10) {
+    } else if (userStreak >= 5 && userTotal >= 25) {
         planStatus = 'Almost Premium';
         badgeStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
         console.log('NEW VERSION - ALMOST PREMIUM - streak:', userStreak, 'total:', userTotal);
