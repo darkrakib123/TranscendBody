@@ -320,7 +320,7 @@
                                     </div>
                                 </div>
                                 <div class="text-end">
-                                    <div class="display-6 fw-bold" id="currentStreak">21</div>
+                                    <div class="display-3 fw-bold" id="currentStreak" style="font-size: 4rem; line-height: 1;">21</div>
                                 </div>
                             </div>
                             <div class="progress mt-3" style="height: 6px; background: rgba(255,255,255,0.2);">
@@ -331,29 +331,33 @@
                         
                         <!-- This Week & Total Stats in Row -->
                         <div class="row g-3 mb-3">
-                            <div class="col-6">
-                                <div class="stat-card p-3 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 12px; height: 140px; box-shadow: 0 6px 20px rgba(17,153,142,0.3);">
+                            <div class="col-12 col-sm-6">
+                                <div class="stat-card p-4 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 12px; min-height: 160px; box-shadow: 0 6px 20px rgba(17,153,142,0.3);">
                                     <div>
-                                        <div class="stat-icon mb-2" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-chart-line"></i>
+                                        <div class="stat-icon mb-3" style="width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-chart-line fa-lg"></i>
                                         </div>
-                                        <h6 class="fw-bold mb-1">This Week</h6>
-                                        <p class="mb-0 opacity-90" style="font-size: 12px;">Average completion</p>
+                                        <h6 class="fw-bold mb-2">This Week</h6>
+                                        <p class="mb-0 opacity-90" style="font-size: 13px;">Average completion</p>
                                     </div>
-                                    <div class="h4 fw-bold mb-0 text-end" id="weeklyAverage">100%</div>
+                                    <div class="text-center mt-3">
+                                        <div class="display-4 fw-bold mb-0" id="weeklyAverage" style="font-size: 3.5rem; line-height: 1;">100%</div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="col-6">
-                                <div class="stat-card p-3 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border-radius: 12px; height: 140px; box-shadow: 0 6px 20px rgba(255,154,158,0.3);">
+                            <div class="col-12 col-sm-6">
+                                <div class="stat-card p-4 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border-radius: 12px; min-height: 160px; box-shadow: 0 6px 20px rgba(255,154,158,0.3);">
                                     <div>
-                                        <div class="stat-icon mb-2" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-trophy"></i>
+                                        <div class="stat-icon mb-3" style="width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-trophy fa-lg"></i>
                                         </div>
-                                        <h6 class="fw-bold mb-1">Completed</h6>
-                                        <p class="mb-0 opacity-90" style="font-size: 12px;">Total activities</p>
+                                        <h6 class="fw-bold mb-2">Completed</h6>
+                                        <p class="mb-0 opacity-90" style="font-size: 13px;">Total activities</p>
                                     </div>
-                                    <div class="h4 fw-bold mb-0 text-end" id="totalActivities">105</div>
+                                    <div class="text-center mt-3">
+                                        <div class="display-4 fw-bold mb-0" id="totalActivities" style="font-size: 3.5rem; line-height: 1;">105</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -365,7 +369,7 @@
                                     <i class="fas fa-medal" style="font-size: 24px; color: white;"></i>
                                 </div>
                                 <h6 class="fw-bold mb-3" style="color: #495057;">Achievement Level</h6>
-                                <span class="badge achievement-badge-large" id="achievementBadge" style="font-size: 16px; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">Master</span>
+                                <span class="badge achievement-badge-large" id="achievementBadge" style="font-size: 18px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">Master</span>
                                 <p class="text-muted mt-3 mb-0" style="font-size: 12px;">Keep completing activities to level up!</p>
                             </div>
                         </div>
