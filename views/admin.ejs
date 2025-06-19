@@ -43,7 +43,7 @@
         <!-- Tab Content -->
         <div>
             <!-- Users Section -->
-            <div id="usersSection" style="display: none;">
+            <div id="usersSection" style="display: block;">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">User Management</h5>
@@ -145,19 +145,28 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tab = urlParams.get('tab');
             
+            console.log('URL tab parameter:', tab);
+            
             if (tab === 'activities') {
+                console.log('Loading activities tab');
                 showActivitiesTab();
             } else {
+                console.log('Loading users tab (default)');
                 showUsersTab(); // Default to users tab
             }
         });
 
         function showUsersTab() {
-            document.getElementById('usersTab').classList.remove('btn-outline-primary');
-            document.getElementById('usersTab').classList.add('btn-primary');
-            document.getElementById('activitiesTab').classList.remove('btn-secondary');
-            document.getElementById('activitiesTab').classList.add('btn-outline-secondary');
+            console.log('Showing users tab');
             
+            // Update button styles
+            const usersTab = document.getElementById('usersTab');
+            const activitiesTab = document.getElementById('activitiesTab');
+            
+            usersTab.className = 'btn btn-primary me-3';
+            activitiesTab.className = 'btn btn-outline-secondary';
+            
+            // Show/hide sections
             document.getElementById('usersSection').style.display = 'block';
             document.getElementById('activitiesSection').style.display = 'none';
             
@@ -170,11 +179,16 @@
         }
 
         function showActivitiesTab() {
-            document.getElementById('activitiesTab').classList.remove('btn-outline-secondary');
-            document.getElementById('activitiesTab').classList.add('btn-secondary');
-            document.getElementById('usersTab').classList.remove('btn-primary');
-            document.getElementById('usersTab').classList.add('btn-outline-primary');
+            console.log('Showing activities tab');
             
+            // Update button styles
+            const usersTab = document.getElementById('usersTab');
+            const activitiesTab = document.getElementById('activitiesTab');
+            
+            activitiesTab.className = 'btn btn-secondary';
+            usersTab.className = 'btn btn-outline-primary me-3';
+            
+            // Show/hide sections
             document.getElementById('activitiesSection').style.display = 'block';
             document.getElementById('usersSection').style.display = 'none';
             
