@@ -450,9 +450,9 @@ function updateStatsDisplay(stats) {
         };
     }
     
-    // Update streak value and progress
-    const streakValue = document.getElementById('streakValue');
-    const streakProgress = document.getElementById('streakProgress');
+    // Update streak value and progress - using correct IDs from dashboard
+    const streakValue = document.getElementById('currentStreak');
+    const streakProgress = document.getElementById('streakBar');
     const streakMessage = document.getElementById('streakMessage');
     
     if (streakValue) {
@@ -477,14 +477,14 @@ function updateStatsDisplay(stats) {
         }
     }
     
-    // Update weekly average
-    const weeklyValue = document.getElementById('weeklyValue');
+    // Update weekly average - using correct ID
+    const weeklyValue = document.getElementById('weeklyAverage');
     if (weeklyValue) {
         weeklyValue.textContent = `${stats.weeklyAverage || 0}%`;
     }
     
-    // Update total activities
-    const totalValue = document.getElementById('totalValue');
+    // Update total activities - using correct ID
+    const totalValue = document.getElementById('totalActivities');
     if (totalValue) {
         totalValue.textContent = stats.totalActivities || 0;
     }
