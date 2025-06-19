@@ -1127,8 +1127,8 @@
         }
 
         function getSubscriptionStatus(streak, totalActivities) {
-            if (streak >= 7 || totalActivities >= 10) return 'Premium Earned';
-            if (streak >= 3 || totalActivities >= 7) return 'Almost Premium';
+            if (streak >= 7 && totalActivities >= 15) return 'Premium Earned';
+            if (streak >= 5 && totalActivities >= 10) return 'Almost Premium';
             return 'Free Plan';
         }
 
@@ -1250,21 +1250,23 @@
             let status = 'Free Plan';
             let statusStyle = 'background: #6c757d; color: white; border: none;';
             
-            // Premium logic: 7+ day streak OR 10+ total activities
-            if (streak >= 7 || totalActivities >= 10) {
+            // Premium logic: BOTH 7+ day streak AND 15+ total activities
+            if (streak >= 7 && totalActivities >= 15) {
                 status = 'Premium Earned';
                 statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-                console.log('Setting Premium Earned status');
+                console.log('FIXED - Setting Premium Earned status - streak:', streak, 'total:', totalActivities);
             } 
-            // Almost Premium: 3+ day streak OR 7+ total activities
-            else if (streak >= 3 || totalActivities >= 7) {
+            // Almost Premium: BOTH 5+ day streak AND 10+ total activities
+            else if (streak >= 5 && totalActivities >= 10) {
                 status = 'Almost Premium';
                 statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
-                console.log('Setting Almost Premium status');
+                console.log('FIXED - Setting Almost Premium status - streak:', streak, 'total:', totalActivities);
             } 
             // Free Plan: Less than thresholds above
             else {
-                console.log('Setting Free Plan status');
+                status = 'Free Plan';
+                statusStyle = 'background: #6c757d; color: white; border: none;';
+                console.log('FIXED - Setting Free Plan status - streak:', streak, 'total:', totalActivities);
             }
             
             statusElement.textContent = status;
