@@ -663,19 +663,19 @@ function updateSubscriptionStatus(stats) {
     let status = 'Free Plan';
     let statusStyle = '';
     
-    // Determine subscription status
+    // Determine subscription status - must meet BOTH criteria for each tier
     if (streak >= 7 && total >= 15) {
         status = 'Premium Earned';
         statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        console.log('Setting Premium Earned status');
+        console.log('Setting Premium Earned status - streak:', streak, 'total:', total);
     } else if (streak >= 5 && total >= 10) {
         status = 'Almost Premium';
         statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
-        console.log('Setting Almost Premium status');
+        console.log('Setting Almost Premium status - streak:', streak, 'total:', total);
     } else {
         status = 'Free Plan';
         statusStyle = 'background: #6c757d; color: white; border: none;';
-        console.log('Setting Free Plan status');
+        console.log('Setting Free Plan status - streak:', streak, 'total:', total);
     }
     
     console.log('Final subscription status:', status);
