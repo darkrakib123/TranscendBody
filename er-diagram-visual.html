@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcend Your Body - ER Diagram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 10px 0 0 0;
+        }
+        
+        .diagram-container {
+            position: relative;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 50px;
+            margin: 20px 0;
+            min-height: 900px;
+            overflow: hidden;
+        }
+        
+        .entity {
+            position: absolute;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            min-width: 260px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 11px;
+        }
+        
+        .entity-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 6px 6px 0 0;
+            font-size: 14px;
+        }
+        
+        .entity-content {
+            padding: 8px;
+        }
+        
+        .field {
+            padding: 4px 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .field:last-child {
+            border-bottom: none;
+        }
+        
+        .field-name {
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+        }
+        
+        .field-type {
+            color: #666;
+            font-size: 10px;
+            margin-left: 10px;
+        }
+        
+        .primary-key {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .foreign-key {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .progress-field {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .relationship {
+            position: absolute;
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .relationship-label {
+            position: absolute;
+            background: white;
+            padding: 3px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 11px;
+            z-index: 10;
+        }
+        
+        .legend h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        
+        .progress-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #fff;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 11px;
+            max-width: 320px;
+            z-index: 10;
+        }
+        
+        .progress-box h3 {
+            margin: 0 0 10px 0;
+            color: #28a745;
+            font-size: 13px;
+        }
+        
+        .calculated-attr {
+            background: #e8f5e8;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+            font-size: 10px;
+        }
+
+        /* Entity positions */
+        .users { top: 120px; left: 80px; }
+        .sessions { top: 120px; left: 380px; }
+        .activities { top: 120px; left: 680px; }
+        .daily-trackers { top: 420px; left: 280px; }
+        .tracker-entries { top: 680px; left: 580px; }
+        
+        .business-logic {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .business-logic h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .logic-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            font-size: 12px;
+        }
+        
+        .logic-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .logic-section h4 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Transcend Your Body - Daily Tracker</h1>
+            <p>Complete Entity Relationship Diagram with Progress Tracking Attributes</p>
+        </div>
+        
+        <div class="progress-box">
+            <h3>Progress Tracking System</h3>
+            <div class="calculated-attr"><strong>Current Streak:</strong> Consecutive days with completed activities</div>
+            <div class="calculated-attr"><strong>Weekly Average:</strong> Avg completion % over last 7 days</div>
+            <div class="calculated-attr"><strong>Total Activities:</strong> Total completed activities count</div>
+            <div class="calculated-attr"><strong>Achievement Level:</strong> Beginner → Starter → Intermediate → Advanced → Expert → Master</div>
+            <div class="calculated-attr"><strong>Subscription Status:</strong> Free Plan → Almost Premium → Premium Earned</div>
+            <div class="calculated-attr"><strong>Completion Rate:</strong> Daily progress percentage stored in daily_trackers</div>
+        </div>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color primary-key" style="background-color: #e74c3c;"></div>
+                Primary Key
+            </div>
+            <div class="legend-item">
+                <div class="legend-color foreign-key" style="background-color: #3498db;"></div>
+                Foreign Key
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #28a745;"></div>
+                Progress Field
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f39c12;"></div>
+                Subscription Field
+            </div>
+        </div>
+        
+        <div class="diagram-container">
+            <!-- Users Entity -->
+            <div class="entity users">
+                <div class="entity-header">👥 users</div>
+                <div class="entity-content">
+                    <div class="field">
+                        <span class="field-name primary-key">id</span>
+                        <span class="field-type">VARCHAR (PK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">email</span>
+                        <span class="field-type">VARCHAR UNIQUE</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">password</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">first_name</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">last_name</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">profile_image_url</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">role</span>
+                        <span class="field-type">VARCHAR (user/admin)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name" style="color: #f39c12; font-weight: bold;">subscription_status</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name" style="color: #f39c12; font-weight: bold;">premium_until</span>
+                        <span class="field-type">DATE</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name" style="color: #f39c12; font-weight: bold;">streak_target</span>
+                        <span class="field-type">INTEGER</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">created_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">updated_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sessions Entity -->
+            <div class="entity sessions">
+                <div class="entity-header">🔐 sessions</div>
+                <div class="entity-content">
+                    <div class="field">
+                        <span class="field-name primary-key">sid</span>
+                        <span class="field-type">VARCHAR (PK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">sess</span>
+                        <span class="field-type">JSONB</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">expire</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Activities Entity -->
+            <div class="entity activities">
+                <div class="entity-header">🏃 activities</div>
+                <div class="entity-content">
+                    <div class="field">
+                        <span class="field-name primary-key">id</span>
+                        <span class="field-type">SERIAL (PK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">title</span>
+                        <span class="field-type">TEXT</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">description</span>
+                        <span class="field-type">TEXT</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">category</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">is_custom</span>
+                        <span class="field-type">BOOLEAN</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name foreign-key">created_by</span>
+                        <span class="field-type">VARCHAR (FK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">created_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daily Trackers Entity -->
+            <div class="entity daily-trackers">
+                <div class="entity-header">📅 daily_trackers</div>
+                <div class="entity-content">
+                    <div class="field">
+                        <span class="field-name primary-key">id</span>
+                        <span class="field-type">SERIAL (PK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name foreign-key">user_id</span>
+                        <span class="field-type">VARCHAR (FK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">date</span>
+                        <span class="field-type">DATE</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name progress-field">completion_rate</span>
+                        <span class="field-type">INTEGER (%)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">created_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tracker Entries Entity -->
+            <div class="entity tracker-entries">
+                <div class="entity-header">✅ tracker_entries</div>
+                <div class="entity-content">
+                    <div class="field">
+                        <span class="field-name primary-key">id</span>
+                        <span class="field-type">SERIAL (PK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name foreign-key">tracker_id</span>
+                        <span class="field-type">INTEGER (FK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name foreign-key">activity_id</span>
+                        <span class="field-type">INTEGER (FK)</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">time_slot</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name progress-field">status</span>
+                        <span class="field-type">VARCHAR</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">created_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name">updated_at</span>
+                        <span class="field-type">TIMESTAMP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SVG for relationships -->
+            <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                    </marker>
+                </defs>
+                
+                <!-- Users to Daily Trackers -->
+                <path d="M 200 350 L 200 390 L 350 390 L 350 420" class="relationship" />
+                
+                <!-- Users to Activities (created_by) -->
+                <path d="M 340 200 L 680 200" class="relationship" />
+                
+                <!-- Daily Trackers to Tracker Entries -->
+                <path d="M 430 500 L 430 640 L 650 640 L 650 680" class="relationship" />
+                
+                <!-- Activities to Tracker Entries -->
+                <path d="M 780 280 L 780 620 L 750 620 L 750 680" class="relationship" />
+            </svg>
+            
+            <!-- Relationship labels -->
+            <div class="relationship-label" style="top: 370px; left: 270px;">1:N</div>
+            <div class="relationship-label" style="top: 180px; left: 500px;">1:N (optional)</div>
+            <div class="relationship-label" style="top: 560px; left: 520px;">1:N</div>
+            <div class="relationship-label" style="top: 600px; left: 760px;">1:N</div>
+        </div>
+        
+        <div class="business-logic">
+            <h3>Progress Calculation & Business Logic</h3>
+            <div class="logic-grid">
+                <div class="logic-section">
+                    <h4>Achievement Levels (Based on Total Activities)</h4>
+                    • <strong>Beginner:</strong> 0 activities<br>
+                    • <strong>Starter:</strong> 1+ activities<br>
+                    • <strong>Intermediate:</strong> 10+ activities<br>
+                    • <strong>Advanced:</strong> 25+ activities<br>
+                    • <strong>Expert:</strong> 50+ activities<br>
+                    • <strong>Master:</strong> 100+ activities
+                </div>
+                <div class="logic-section">
+                    <h4>Subscription Tiers (Engagement-Based)</h4>
+                    • <strong>Free Plan:</strong> Default starting tier<br>
+                    • <strong>Almost Premium:</strong> 3+ day streak OR 7+ activities<br>
+                    • <strong>Premium Earned:</strong> 7+ day streak OR 10+ activities<br><br>
+                    <strong>Key Formula:</strong><br>
+                    completion_rate = (completed_entries / total_entries) × 100
+                </div>
+                <div class="logic-section">
+                    <h4>Streak Calculation</h4>
+                    Current streak is calculated by counting consecutive days with completed activities, working backwards from today using the daily_trackers table where completion_rate > 0.
+                </div>
+                <div class="logic-section">
+                    <h4>Daily Progress Flow</h4>
+                    1. User selects activities for time slots<br>
+                    2. tracker_entries created with "pending" status<br>
+                    3. User marks activities as "completed"<br>
+                    4. completion_rate recalculated in daily_trackers<br>
+                    5. Streaks and achievements updated dynamically
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

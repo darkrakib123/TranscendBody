@@ -1,4 +1,8 @@
-# Transcend Your Body - Daily Tracker ER Diagram
+# Transcend Your Body - Daily Tracker: Entity Relationship Diagram
+
+## Database Schema Overview
+
+This document outlines the complete database schema for the Transcend Your Body daily activity tracking application, including all entities, relationships, and business logic with progress tracking attributes.
 
 ## Database Schema and Relationships
 

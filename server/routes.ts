@@ -99,6 +99,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.render('admin', { title: 'Admin Panel' });
   });
 
+  // ER Diagram route
+  app.get('/er-diagram', requireAuth, (req, res) => {
+    res.sendFile('er-diagram-visual.html', { root: '.' });
+  });
+
   // Admin API routes
   app.get('/api/admin/users', requireAdmin, async (req, res) => {
     try {
