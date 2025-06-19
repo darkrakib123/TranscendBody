@@ -520,6 +520,8 @@ function updateAchievementLevel(stats) {
     
     achievementBadge.textContent = level;
     achievementBadge.className = `badge achievement-badge-large ${badgeClass}`;
+    achievementBadge.style.fontSize = '18px';
+    achievementBadge.style.padding = '12px 24px';
 }
 
 // Update subscription status based on stats
