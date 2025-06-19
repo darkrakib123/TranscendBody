@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import passport from 'passport';
 import bcrypt from 'bcrypt';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { storage } from "./storage";
 import { setupAuthentication, requireAuth, requireAdmin, setFlash } from "./auth";
 import { insertActivitySchema, insertTrackerEntrySchema, trackerEntries } from "@shared/schema";
@@ -15,7 +17,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve ER diagram
   app.get('/docs/er-diagram-visual.html', (req, res) => {
-    res.sendFile('er-diagram-visual.html', { root: './docs' });
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    res.sendFile(path.join(__dirname, '../docs/er-diagram-visual.html'));
   });
 
   // Main routes
