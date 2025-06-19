@@ -494,13 +494,13 @@ function updateAchievementLevel(stats) {
     let level = 'Beginner';
     let badgeClass = 'bg-secondary';
     
-    if (streak >= 30 || total >= 50) {
+    if (streak >= 21 || total >= 100) {
         level = 'Master';
         badgeClass = 'bg-warning text-dark';
-    } else if (streak >= 14 || total >= 25) {
+    } else if (streak >= 14 || total >= 50) {
         level = 'Advanced';
         badgeClass = 'bg-info';
-    } else if (streak >= 7 || total >= 10) {
+    } else if (streak >= 7 || total >= 25) {
         level = 'Intermediate';
         badgeClass = 'bg-success';
     }

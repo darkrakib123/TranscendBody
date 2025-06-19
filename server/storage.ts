@@ -218,8 +218,8 @@ export class DatabaseStorage implements IStorage {
       : 0;
 
     // Total completed activities
-    const totalActivities = await db
-      .select()
+    const totalActivitiesResult = await db
+      .select({ count: sql<number>`count(*)` })
       .from(trackerEntries)
       .innerJoin(dailyTrackers, eq(trackerEntries.trackerId, dailyTrackers.id))
       .where(and(
@@ -227,10 +227,12 @@ export class DatabaseStorage implements IStorage {
         eq(trackerEntries.status, "completed")
       ));
 
+    const totalActivities = totalActivitiesResult[0]?.count || 0;
+
     return {
       currentStreak,
       weeklyAverage,
-      totalActivities: totalActivities.length,
+      totalActivities,
     };
   }
 }
