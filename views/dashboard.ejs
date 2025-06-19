@@ -204,11 +204,8 @@
     <div class="dashboard-container">
         <!-- Header Section -->
         <div class="header-section position-relative">
-            <a href="/logout" class="logout-btn">
-                <i class="fas fa-sign-out-alt me-1"></i> Logout
-            </a>
             <div class="row align-items-center">
-                <div class="col-md-8">
+                <div class="col-md-7">
                     <h2 class="mb-1">Welcome back, <%= user.firstName || 'User' %>!</h2>
                     <p class="mb-0 opacity-75">Your Daily Activities - <span id="currentDate"></span></p>
                     <% if (user.role === 'admin') { %>
@@ -222,7 +219,7 @@
                         </div>
                     <% } %>
                 </div>
-                <div class="col-md-4 d-flex justify-content-end align-items-center pe-4">
+                <div class="col-md-3 d-flex justify-content-center align-items-center">
                     <div class="progress-circle-container" style="position: relative; width: 100px; height: 100px;">
                         <svg class="progress-circle-svg" width="100" height="100" style="transform: rotate(-90deg);">
                             <circle cx="50" cy="50" r="45" 
@@ -252,6 +249,11 @@
                             <div style="font-size: 10px; opacity: 0.9;">Complete</div>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-2 d-flex justify-content-end">
+                    <a href="/logout" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
                 </div>
             </div>
         </div>
