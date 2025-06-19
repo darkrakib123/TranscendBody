@@ -871,10 +871,17 @@
             console.log('Applying Intermediate theme (light pink) to dashboard');
             
             // Update main streak card
-            const streakCards = document.querySelectorAll('.streak-featured-card');
+            const streakCards = document.querySelectorAll('.streak-featured-card, .streak-card');
             streakCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)';
+                card.style.setProperty('background', 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)', 'important');
+                card.style.setProperty('box-shadow', '0 8px 24px rgba(255,107,150,0.3)', 'important');
             });
+            
+            // Also update by specific ID
+            const mainStreakCard = document.getElementById('mainStreakCard');
+            if (mainStreakCard) {
+                mainStreakCard.style.setProperty('background', 'linear-gradient(135deg, #ff6b96 0%, #ff8fb3 100%)', 'important');
+            }
             
             // Update progress bars
             const progressBars = document.querySelectorAll('.progress-bar');
@@ -1250,23 +1257,27 @@
             let status = 'Free Plan';
             let statusStyle = 'background: #6c757d; color: white; border: none;';
             
+            console.log('Checking conditions:');
+            console.log('  Premium: streak>=7 && total>=15 =', streak >= 7, '&&', totalActivities >= 15, '=', streak >= 7 && totalActivities >= 15);
+            console.log('  Almost: streak>=5 && total>=10 =', streak >= 5, '&&', totalActivities >= 10, '=', streak >= 5 && totalActivities >= 10);
+            
             // Premium logic: BOTH 7+ day streak AND 15+ total activities  
             if (streak >= 7 && totalActivities >= 15) {
                 status = 'Premium Earned';
                 statusStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-                console.log('FIXED - Setting Premium Earned status - streak:', streak, 'total:', totalActivities);
+                console.log('TAKING Premium Earned path - streak:', streak, 'total:', totalActivities);
             } 
             // Almost Premium: BOTH 5+ day streak AND 10+ total activities
             else if (streak >= 5 && totalActivities >= 10) {
                 status = 'Almost Premium';
                 statusStyle = 'background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%); color: white; border: none;';
-                console.log('FIXED - Setting Almost Premium status - streak:', streak, 'total:', totalActivities);
+                console.log('TAKING Almost Premium path - streak:', streak, 'total:', totalActivities);
             } 
             // Free Plan: Less than thresholds above
             else {
                 status = 'Free Plan';
                 statusStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-                console.log('FIXED - Setting Free Plan status - streak:', streak, 'total:', totalActivities);
+                console.log('TAKING Free Plan path - streak:', streak, 'total:', totalActivities);
             }
             
             statusElement.textContent = status;
