@@ -437,23 +437,99 @@ function updateProgressChart(percentage) {
 
 // Update stats display
 function updateStatsDisplay(stats) {
-    const elements = {
-        currentStreak: document.getElementById('currentStreak'),
-        weeklyAverage: document.getElementById('weeklyAverage'),
-        totalActivities: document.getElementById('totalActivities')
-    };
+    console.log('Updating stats display:', stats);
     
-    if (elements.currentStreak) {
-        elements.currentStreak.textContent = stats.currentStreak;
+    // Update streak value and progress
+    const streakValue = document.getElementById('streakValue');
+    const streakProgress = document.getElementById('streakProgress');
+    const streakMessage = document.getElementById('streakMessage');
+    
+    if (streakValue) {
+        streakValue.textContent = stats.currentStreak || 0;
     }
     
-    if (elements.weeklyAverage) {
-        elements.weeklyAverage.textContent = `${stats.weeklyAverage}%`;
+    if (streakProgress) {
+        const progressPercent = Math.min((stats.currentStreak || 0) * 10, 100);
+        streakProgress.style.width = `${progressPercent}%`;
     }
     
-    if (elements.totalActivities) {
-        elements.totalActivities.textContent = stats.totalActivities;
+    if (streakMessage) {
+        const streak = stats.currentStreak || 0;
+        if (streak === 0) {
+            streakMessage.textContent = 'Start your streak today!';
+        } else if (streak < 7) {
+            streakMessage.textContent = `${streak} days - keep going!`;
+        } else {
+            streakMessage.textContent = `${streak} days - incredible consistency!`;
+        }
     }
+    
+    // Update weekly average
+    const weeklyValue = document.getElementById('weeklyValue');
+    if (weeklyValue) {
+        weeklyValue.textContent = `${stats.weeklyAverage || 0}%`;
+    }
+    
+    // Update total activities
+    const totalValue = document.getElementById('totalValue');
+    if (totalValue) {
+        totalValue.textContent = stats.totalActivities || 0;
+    }
+    
+    // Update achievement level
+    updateAchievementLevel(stats);
+    
+    // Update subscription status
+    updateSubscriptionStatus(stats);
+}
+
+// Update achievement level based on stats
+function updateAchievementLevel(stats) {
+    const achievementBadge = document.getElementById('achievementBadge');
+    if (!achievementBadge) return;
+    
+    const streak = stats.currentStreak || 0;
+    const total = stats.totalActivities || 0;
+    
+    let level = 'Beginner';
+    let badgeClass = 'bg-secondary';
+    
+    if (streak >= 30 || total >= 50) {
+        level = 'Master';
+        badgeClass = 'bg-warning text-dark';
+    } else if (streak >= 14 || total >= 25) {
+        level = 'Advanced';
+        badgeClass = 'bg-info';
+    } else if (streak >= 7 || total >= 10) {
+        level = 'Intermediate';
+        badgeClass = 'bg-success';
+    }
+    
+    achievementBadge.textContent = level;
+    achievementBadge.className = `badge achievement-badge-large ${badgeClass}`;
+}
+
+// Update subscription status based on stats
+function updateSubscriptionStatus(stats) {
+    const subscriptionStatus = document.getElementById('subscriptionStatus');
+    if (!subscriptionStatus) return;
+    
+    const streak = stats.currentStreak || 0;
+    const total = stats.totalActivities || 0;
+    
+    let status = 'Free Plan';
+    let badgeClass = 'bg-secondary';
+    
+    if (streak >= 7 || total >= 10) {
+        status = 'Premium Earned';
+        badgeClass = 'bg-warning text-dark';
+    } else if (streak >= 3 || total >= 7) {
+        status = 'Almost Premium';
+        badgeClass = 'bg-success';
+    }
+    
+    subscriptionStatus.textContent = status;
+    subscriptionStatus.className = `badge ${badgeClass} px-3 py-2`;
 }
 
 // Load popular activities
