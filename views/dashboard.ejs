@@ -246,7 +246,7 @@
                             <h5 class="mb-0">Morning</h5>
                             <small class="text-muted">Start your day right</small>
                         </div>
-                        <span class="badge bg-light text-dark me-2">2 of 4 completed</span>
+                        <span class="badge bg-light text-dark me-2" id="morning-progress">0 of 0 completed</span>
                         <button class="add-activity-btn" onclick="showAddActivityModal('morning')">
                             + Add Activity
                         </button>
@@ -266,7 +266,7 @@
                             <h5 class="mb-0">Afternoon</h5>
                             <small class="text-muted">Keep the momentum going</small>
                         </div>
-                        <span class="badge bg-light text-dark me-2">0 of 2 completed</span>
+                        <span class="badge bg-light text-dark me-2" id="afternoon-progress">0 of 0 completed</span>
                         <button class="add-activity-btn" onclick="showAddActivityModal('afternoon')">
                             + Add Activity
                         </button>
@@ -286,7 +286,7 @@
                             <h5 class="mb-0">Evening</h5>
                             <small class="text-muted">Wind down and recover</small>
                         </div>
-                        <span class="badge bg-light text-dark me-2">1 of 2 completed</span>
+                        <span class="badge bg-light text-dark me-2" id="evening-progress">0 of 0 completed</span>
                         <button class="add-activity-btn" onclick="showAddActivityModal('evening')">
                             + Add Activity
                         </button>
@@ -343,7 +343,7 @@
                                         </div>
                                     </div>
                                     <div class="text-center mt-auto">
-                                        <div class="display-4 fw-bold" id="weeklyAverage" style="color: #11998e; font-size: 2.2rem; line-height: 1;">100%</div>
+                                        <div class="display-4 fw-bold" id="weeklyAverage" style="color: #11998e; font-size: 2.2rem; line-height: 1;">0%</div>
                                     </div>
                                 </div>
                             </div>
@@ -359,7 +359,7 @@
                                         </div>
                                     </div>
                                     <div class="text-center mt-auto">
-                                        <div class="display-4 fw-bold" id="totalActivities" style="color: #dc3545; font-size: 2.2rem; line-height: 1;">105</div>
+                                        <div class="display-4 fw-bold" id="totalActivities" style="color: #dc3545; font-size: 2.2rem; line-height: 1;">0</div>
                                     </div>
                                 </div>
                             </div>
@@ -372,7 +372,7 @@
                                     <i class="fas fa-medal" style="font-size: 24px; color: white;"></i>
                                 </div>
                                 <h6 class="fw-bold mb-3" style="color: #495057;">Achievement Level</h6>
-                                <span class="badge achievement-badge-large" id="achievementBadge" style="font-size: 18px; padding: 12px 24px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;">Beginner</span>
+                                <span class="badge achievement-badge-large" id="achievementBadge" style="font-size: 18px; padding: 12px 24px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;">Loading...</span>
                                 <p class="text-muted mt-3 mb-0" style="font-size: 12px;">Keep completing activities to level up!</p>
                             </div>
                         </div>
