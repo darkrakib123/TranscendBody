@@ -483,10 +483,13 @@ function updateStatsDisplay(stats) {
         weeklyValue.textContent = `${stats.weeklyAverage || 0}%`;
     }
     
-    // Update total activities - using correct ID
+    // Update total activities - using correct ID with forced refresh
     const totalValue = document.getElementById('totalActivities');
     if (totalValue) {
+        console.log('Forcing update of totalActivities to:', stats.totalActivities);
+        totalValue.innerHTML = '';
         totalValue.textContent = stats.totalActivities || 0;
+        totalValue.setAttribute('data-value', stats.totalActivities || 0);
     }
     
     // Update achievement level
@@ -504,6 +507,8 @@ function updateAchievementLevel(stats) {
     const streak = stats.currentStreak || 0;
     const total = stats.totalActivities || 0;
     
+    console.log('UpdateAchievementLevel - Total activities:', total, 'Streak:', streak);
+    
     let level = 'Beginner';
     let badgeStyle = '';
     
@@ -518,6 +523,9 @@ function updateAchievementLevel(stats) {
         badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
     }
     
+    console.log('Setting achievement level to:', level, 'for total:', total);
+    
+    achievementBadge.innerHTML = '';
     achievementBadge.textContent = level;
     achievementBadge.className = 'badge achievement-badge-large';
     achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
