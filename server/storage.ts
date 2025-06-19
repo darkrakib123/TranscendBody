@@ -226,6 +226,12 @@ export class DatabaseStorage implements IStorage {
         weeklyAverage = Math.min(weeklyAverage, 78); // Intermediate: ~78% average  
       } else if (userId === 'master_user') {
         weeklyAverage = Math.min(weeklyAverage, 92); // Master: ~92% average
+      } else {
+        // Admin and other master-level users get high averages
+        const user = await this.getUser(userId);
+        if (user && (user.role === 'admin' || user.email === 'admin@transcendbody.com')) {
+          weeklyAverage = Math.min(weeklyAverage, 92); // Admin gets master-level stats
+        }
       }
     }
 
