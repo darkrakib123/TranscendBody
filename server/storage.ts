@@ -253,6 +253,32 @@ export class DatabaseStorage implements IStorage {
       totalActivities,
     };
   }
+
+  /**
+   * Helper method to get total completed activities count for a user
+   * Used for determining user level and appropriate weekly averages
+   * @param userId - User's unique identifier
+   * @returns Total number of completed activities
+   */
+  private async getTotalActivitiesCount(userId: string): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(trackerEntries)
+        .innerJoin(dailyTrackers, eq(trackerEntries.trackerId, dailyTrackers.id))
+        .where(
+          and(
+            eq(dailyTrackers.userId, userId),
+            eq(trackerEntries.status, 'completed')
+          )
+        );
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error counting total activities:', error);
+      return 0;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

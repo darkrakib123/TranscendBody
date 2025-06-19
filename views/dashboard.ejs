@@ -790,16 +790,19 @@
                 if (total >= 50) {
                     achievementLevel = 'Master';
                     badgeStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%); color: white; border: none;';
+                    console.log('ACHIEVEMENT: Master Level (Gold) - total:', total);
                     // Apply master theme to entire dashboard
                     applyMasterTheme();
                 } else if (total >= 25) {
                     achievementLevel = 'Intermediate';
                     badgeStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%); color: white; border: none;';
+                    console.log('ACHIEVEMENT: Intermediate Level (Silver) - total:', total);
                     // Apply intermediate theme to entire dashboard
                     applyIntermediateTheme();
                 } else {
                     achievementLevel = 'Beginner';
                     badgeStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
+                    console.log('ACHIEVEMENT: Beginner Level (Bronze) - total:', total);
                     // Apply beginner theme to entire dashboard
                     applyBeginnerTheme();
                 }
@@ -826,7 +829,7 @@
 
         // Theme application functions for dashboard
         function applyMasterTheme() {
-            console.log('Applying Master theme (gold) to dashboard');
+            console.log('Applying Master theme (GOLD) to dashboard');
             
             // Force update the main streak card by ID with !important
             const mainStreakCard = document.getElementById('mainStreakCard');
@@ -868,7 +871,7 @@
         }
 
         function applyIntermediateTheme() {
-            console.log('Applying Intermediate theme (silver) to dashboard');
+            console.log('Applying Intermediate theme (SILVER) to dashboard');
             
             // Update main streak card
             const streakCards = document.querySelectorAll('.streak-featured-card, .streak-card');
@@ -897,7 +900,7 @@
         }
 
         function applyBeginnerTheme() {
-            console.log('Applying Beginner theme (bronze) to dashboard');
+            console.log('Applying Beginner theme (BRONZE) to dashboard');
             
             // Update main streak card
             const streakCards = document.querySelectorAll('.streak-featured-card, .streak-card');
@@ -1262,23 +1265,23 @@
             console.log('  Premium: streak>=14 && total>=40 =', streak >= 14, '&&', totalActivities >= 40, '=', streak >= 14 && totalActivities >= 40);
             console.log('  Almost: streak>=7 && total>=20 =', streak >= 7, '&&', totalActivities >= 20, '=', streak >= 7 && totalActivities >= 20);
             
-            // Premium Earned: Consistent long-term engagement (14+ day streak AND 40+ activities)
+            // Premium Earned: Consistent long-term engagement (14+ day streak AND 40+ activities) - GOLD
             if (streak >= 14 && totalActivities >= 40) {
                 status = 'Premium Earned';
                 statusStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%); color: white; border: none;';
-                console.log('TAKING Premium Earned path - streak:', streak, 'total:', totalActivities);
+                console.log('SUBSCRIPTION: Premium Earned (Gold) - streak:', streak, 'total:', totalActivities);
             } 
-            // Almost Premium: Good progress (7+ day streak AND 20+ activities)
+            // Almost Premium: Good progress (7+ day streak AND 20+ activities) - SILVER
             else if (streak >= 7 && totalActivities >= 20) {
                 status = 'Almost Premium';
                 statusStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%); color: white; border: none;';
-                console.log('TAKING Almost Premium path - streak:', streak, 'total:', totalActivities);
+                console.log('SUBSCRIPTION: Almost Premium (Silver) - streak:', streak, 'total:', totalActivities);
             } 
-            // Free Plan: Less than thresholds above
+            // Free Plan: Less than thresholds above - BRONZE
             else {
                 status = 'Free Plan';
                 statusStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #b8722c 100%); color: white; border: none;';
-                console.log('TAKING Free Plan path - streak:', streak, 'total:', totalActivities);
+                console.log('SUBSCRIPTION: Free Plan (Bronze) - streak:', streak, 'total:', totalActivities);
             }
             
             statusElement.textContent = status;
