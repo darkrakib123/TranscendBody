@@ -304,50 +304,61 @@
                             </div>
                         </div>
                         
-                        <!-- Streak Progress -->
-                        <div class="progress-card mb-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center">
-                                    <div class="progress-icon streak-icon">
-                                        <i class="fas fa-fire"></i>
+                        <!-- Stats Grid -->
+                        <div class="row g-3 mb-3">
+                            <!-- Streak Progress -->
+                            <div class="col-12">
+                                <div class="progress-card">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress-icon streak-icon me-2">
+                                                <i class="fas fa-fire"></i>
+                                            </div>
+                                            <div>
+                                                <span class="progress-label d-block">Daily Streak</span>
+                                                <small class="text-muted">Consecutive active days</small>
+                                            </div>
+                                        </div>
+                                        <span class="progress-value" id="currentStreak">0</span>
                                     </div>
-                                    <span class="progress-label">Daily Streak</span>
-                                </div>
-                                <span class="progress-value" id="currentStreak">0</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar streak-bar" id="streakBar"></div>
-                            </div>
-                            <div class="progress-message" id="streakMessage">Start your first day!</div>
-                        </div>
-                        
-                        <!-- Weekly Progress -->
-                        <div class="progress-card mb-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center">
-                                    <div class="progress-icon weekly-icon">
-                                        <i class="fas fa-chart-line"></i>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar streak-bar" id="streakBar"></div>
                                     </div>
-                                    <span class="progress-label">This Week</span>
+                                    <div class="progress-message" id="streakMessage">Start your first day!</div>
                                 </div>
-                                <span class="progress-value" id="weeklyAverage">0%</span>
                             </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar weekly-bar" id="weeklyBar"></div>
-                            </div>
-                            <div class="progress-message" id="weeklyMessage">Keep going strong!</div>
-                        </div>
-                        
-                        <!-- Total Achievements -->
-                        <div class="progress-card">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <div class="d-flex align-items-center">
-                                    <div class="progress-icon total-icon">
-                                        <i class="fas fa-trophy"></i>
+                            
+                            <!-- Weekly and Total in same row -->
+                            <div class="col-6">
+                                <div class="progress-card h-100">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress-icon weekly-icon me-2">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <div>
+                                                <span class="progress-label d-block">This Week</span>
+                                                <small class="text-muted">Average completion</small>
+                                            </div>
+                                        </div>
+                                        <span class="progress-value" id="weeklyAverage">0%</span>
                                     </div>
-                                    <span class="progress-label">Completed</span>
                                 </div>
-                                <span class="progress-value" id="totalActivities">0</span>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="progress-card h-100">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress-icon total-icon me-2">
+                                                <i class="fas fa-trophy"></i>
+                                            </div>
+                                            <div>
+                                                <span class="progress-label d-block">Completed</span>
+                                                <small class="text-muted">Total activities</small>
+                                            </div>
+                                        </div>
+                                        <span class="progress-value" id="totalActivities">0</span>
                             </div>
                             <div class="achievement-level" id="achievementLevel">Beginner</div>
                         </div>
