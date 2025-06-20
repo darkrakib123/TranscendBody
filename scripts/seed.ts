@@ -1,5 +1,7 @@
 import { db } from '../server/db';
-import { activities } from '../shared/schema';
+import * as schema from '../shared/schema';
+import { eq, and } from 'drizzle-orm';
+const { activities } = schema;
 
 const seedActivities = [
   // Workout Activities
