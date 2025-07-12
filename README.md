@@ -1,6 +1,10 @@
-# TranscendBody - Personal Transformation Tracking System
+# TranscendBody – Your 90-Day Tracker for Fat Loss & Muscle Gain
 
-A comprehensive web application for tracking personal transformation activities including workouts, nutrition, recovery, and mindset practices. Built with modern web technologies and designed for both individual users and administrators.
+Built for Beginners, Busy Professionals & Master Coaches
+
+A powerful web application designed to help you stay consistent and accountable across four key pillars of transformation: Workouts, Nutrition, Recovery, and Mindset.
+
+Whether you're just starting out or guiding others, TranscendBody supports your 90-day journey with smart tracking, personalized routines, and a gamified system to keep you progressing every step of the way.
 
 ## 🎯 Project Overview
 
