@@ -31,6 +31,26 @@ TranscendBody is a gamified personal transformation platform that helps users tr
 - **Analytics Dashboard**: Comprehensive statistics and insights
 - **System Monitoring**: Track user engagement and system performance
 
+## 📸 Screenshots
+
+Here's a quick preview of the Transcend Body web app in action:
+
+### 🔐 Login & Landing Page
+Transform your body and mind in just 90 days — plan, track, and thrive.
+![Login Landing Page](screenshots/login-page.png)
+
+---
+
+### 👑 Admin Dashboard
+Track completion, streaks, and user roles with a beautifully designed admin view.
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+---
+
+### 🥉 Beginner Dashboard
+Designed to build strong habits — a daily routine tracker tailored for beginners.
+![Beginner Dashboard](screenshots/beginner-dashboard.png)
+
 ## 🏗️ Technical Architecture
 
 ### Frontend
