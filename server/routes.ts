@@ -1,495 +1,666 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import passport from 'passport';
-import bcrypt from 'bcrypt';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { storage } from "./storage";
-import { setupAuthentication, requireAuth, requireAdmin, setFlash } from "./auth";
-import { insertActivitySchema, insertTrackerEntrySchema, trackerEntries } from "@shared/schema";
-import { z } from "zod";
+/**
+ * TranscendBody - API Routes and Request Handlers
+ * 
+ * This file contains all the Express.js routes for the personal transformation
+ * tracking application, including authentication, dashboard, API endpoints,
+ * and admin functionality.
+ * 
+ * Route Categories:
+ * - Authentication (login, register, logout)
+ * - Dashboard and user interface
+ * - API endpoints for activities and tracking
+ * - Admin panel functionality
+ * - User management and analytics
+ * 
+ * Features:
+ * - Session-based authentication
+ * - Input validation with Zod schemas
+ * - Password hashing with bcrypt
+ * - Database operations with Drizzle ORM
+ * - Error handling and user feedback
+ */
+
+import express from "express";
+import bcrypt from "bcrypt";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
+import { isValidPlan } from "./validators"; // Plan validation utility
+import { setFlash } from "./auth"; // Flash message middleware
+import crypto from "crypto";
+import { sql } from "drizzle-orm";
+import { computeUserProgress } from './progress';
+import { inArray } from 'drizzle-orm';
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication
-  setupAuthentication(app);
+const router = express.Router();
 
-  // Serve ER diagram
-  app.get('/docs/er-diagram-visual.html', (req, res) => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    res.sendFile(path.join(__dirname, '../docs/er-diagram-visual.html'));
+// ---------- Landing Page ----------
+router.get("/", (req, res) => {
+  // Determine which tab to show based on query param
+  const tab = req.query.tab === "signup" ? "signup" : "signin";
+  res.render("landing", {
+    tab,
+    signinError: null,
+    signupError: null,
+    signinData: {},
+    signupData: {},
+    validationErrors: {},
+    successMessage: null,
   });
+});
 
-  // Main routes
-  app.get('/', (req, res) => {
-    // Prevent caching of landing page
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
-    
-    if (req.isAuthenticated()) {
-      return res.redirect('/dashboard');
-    }
-    res.render('landing', { title: 'Welcome' });
-  });
+// Redirect GET /login and /register to / with tab param
+router.get("/login", (req, res) => {
+  res.redirect("/?tab=signin");
+});
+router.get("/register", (req, res) => {
+  res.redirect("/?tab=signup");
+});
 
-  // Authentication routes
-  app.get('/login', (req, res) => {
-    // Prevent caching of login page
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
-    
-    if (req.isAuthenticated()) {
-      return res.redirect('/dashboard');
-    }
-    res.render('login', { title: 'Login' });
-  });
+// ---------- Registration POST ----------
+router.post("/register", async (req, res) => {
+  const { confirmPassword, ...formData } = req.body;
+  const parsed = insertUserSchema.safeParse(formData);
 
-  app.post('/login', passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/login',
-    failureFlash: false
-  }));
-
-  app.get('/register', (req, res) => {
-    // Prevent caching of register page
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
-    
-    if (req.isAuthenticated()) {
-      return res.redirect('/dashboard');
-    }
-    res.render('register', { title: 'Register' });
-  });
-
-  app.post('/register', async (req, res) => {
-    try {
-      const { email, password, firstName, lastName } = req.body;
-      
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
-      if (existingUser) {
-        setFlash(req, 'error', 'Email already registered');
-        return res.redirect('/register');
-      }
-
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create user
-      const user = await storage.createUser({
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: 'user'
-      });
-
-      setFlash(req, 'success', 'Registration successful! Please log in.');
-      res.redirect('/login');
-    } catch (error) {
-      console.error('Registration error:', error);
-      setFlash(req, 'error', 'Registration failed');
-      res.redirect('/register');
-    }
-  });
-
-  app.get('/logout', (req, res) => {
-    req.logout((err) => {
-      if (err) {
-        console.error('Logout error:', err);
-      }
-      setFlash(req, 'success', 'Logged out successfully');
-      res.redirect('/');
+  if (!parsed.success) {
+    return res.status(400).render("landing", {
+      tab: "signup",
+      signupError: "Please correct the highlighted errors.",
+      signinError: null,
+      signupData: formData,
+      signinData: {},
+      validationErrors: parsed.error.flatten().fieldErrors,
+      successMessage: null,
     });
-  });
-
-  // Dashboard route
-  app.get('/dashboard', requireAuth, (req, res) => {
-    res.render('dashboard', { title: 'Dashboard' });
-  });
-
-  // Progress route
-  app.get('/progress', requireAuth, (req, res) => {
-    res.render('progress', { title: 'Progress' });
-  });
-
-  // Admin routes
-  app.get('/admin', requireAdmin, (req, res) => {
-    res.render('admin', { title: 'Admin Panel' });
-  });
-
-  // ER Diagram route
-  app.get('/er-diagram', requireAuth, (req, res) => {
-    res.sendFile('er-diagram-visual.html', { root: '.' });
-  });
-
-  // Admin API routes
-  app.get('/api/admin/users', requireAdmin, async (req, res) => {
-    try {
-      const users = await storage.getAllUsers();
-      console.log('Fetched users for admin:', users.length, 'users');
-      res.json(users);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
-    }
-  });
-
-  app.patch('/api/admin/users/:id/role', requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { role } = req.body;
-      
-      if (!['client', 'admin'].includes(role)) {
-        return res.status(400).json({ message: 'Invalid role' });
-      }
-      
-      const user = await storage.updateUserRole(id, role);
-      res.json(user);
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      res.status(500).json({ message: 'Failed to update user role' });
-    }
-  });
-
-  // Get user stats for admin view
-  app.get('/api/admin/user-stats/:userId', requireAdmin, async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const stats = await storage.getUserStats(userId);
-      res.json(stats);
-    } catch (error) {
-      console.error(`Error fetching stats for user ${req.params.userId}:`, error);
-      res.status(500).json({ message: "Failed to fetch user stats" });
-    }
-  });
-
-  app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      // Add user deletion logic here
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      res.status(500).json({ message: 'Failed to delete user' });
-    }
-  });
-
-  app.post('/api/admin/activities', requireAdmin, async (req, res) => {
-    try {
-      const result = insertActivitySchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: 'Invalid activity data' });
-      }
-      
-      const activity = await storage.createActivity(result.data);
-      res.json(activity);
-    } catch (error) {
-      console.error('Error creating activity:', error);
-      res.status(500).json({ message: 'Failed to create activity' });
-    }
-  });
-
-  app.delete('/api/admin/activities/:id', requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const success = await storage.deleteActivity(parseInt(id));
-      
-      if (success) {
-        res.json({ success: true });
-      } else {
-        res.status(404).json({ message: 'Activity not found' });
-      }
-    } catch (error) {
-      console.error('Error deleting activity:', error);
-      res.status(500).json({ message: 'Failed to delete activity' });
-    }
-  });
-
-  // API Activity routes
-  app.get('/api/activities', requireAuth, async (req, res) => {
-    try {
-      const activities = await storage.getActivities();
-      res.json(activities);
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-      res.status(500).json({ message: "Failed to fetch activities" });
-    }
-  });
-
-  app.post('/api/activities', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const activityData = insertActivitySchema.parse({
-        ...req.body,
-        createdBy: req.body.isCustom ? userId : null,
-      });
-      
-      const activity = await storage.createActivity(activityData);
-      res.json(activity);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid activity data", errors: error.errors });
-      }
-      console.error("Error creating activity:", error);
-      res.status(500).json({ message: "Failed to create activity" });
-    }
-  });
-
-  app.delete('/api/activities/:id', requireAuth, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.id);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteActivity(id);
-      
-      if (success) {
-        res.json({ message: "Activity deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Activity not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting activity:", error);
-      res.status(500).json({ message: "Failed to delete activity" });
-    }
-  });
-
-  // Daily tracker routes
-  app.get('/api/tracker/today', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const today = new Date().toISOString().split('T')[0];
-      
-      let tracker = await storage.getDailyTracker(userId, today);
-      
-      // Create tracker if it doesn't exist
-      if (!tracker) {
-        const newTracker = await storage.createDailyTracker({
-          userId,
-          date: today,
-        });
-        tracker = { ...newTracker, entries: [] };
-      }
-      
-      res.json(tracker);
-    } catch (error) {
-      console.error("Error fetching daily tracker:", error);
-      res.status(500).json({ message: "Failed to fetch daily tracker" });
-    }
-  });
-
-  // Add activity to tracker route
-  app.post('/api/tracker/add-activity', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const { activityId, timeSlot, customName, customDescription, customCategory } = req.body;
-      
-      if (!timeSlot || !['morning', 'afternoon', 'evening'].includes(timeSlot)) {
-        return res.status(400).json({ message: "Valid time slot is required" });
-      }
-
-      let finalActivityId = parseInt(activityId);
-
-      // If creating a custom activity
-      if (activityId === 'custom' || !activityId) {
-        if (!customName || !customCategory) {
-          return res.status(400).json({ message: "Custom activity name and category are required" });
-        }
-
-        // Create the custom activity
-        const newActivity = await storage.createActivity({
-          title: customName,
-          description: customDescription || null,
-          category: customCategory,
-          isCustom: true,
-          createdBy: userId
-        });
-        finalActivityId = newActivity.id;
-      }
-
-      // Get today's date
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Get or create today's tracker
-      let tracker = await storage.getDailyTracker(userId, today);
-      if (!tracker) {
-        await storage.createDailyTracker({
-          userId,
-          date: today,
-        });
-        // Re-fetch with entries
-        tracker = await storage.getDailyTracker(userId, today);
-      }
-
-      if (!tracker) {
-        return res.status(500).json({ message: "Failed to create tracker" });
-      }
-
-      // Create tracker entry
-      const entry = await storage.createTrackerEntry({
-        trackerId: tracker.id,
-        activityId: finalActivityId,
-        timeSlot,
-        status: 'pending'
-      });
-
-      // Update completion rate
-      await updateTrackerCompletion(tracker.id);
-
-      res.json({ success: true, entry });
-    } catch (error) {
-      console.error("Error adding activity to tracker:", error);
-      res.status(500).json({ message: "Failed to add activity" });
-    }
-  });
-
-  // Tracker entry routes
-  app.post('/api/tracker/entries', requireAuth, async (req: any, res) => {
-    try {
-      const entryData = insertTrackerEntrySchema.parse(req.body);
-      const entry = await storage.createTrackerEntry(entryData);
-      
-      // Update completion rate
-      if (entryData.trackerId) {
-        await updateTrackerCompletion(entryData.trackerId);
-      }
-      
-      res.json(entry);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid entry data", errors: error.errors });
-      }
-      console.error("Error creating tracker entry:", error);
-      res.status(500).json({ message: "Failed to create tracker entry" });
-    }
-  });
-
-  app.patch('/api/tracker/entries/:id/status', requireAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { status } = req.body;
-      
-      if (!['pending', 'completed'].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
-      }
-      
-      const entry = await storage.updateTrackerEntryStatus(id, status);
-      
-      // Update completion rate
-      await updateTrackerCompletion(entry.trackerId);
-      
-      res.json(entry);
-    } catch (error) {
-      console.error("Error updating tracker entry:", error);
-      res.status(500).json({ message: "Failed to update tracker entry" });
-    }
-  });
-
-  app.delete('/api/tracker/entries/:id', requireAuth, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      // Get the entry first to find the tracker ID for completion update
-      const entryData = await db.select().from(trackerEntries).where(eq(trackerEntries.id, id)).limit(1);
-      const trackerId = entryData[0]?.trackerId;
-      
-      const success = await storage.deleteTrackerEntry(id);
-      
-      if (success) {
-        // Update completion rate after deletion
-        if (trackerId) {
-          await updateTrackerCompletion(trackerId);
-        }
-        res.json({ message: "Entry deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Entry not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting tracker entry:", error);
-      res.status(500).json({ message: "Failed to delete tracker entry" });
-    }
-  });
-
-  // Statistics routes
-  app.get('/api/stats', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const stats = await storage.getUserStats(userId);
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      res.status(500).json({ message: "Failed to fetch stats" });
-    }
-  });
-
-  // Admin routes
-  app.get('/api/admin/users', requireAuth, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.id);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      const users = await storage.getAllUsers();
-      res.json(users);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
-    }
-  });
-
-  app.patch('/api/admin/users/:id/role', requireAuth, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.id);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      const { id } = req.params;
-      const { role } = req.body;
-      
-      if (!['admin', 'user'].includes(role)) {
-        return res.status(400).json({ message: "Invalid role" });
-      }
-      
-      const updatedUser = await storage.updateUserRole(id, role);
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      res.status(500).json({ message: "Failed to update user role" });
-    }
-  });
-
-  // Helper function to update completion rate
-  async function updateTrackerCompletion(trackerId: number) {
-    try {
-      // Get all entries for this tracker
-      const entries = await db
-        .select()
-        .from(trackerEntries)
-        .where(eq(trackerEntries.trackerId, trackerId));
-      
-      const totalEntries = entries.length;
-      const completedEntries = entries.filter(e => e.status === 'completed').length;
-      const completionRate = totalEntries > 0 ? Math.round((completedEntries / totalEntries) * 100) : 0;
-      
-      await storage.updateTrackerCompletion(trackerId, completionRate);
-    } catch (error) {
-      console.error('Error updating tracker completion:', error);
-    }
   }
 
-  const httpServer = createServer(app);
-  return httpServer;
+  if (req.body.password !== confirmPassword) {
+    return res.status(400).render("landing", {
+      tab: "signup",
+      signupError: "Passwords do not match.",
+      signinError: null,
+      signupData: formData,
+      signinData: {},
+      validationErrors: {},
+      successMessage: null,
+    });
+  }
+
+  // Set sensible defaults for optional fields
+  const userData = {
+    ...parsed.data,
+    preferredName: parsed.data.preferredName || parsed.data.firstName,
+    gender: parsed.data.gender || "",
+    age: parsed.data.age || null,
+    plan: parsed.data.plan || "trial",
+    tier: parsed.data.tier || "bronze",
+    accountabilityLevel: parsed.data.accountabilityLevel || "beginner",
+  };
+
+  // Generate a unique id for the new user
+  const userId = crypto.randomUUID();
+
+  // Hash password and try to insert
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  try {
+    await db.insert(users).values({
+      id: userId,
+      ...userData,
+      password: hashedPassword,
+      activitiesCount: 0,
+    });
+    // After successful registration, show success message and switch to login tab
+    return res.render("landing", {
+      tab: "signin",
+      signinError: null,
+      signupError: null,
+      signinData: { email: userData.email },
+      signupData: {},
+      validationErrors: {},
+      successMessage: "Account created successfully! Please log in.",
+    });
+  } catch (error) {
+    return res.status(400).render("landing", {
+      tab: "signup",
+      signupError: "User already exists or database error.",
+      signinError: null,
+      signupData: formData,
+      signinData: {},
+      validationErrors: {},
+      successMessage: null,
+    });
+  }
+});
+
+// ---------- Login POST ----------
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).render("landing", {
+      tab: "signin",
+      signinError: "Invalid credentials.",
+      signupError: null,
+      signinData: { email },
+      signupData: {},
+      validationErrors: {},
+      successMessage: null,
+    });
+  }
+
+  req.session.userId = user.id;
+  res.redirect("/dashboard");
+});
+
+// ---------- Logout ----------
+router.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
+});
+
+// ---------- Dashboard ----------
+router.get("/dashboard", async (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect("/login");
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.session.userId),
+  });
+
+  if (!user) {
+    return res.redirect("/login");
+  }
+
+  // Get user's progress data for template rendering
+  try {
+    const trackers = await db.select().from(dailyTrackers).where(eq(dailyTrackers.userId, user.id)).orderBy(desc(dailyTrackers.date));
+    const trackerIds = trackers.map(d => d.id);
+    let entries = [];
+    if (trackerIds.length > 0) {
+      entries = await db.select().from(trackerEntries).where(inArray(trackerEntries.trackerId, trackerIds));
+    }
+    const progress = computeUserProgress(user, trackers, entries);
+    
+    res.render("dashboard_modern", { 
+      user, 
+      streak: progress.currentStreak,
+      completionRate: progress.completionRate,
+      accountabilityCountdown: progress.accountabilityCountdown,
+      accountabilityMessage: progress.accountabilityMessage,
+      activitiesCompleted: progress.activitiesCompleted,
+      weeklyAverage: progress.weeklyAverage,
+      // Add any other fields needed by the dashboard
+    });
+  } catch (err) {
+    console.error("Error fetching user progress for dashboard:", err);
+    // Fallback with default values
+    res.render("dashboard_modern", { 
+      user, 
+      streak: 0,
+      completionRate: 0
+    });
+  }
+});
+
+// ---------- API: Get All Activities ----------
+router.get("/api/activities", async (req, res) => {
+  try {
+    // Only return global activities for all users
+    const globalActivitiesList = await db.select().from(globalActivities);
+    res.json(globalActivitiesList);
+  } catch (err) {
+    console.error("Error fetching activities:", err);
+    res.status(500).json({ error: "Failed to fetch activities" });
+  }
+});
+
+// ---------- API: Get User Stats ----------
+router.get("/api/stats", async (req, res) => {
+  let targetUserId = (req.session as any).userId;
+  if (req.query.userId && req.user && req.user.role === 'admin') {
+    targetUserId = req.query.userId;
+  }
+  if (!targetUserId) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const user = await db.query.users.findFirst({ where: eq(users.id, targetUserId) });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const trackers = await db.select().from(dailyTrackers).where(eq(dailyTrackers.userId, user.id)).orderBy(desc(dailyTrackers.date));
+    const trackerIds = trackers.map(d => d.id);
+    let entries = [];
+    if (trackerIds.length > 0) {
+      entries = await db.select().from(trackerEntries).where(inArray(trackerEntries.trackerId, trackerIds));
+    }
+    const progress = computeUserProgress(user, trackers, entries);
+    res.json(progress);
+  } catch (err) {
+    console.error("Error fetching stats:", err);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+// ---------- API: Get Today's Tracker ----------
+router.get("/api/tracker/today", async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  try {
+    // Find today's tracker
+    const tracker = await db.query.dailyTrackers.findFirst({
+      where: and(
+        eq(dailyTrackers.userId, req.session.userId),
+        eq(dailyTrackers.date, today)
+      ),
+      orderBy: [desc(dailyTrackers.id)],
+    });
+
+    if (!tracker) return res.status(404).json({ error: "No tracker for today" });
+
+    // Always join trackerEntries with globalActivities for all users
+    const entries = await db
+      .select({
+        id: trackerEntries.id,
+        trackerId: trackerEntries.trackerId,
+        activityId: trackerEntries.activityId,
+        timeSlot: trackerEntries.timeSlot,
+        status: trackerEntries.status,
+        createdAt: trackerEntries.createdAt,
+        updatedAt: trackerEntries.updatedAt,
+        activity: globalActivities,
+      })
+      .from(trackerEntries)
+      .innerJoin(globalActivities, eq(trackerEntries.activityId, globalActivities.id))
+      .where(eq(trackerEntries.trackerId, tracker.id));
+
+    res.json({ ...tracker, entries });
+  } catch (err) {
+    console.error("Error fetching today's tracker:", err);
+    res.status(500).json({ error: "Failed to fetch today's tracker" });
+  }
+});
+
+// PATCH: Update tracker entry status
+router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const { entryId } = req.params;
+  const { status } = req.body;
+  try {
+    // Check ownership or admin
+    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryId) });
+    if (!entry) return res.status(404).json({ error: 'Entry not found' });
+    const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
+    if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
+    const user = await db.query.users.findFirst({ where: eq(users.id, req.session.userId) });
+    if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error updating tracker entry status:', err);
+    res.status(500).json({ error: 'Failed to update tracker entry status' });
+  }
+});
+
+// DELETE: Remove tracker entry
+router.delete('/api/tracker/entries/:entryId', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const { entryId } = req.params;
+  try {
+    // Check ownership or admin
+    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryId) });
+    if (!entry) return res.status(404).json({ error: 'Entry not found' });
+    const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
+    if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
+    const user = await db.query.users.findFirst({ where: eq(users.id, req.session.userId) });
+    if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    await db.delete(trackerEntries).where(eq(trackerEntries.id, entryId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting tracker entry:', err);
+    res.status(500).json({ error: 'Failed to delete tracker entry' });
+  }
+});
+
+// ---------- API: Add Tracker Entry ----------
+router.post('/api/tracker/entries', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  const { trackerId, activityId, timeSlot, status } = req.body;
+  if (!trackerId || !activityId || !timeSlot) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+  try {
+    // Optionally: check that tracker belongs to user
+    const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerId) });
+    if (!tracker || tracker.userId !== req.session.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const [entry] = await db.insert(trackerEntries).values({
+      trackerId,
+      activityId,
+      timeSlot,
+      status: status || 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    res.json(entry);
+  } catch (err) {
+    console.error('Error adding tracker entry:', err);
+    res.status(500).json({ error: 'Failed to add tracker entry' });
+  }
+});
+
+// Middleware to check admin
+async function requireAdmin(req, res, next) {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.session.userId),
+  });
+  
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  
+  req.user = user; // Add user to request for convenience
+  next();
 }
+
+// ---------- ADMIN API: Get All Users ----------
+router.get('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const allUsers = await db.select().from(users);
+    // For each user, fetch their trackers and tracker entries, then compute progress
+    const userProgressList = await Promise.all(allUsers.map(async (user) => {
+      const trackers = await db.select().from(dailyTrackers).where(eq(dailyTrackers.userId, user.id)).orderBy(desc(dailyTrackers.date));
+      const trackerIds = trackers.map(d => d.id);
+      let entries = [];
+      if (trackerIds.length > 0) {
+        entries = await db.select().from(trackerEntries).where(inArray(trackerEntries.trackerId, trackerIds));
+      }
+      const progress = computeUserProgress(user, trackers, entries);
+      return {
+        ...user,
+        ...progress,
+      };
+    }));
+    res.json(userProgressList);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// ---------- ADMIN API: Delete User ----------
+router.delete('/api/admin/users/:userId', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await db.delete(users).where(eq(users.id, userId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+// ---------- ADMIN API: Update User Role ----------
+router.patch('/api/admin/users/:userId/role', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+    await db.update(users).set({ role }).where(eq(users.id, userId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error updating user role:', err);
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
+});
+
+// ---------- ADMIN API: Get Single User ----------
+router.get('/api/admin/users/:userId', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching user:', err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// ---------- ADMIN API: Update User Details ----------
+router.patch('/api/admin/users/:userId', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { firstName, lastName, preferredName, gender, age, role, plan, accountabilityLevel, tier } = req.body;
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (preferredName !== undefined) updateData.preferredName = preferredName;
+    if (gender !== undefined) updateData.gender = gender;
+    if (age !== undefined) updateData.age = age;
+    if (role !== undefined) updateData.role = role;
+    if (plan !== undefined) updateData.plan = plan;
+    if (accountabilityLevel !== undefined) updateData.accountabilityLevel = accountabilityLevel;
+    if (tier !== undefined) updateData.tier = tier;
+    await db.update(users).set(updateData).where(eq(users.id, userId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// ---------- ADMIN API: Get User Stats ----------
+router.get('/api/admin/user-stats/:userId', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // Total activities completed
+    const totalResult = await db.execute(
+      `SELECT COUNT(*) AS total FROM tracker_entries te
+       JOIN daily_trackers dt ON te.tracker_id = dt.id
+       WHERE dt.user_id = $1 AND te.status = 'completed'`,
+      [userId]
+    );
+    const totalActivities = totalResult.rows?.[0]?.total || 0;
+    // Current streak (simplified)
+    const streakResult = await db.execute(
+      `SELECT COUNT(*) AS streak
+       FROM (
+         SELECT date, COUNT(*) AS completed
+         FROM daily_trackers dt
+         JOIN tracker_entries te ON te.tracker_id = dt.id
+         WHERE dt.user_id = $1 AND te.status = 'completed'
+         GROUP BY date
+         ORDER BY date DESC
+       ) AS streaks
+       WHERE completed > 0`,
+      [userId]
+    );
+    const currentStreak = streakResult.rows?.[0]?.streak || 0;
+    res.json({ totalActivities, currentStreak });
+  } catch (err) {
+    console.error('Error fetching user stats:', err);
+    res.status(500).json({ error: 'Failed to fetch user stats' });
+  }
+});
+
+// ---------- ADMIN API: Get All Activities ----------
+router.get('/api/admin/activities', requireAdmin, async (req, res) => {
+  try {
+    const allActivities = await db.select().from(globalActivities);
+    res.json(allActivities);
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+    res.status(500).json({ error: 'Failed to fetch activities' });
+  }
+});
+
+// ---------- ADMIN API: Add Activity ----------
+router.post('/api/admin/activities', requireAdmin, async (req, res) => {
+  try {
+    const { title, description, category, difficulty } = req.body;
+    // Check for duplicate (title + category)
+    const existing = await db.select().from(globalActivities).where(and(eq(globalActivities.title, title), eq(globalActivities.category, category)));
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'An activity with this title and category already exists.' });
+    }
+    const [activity] = await db.insert(globalActivities).values({ title, description, category, difficulty }).returning();
+    res.json(activity);
+  } catch (err) {
+    console.error('Error adding activity:', err);
+    res.status(500).json({ error: 'Failed to add activity' });
+  }
+});
+
+// ---------- ADMIN API: Delete Activity ----------
+router.delete('/api/admin/activities/:activityId', requireAdmin, async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    await db.delete(globalActivities).where(eq(globalActivities.id, activityId));
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting activity:', err);
+    res.status(500).json({ error: 'Failed to delete activity' });
+  }
+});
+
+// ---------- ADMIN API: Update Activity ----------
+router.patch('/api/admin/activities/:activityId', requireAdmin, async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const { title, description, category, difficulty } = req.body;
+    // Check for duplicate (title + category), excluding this activity
+    if (title && category) {
+      const existing = await db.select().from(globalActivities)
+        .where(and(eq(globalActivities.title, title), eq(globalActivities.category, category), sql`id != ${activityId}`));
+      if (existing.length > 0) {
+        return res.status(400).json({ error: 'An activity with this title and category already exists.' });
+      }
+    }
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (category !== undefined) updateData.category = category;
+    if (difficulty !== undefined) updateData.difficulty = difficulty;
+    const [updated] = await db.update(globalActivities).set(updateData).where(eq(globalActivities.id, activityId)).returning();
+    if (!updated) return res.status(404).json({ error: 'Activity not found' });
+    res.json({ success: true, activity: updated });
+  } catch (err) {
+    console.error('Error updating activity:', err);
+    res.status(500).json({ error: 'Failed to update activity' });
+  }
+});
+
+// ---------- ADMIN API: Get All User Stats (Batch) ----------
+router.get('/api/admin/user-stats', requireAdmin, async (req, res) => {
+  try {
+    const allUsers = await db.select().from(users);
+    const allTrackers = await db.select().from(dailyTrackers);
+    const allEntries = await db.select().from(trackerEntries);
+    // For each user, compute their stats
+    const userStats = allUsers.map(user => {
+      const trackers = allTrackers.filter(t => t.userId === user.id);
+      const trackerIds = trackers.map(t => t.id);
+      const entries = allEntries.filter(e => trackerIds.includes(e.trackerId));
+      const progress = computeUserProgress(user, trackers, entries);
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        preferredName: user.preferredName,
+        plan: user.plan,
+        tier: user.tier,
+        accountabilityLevel: user.accountabilityLevel,
+        role: user.role,
+        activitiesCompleted: progress.activitiesCompleted,
+        currentStreak: progress.currentStreak,
+      };
+    });
+    res.json(userStats);
+  } catch (err) {
+    console.error('Error fetching all user stats:', err);
+    res.status(500).json({ error: 'Failed to fetch user stats' });
+  }
+});
+
+// ---------- ADMIN API: Reset Demo Data ----------
+router.post('/api/admin/reset-demo-data', requireAdmin, async (req, res) => {
+  try {
+    const result = await seedDemoData(db);
+    if (result.success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ success: false, error: result.error });
+    }
+  } catch (err) {
+    console.error('Error resetting demo data:', err);
+    res.status(500).json({ success: false, error: err });
+  }
+});
+
+// ---------- API: Add Activity (for all users, e.g. custom) ----------
+router.post('/api/activities', async (req, res) => {
+  try {
+    const { title, description, category, timeSlot, isCustom, difficulty } = req.body;
+    if (!title || !category) {
+      return res.status(400).json({ error: 'Title and category are required.' });
+    }
+    // Check for duplicate (title + category)
+    const existing = await db.select().from(globalActivities).where(and(eq(globalActivities.title, title), eq(globalActivities.category, category)));
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'An activity with this title and category already exists.' });
+    }
+    const [activity] = await db.insert(globalActivities).values({
+      title,
+      description,
+      category,
+      timeOfDay: timeSlot,
+      isCustom: isCustom ?? true,
+      difficulty: difficulty || 'easy',
+      createdBy: req.user?.id || null
+    }).returning();
+    res.json(activity);
+  } catch (err) {
+    console.error('Error adding activity:', err);
+    res.status(500).json({ error: 'Failed to add activity' });
+  }
+});
+
+// Admin panel page (UI)
+router.get("/admin", async (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect("/login");
+  }
+  
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.session.userId),
+  });
+  
+  if (!user || user.role !== "admin") {
+    return res.status(403).render("landing", { 
+      tab: "signin",
+      signinError: "Admin access required",
+      signupError: null,
+      signinData: {},
+      signupData: {},
+      validationErrors: {},
+      successMessage: null
+    });
+  }
+  
+  res.render("admin", { user });
+});
+
+export default router;

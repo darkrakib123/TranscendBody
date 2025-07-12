@@ -43,11 +43,11 @@ export interface IStorage {
   deleteTrackerEntry(id: number): Promise<boolean>;
   
   // Statistics
-  getUserStats(userId: string): Promise<{
-    currentStreak: number;
-    weeklyAverage: number;
-    totalActivities: number;
-  }>;
+  // getUserStats(userId: string): Promise<{
+  //   currentStreak: number;
+  //   weeklyAverage: number;
+  //   totalActivities: number;
+  // }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -188,71 +188,71 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Statistics
-  async getUserStats(userId: string): Promise<{
-    currentStreak: number;
-    weeklyAverage: number;
-    totalActivities: number;
-  }> {
-    // This is a simplified implementation - in production you'd want more sophisticated streak calculation
-    const recentTrackers = await db
-      .select()
-      .from(dailyTrackers)
-      .where(eq(dailyTrackers.userId, userId))
-      .orderBy(desc(dailyTrackers.date))
-      .limit(30);
+  // async getUserStats(userId: string): Promise<{
+  //   currentStreak: number;
+  //   weeklyAverage: number;
+  //   totalActivities: number;
+  // }> {
+  //   // This is a simplified implementation - in production you'd want more sophisticated streak calculation
+  //   const recentTrackers = await db
+  //     .select()
+  //     .from(dailyTrackers)
+  //     .where(eq(dailyTrackers.userId, userId))
+  //     .orderBy(desc(dailyTrackers.date))
+  //     .limit(30);
 
-    // Calculate current streak (consecutive days with >0% completion)
-    let currentStreak = 0;
-    for (const tracker of recentTrackers) {
-      if (tracker.completionRate > 0) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
+  //   // Calculate current streak (consecutive days with >0% completion)
+  //   let currentStreak = 0;
+  //   for (const tracker of recentTrackers) {
+  //     if (tracker.completionRate > 0) {
+  //       currentStreak++;
+  //     } else {
+  //       break;
+  //     }
+  //   }
 
-    // Calculate weekly average (last 7 days) - fix for intermediate account
-    const weekTrackers = recentTrackers.slice(0, 7);
-    let weeklyAverage = 0;
-    if (weekTrackers.length > 0) {
-      // For intermediate user, should show 75% not 100%
-      const sum = weekTrackers.reduce((sum, t) => sum + t.completionRate, 0);
-      weeklyAverage = Math.round(sum / weekTrackers.length);
+  //   // Calculate weekly average (last 7 days) - fix for intermediate account
+  //   const weekTrackers = recentTrackers.slice(0, 7);
+  //   let weeklyAverage = 0;
+  //   if (weekTrackers.length > 0) {
+  //     // For intermediate user, should show 75% not 100%
+  //     const sum = weekTrackers.reduce((sum, t) => sum + t.completionRate, 0);
+  //     weeklyAverage = Math.round(sum / weekTrackers.length);
       
-      // Calculate realistic weekly averages dynamically based on actual performance
-      // This ensures demo accounts show appropriate progression levels
-      const totalActivitiesCount = await this.getTotalActivitiesCount(userId);
+  //     // Calculate realistic weekly averages dynamically based on actual performance
+  //     // This ensures demo accounts show appropriate progression levels
+  //     const totalActivitiesCount = await this.getTotalActivitiesCount(userId);
       
-      if (totalActivitiesCount < 20) {
-        // Beginner level: cap at 71% to show room for improvement
-        weeklyAverage = Math.min(weeklyAverage, 71);
-      } else if (totalActivitiesCount < 40) {
-        // Intermediate level: cap at 78% to show good progress
-        weeklyAverage = Math.min(weeklyAverage, 78);
-      } else {
-        // Master level: cap at 92% to show excellent performance
-        weeklyAverage = Math.min(weeklyAverage, 92);
-      }
-    }
+  //     if (totalActivitiesCount < 20) {
+  //       // Beginner level: cap at 71% to show room for improvement
+  //       weeklyAverage = Math.min(weeklyAverage, 71);
+  //     } else if (totalActivitiesCount < 40) {
+  //       // Intermediate level: cap at 78% to show good progress
+  //       weeklyAverage = Math.min(weeklyAverage, 78);
+  //     } else {
+  //       // Master level: cap at 92% to show excellent performance
+  //       weeklyAverage = Math.min(weeklyAverage, 92);
+  //     }
+  //   }
 
-    // Total completed activities - use a simpler approach
-    const allCompletedEntries = await db
-      .select()
-      .from(trackerEntries)
-      .innerJoin(dailyTrackers, eq(trackerEntries.trackerId, dailyTrackers.id))
-      .where(and(
-        eq(dailyTrackers.userId, userId),
-        eq(trackerEntries.status, "completed")
-      ));
+  //   // Total completed activities - use a simpler approach
+  //   const allCompletedEntries = await db
+  //     .select()
+  //     .from(trackerEntries)
+  //     .innerJoin(dailyTrackers, eq(trackerEntries.trackerId, dailyTrackers.id))
+  //     .where(and(
+  //       eq(dailyTrackers.userId, userId),
+  //       eq(trackerEntries.status, "completed")
+  //     ));
 
-    const totalActivities = allCompletedEntries.length;
+  //   const totalActivities = allCompletedEntries.length;
 
-    return {
-      currentStreak,
-      weeklyAverage,
-      totalActivities,
-    };
-  }
+  //   return {
+  //     currentStreak,
+  //     weeklyAverage,
+  //     totalActivities,
+  //   };
+  // }
 
   /**
    * Helper method to get total completed activities count for a user

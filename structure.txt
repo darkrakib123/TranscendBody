@@ -1,0 +1,327 @@
+# TranscendBody - Project Structure Documentation
+
+## 📋 Project Overview
+TranscendBody is a comprehensive personal transformation tracking system built with Node.js, TypeScript, and PostgreSQL. The application helps users track daily activities across four wellness pillars: Workout, Nutrition, Recovery, and Mindset.
+
+## 🏗️ Architecture Overview
+
+### Technology Stack
+- **Frontend**: EJS templates, Tailwind CSS, Vanilla JavaScript, Chart.js
+- **Backend**: Node.js, Express.js, TypeScript
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Session-based with bcrypt
+- **Validation**: Zod schema validation
+
+### Application Flow
+1. Users register/login through the authentication system
+2. Dashboard displays daily activities across 4 time slots
+3. Users can complete activities and track progress
+4. Admin panel provides user and activity management
+5. Analytics show completion rates and progress over time
+
+## 📁 Directory Structure
+
+### Root Level Files
+```
+TranscendBodyCursor/
+├── package.json              # Project dependencies and scripts
+├── tsconfig.json             # TypeScript configuration
+├── drizzle.config.json       # Database migration configuration
+├── .env                      # Environment variables (not in repo)
+├── README.md                 # Project documentation
+├── structure.txt             # This file - project structure guide
+└── generateStructure.mjs     # Utility to generate project structure
+```
+
+### Server Directory (`/server`)
+Contains all backend server code and business logic.
+
+```
+server/
+├── index.ts                  # Main server entry point and Express app setup
+├── routes.ts                 # API route definitions and request handlers
+├── auth.ts                   # Authentication middleware and user session management
+├── db.ts                     # Database connection and Drizzle ORM setup
+├── progress.ts               # Progress tracking and analytics logic
+├── storage.ts                # Session storage configuration
+└── validators.ts             # Input validation schemas using Zod
+```
+
+**File Details:**
+- **index.ts**: Express server setup, middleware configuration, error handling
+- **routes.ts**: All API endpoints for users, activities, trackers, and admin functions
+- **auth.ts**: Login/logout logic, session management, password hashing
+- **db.ts**: PostgreSQL connection, Drizzle ORM configuration
+- **progress.ts**: Completion rate calculations, streak tracking, analytics
+- **storage.ts**: Session storage setup for user authentication
+- **validators.ts**: Input validation for user registration, activity creation, etc.
+
+### Shared Directory (`/shared`)
+Contains code shared between frontend and backend.
+
+```
+shared/
+├── schema.ts                 # Database schema definitions and types
+└── schema.js                 # JavaScript version of schema (legacy)
+```
+
+**File Details:**
+- **schema.ts**: Complete database schema with tables, relations, and TypeScript types
+- **schema.js**: Legacy JavaScript version (maintained for compatibility)
+
+### Views Directory (`/views`)
+Contains EJS template files for the frontend.
+
+```
+views/
+├── layout.ejs                # Base layout template with common HTML structure
+├── index.ejs                 # Landing page and login/registration forms
+├── dashboard.ejs             # Main user dashboard with activity tracking
+├── dashboard_modern.ejs      # Modern dashboard design (alternative)
+├── admin.ejs                 # Admin panel for user and activity management
+└── landing.ejs               # Marketing landing page
+```
+
+**File Details:**
+- **layout.ejs**: Base template with navigation, footer, and common styling
+- **index.ejs**: Authentication pages (login/register) and landing content
+- **dashboard.ejs**: Main user interface with activity cards, progress charts
+- **admin.ejs**: Admin panel with user management, activity management, analytics
+- **landing.ejs**: Marketing page explaining the application features
+
+### Public Directory (`/public`)
+Contains static assets served directly to the browser.
+
+```
+public/
+├── css/
+│   ├── style.css             # Main application styles
+│   └── themes.css            # Theme-specific styling
+├── js/
+│   ├── app.js                # Main application JavaScript
+│   └── modal.js              # Modal component functionality
+└── images/                   # Image assets (if any)
+```
+
+**File Details:**
+- **style.css**: Main application styling with Tailwind CSS utilities
+- **themes.css**: Color themes and custom styling
+- **app.js**: Main client-side JavaScript for dashboard functionality
+- **modal.js**: Modal dialog components and interactions
+
+### Scripts Directory (`/scripts`)
+Contains database seeding and utility scripts.
+
+```
+scripts/
+├── cleanAndSeed.ts           # Clean database and reseed all data
+├── seedMasterActivities.ts   # Seed the 40 master-level activities
+├── seedDemoData.ts           # Seed demo users and sample data
+├── verifyCounts.ts           # Verify database record counts
+├── cleanDuplicates.ts        # Remove duplicate database records
+├── comprehensiveTest.ts      # Comprehensive system testing
+└── testDemoAccounts.ts       # Test demo account functionality
+```
+
+**File Details:**
+- **cleanAndSeed.ts**: Complete database reset and reseeding
+- **seedMasterActivities.ts**: Seeds 40 curated activities for fat loss/muscle gain
+- **seedDemoData.ts**: Creates demo users with realistic progress data
+- **verifyCounts.ts**: Validates database integrity and record counts
+- **comprehensiveTest.ts**: End-to-end testing of all features
+- **testDemoAccounts.ts**: Tests demo account login and functionality
+
+### Drizzle Directory (`/drizzle`)
+Contains database migration files and metadata.
+
+```
+drizzle/
+├── 0000_premium_plazm.sql    # Initial database schema migration
+├── 0001_last_miss_america.sql # Schema update migration
+├── 0002_add_isadmin_isglobal.sql # Admin and global fields migration
+└── meta/
+    ├── _journal.json         # Migration journal
+    ├── 0000_snapshot.json    # Database snapshot
+    └── 0001_snapshot.json    # Updated database snapshot
+```
+
+## 🗄️ Database Schema
+
+### Core Tables
+
+#### Users Table
+Stores user account information and preferences.
+```sql
+users (
+  id: VARCHAR (Primary Key)           # Unique user identifier
+  email: VARCHAR (Unique)             # User email address
+  password: VARCHAR                   # Bcrypt hashed password
+  first_name: VARCHAR                 # User's first name
+  last_name: VARCHAR                  # User's last name
+  preferred_name: VARCHAR             # Preferred display name
+  gender: VARCHAR                     # Gender (male/female/nonbinary/other)
+  age: INTEGER                        # User age
+  role: VARCHAR                       # User role (user/admin)
+  plan: VARCHAR                       # Subscription plan (basic/pro)
+  accountability_level: VARCHAR       # Skill level (beginner/intermediate/master)
+  tier: VARCHAR                       # Achievement tier (bronze/silver/gold)
+  is_admin: BOOLEAN                   # Admin privileges flag
+  created_at: TIMESTAMP               # Account creation timestamp
+  updated_at: TIMESTAMP               # Last update timestamp
+)
+```
+
+#### Global Activities Table
+Stores system-wide activities available to all users.
+```sql
+global_activities (
+  id: SERIAL (Primary Key)            # Unique activity identifier
+  title: TEXT                         # Activity name
+  description: TEXT                   # Activity description
+  category: VARCHAR                   # Category (workout/nutrition/recovery/mindset)
+  time_of_day: VARCHAR                # Default time slot (morning/afternoon/evening/night)
+  is_custom: BOOLEAN                  # Custom activity flag
+  difficulty: VARCHAR                 # Difficulty level (easy/medium/hard)
+  created_by: VARCHAR                 # Creator user ID (FK to users.id)
+  created_at: TIMESTAMP               # Creation timestamp
+)
+```
+
+#### Daily Trackers Table
+Tracks daily completion rates for each user.
+```sql
+daily_trackers (
+  id: SERIAL (Primary Key)            # Unique tracker identifier
+  user_id: VARCHAR                    # User ID (FK to users.id)
+  date: DATE                          # Tracking date
+  completion_rate: INTEGER            # Daily completion percentage (0-100)
+  created_at: TIMESTAMP               # Creation timestamp
+)
+```
+
+#### Tracker Entries Table
+Individual activity entries within daily trackers.
+```sql
+tracker_entries (
+  id: SERIAL (Primary Key)            # Unique entry identifier
+  tracker_id: INTEGER                 # Daily tracker ID (FK to daily_trackers.id)
+  activity_id: INTEGER                # Activity ID (FK to global_activities.id)
+  time_slot: VARCHAR                  # Time slot (morning/afternoon/evening/night)
+  status: VARCHAR                     # Completion status (pending/completed)
+  created_at: TIMESTAMP               # Creation timestamp
+  updated_at: TIMESTAMP               # Last update timestamp
+)
+```
+
+#### Sessions Table
+Stores user session data for authentication.
+```sql
+sessions (
+  sid: VARCHAR (Primary Key)          # Session identifier
+  sess: JSONB                         # Session data
+  expire: TIMESTAMP                   # Session expiration timestamp
+)
+```
+
+## 🔄 Data Flow
+
+### User Authentication Flow
+1. User submits login credentials
+2. Server validates credentials against database
+3. If valid, creates session and redirects to dashboard
+4. Session maintained across requests
+
+### Activity Tracking Flow
+1. User views daily dashboard with assigned activities
+2. User completes activities by clicking status buttons
+3. Frontend sends completion updates to API
+4. Backend updates tracker entries and recalculates completion rates
+5. Dashboard refreshes with updated progress
+
+### Admin Management Flow
+1. Admin logs in with admin credentials
+2. Admin panel displays user statistics and activity management
+3. Admin can edit users, manage activities, view analytics
+4. Changes are immediately reflected in the system
+
+## 🎯 Key Features Implementation
+
+### Gamification System
+- **Tiers**: Bronze, Silver, Gold (stored in users.tier)
+- **Levels**: Beginner, Intermediate, Master (stored in users.accountability_level)
+- **Progress Tracking**: Daily completion rates and streaks
+- **Visual Feedback**: Charts and progress indicators
+
+### Activity Management
+- **40 Pre-built Activities**: Curated for fat loss and muscle gain
+- **Custom Activities**: Users can create personalized activities
+- **Time Slot Assignment**: Morning, Afternoon, Evening, Night
+- **Category Organization**: Workout, Nutrition, Recovery, Mindset
+
+### Analytics and Reporting
+- **User Analytics**: Completion rates, streaks, category breakdown
+- **Admin Analytics**: User engagement, activity popularity, system metrics
+- **Real-time Updates**: Instant feedback on activity completion
+- **Historical Data**: Progress tracking over time
+
+## 🔧 Development Workflow
+
+### Local Development
+1. Start development server: `npm run dev`
+2. Access application: http://localhost:5050
+3. Use demo accounts for testing
+4. Database changes: `npm run db:push`
+5. Reseed data: `npm run seed`
+
+### Database Management
+1. Schema changes: Modify `shared/schema.ts`
+2. Generate migration: `npx drizzle-kit generate`
+3. Apply migration: `npm run db:push`
+4. Seed data: Run appropriate seeding script
+
+### Testing
+1. Use demo accounts for feature testing
+2. Run verification scripts: `npm run verifyCounts`
+3. Test admin functionality with admin@demo.com
+4. Test user functionality with other demo accounts
+
+## 📊 Performance Considerations
+
+### Database Optimization
+- Indexed foreign keys for fast joins
+- Composite indexes on frequently queried columns
+- Efficient query patterns for analytics
+
+### Frontend Optimization
+- Minimal JavaScript bundle size
+- Efficient DOM updates
+- Responsive design for all devices
+
+### Security Measures
+- Password hashing with bcrypt
+- Session-based authentication
+- Input validation with Zod
+- SQL injection protection with Drizzle ORM
+
+## 🚀 Deployment Considerations
+
+### Environment Variables
+- `DATABASE_URL`: PostgreSQL connection string
+- `SESSION_SECRET`: Secret key for session encryption
+- `PORT`: Server port (default: 5050)
+
+### Production Setup
+1. Set up PostgreSQL database
+2. Configure environment variables
+3. Build application: `npm run build`
+4. Start production server: `npm start`
+
+### Monitoring
+- Application logs for debugging
+- Database performance monitoring
+- User activity analytics
+- Error tracking and reporting
+
+---
+
+This structure provides a comprehensive overview of the TranscendBody application, making it accessible to both technical and non-technical stakeholders while maintaining detailed implementation information for developers. 

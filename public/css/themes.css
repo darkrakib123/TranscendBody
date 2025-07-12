@@ -17,24 +17,36 @@
   /* Bronze Theme (Beginner/Free Plan) */
   --bronze-primary: #cd7f32;
   --bronze-secondary: #b8722c;
-  --bronze-gradient: linear-gradient(135deg, var(--bronze-primary) 0%, var(--bronze-secondary) 100%);
+  --bronze-gradient: linear-gradient(
+    135deg,
+    var(--bronze-primary) 0%,
+    var(--bronze-secondary) 100%
+  );
   --bronze-shadow: rgba(205, 127, 50, 0.3);
   --bronze-light: rgba(205, 127, 50, 0.1);
-  
+
   /* Silver Theme (Intermediate/Almost Premium) */
   --silver-primary: #c0c0c0;
   --silver-secondary: #a8a8a8;
-  --silver-gradient: linear-gradient(135deg, var(--silver-primary) 0%, var(--silver-secondary) 100%);
+  --silver-gradient: linear-gradient(
+    135deg,
+    var(--silver-primary) 0%,
+    var(--silver-secondary) 100%
+  );
   --silver-shadow: rgba(192, 192, 192, 0.3);
   --silver-light: rgba(192, 192, 192, 0.1);
-  
+
   /* Gold Theme (Master/Premium Earned) */
   --gold-primary: #ffd700;
   --gold-secondary: #ffcc00;
-  --gold-gradient: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-secondary) 100%);
+  --gold-gradient: linear-gradient(
+    135deg,
+    var(--gold-primary) 0%,
+    var(--gold-secondary) 100%
+  );
   --gold-shadow: rgba(255, 215, 0, 0.3);
   --gold-light: rgba(255, 215, 0, 0.1);
-  
+
   /* Dynamic theme variables (changed via JavaScript) */
   --theme-gradient: var(--bronze-gradient);
   --theme-shadow: var(--bronze-shadow);
@@ -116,6 +128,13 @@
   --theme-light: var(--gold-light);
 }
 
+.streak-card,
+.stat-card,
+.progress-bar {
+  background: var(--theme-gradient) !important;
+  /* ...other styles... */
+}
+
 /* ==================== RESPONSIVE DESIGN ==================== */
 
 /**
@@ -174,4 +193,18 @@
 .streak-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px var(--theme-shadow) !important;
+}
+
+/* ==================== ACCOUNTABILITY LEVEL COLORS ==================== */
+.accountability-beginner {
+  --accountability-color: #6c757d;
+  border-left: 6px solid #6c757d !important;
+}
+.accountability-intermediate {
+  --accountability-color: #17a2b8;
+  border-left: 6px solid #17a2b8 !important;
+}
+.accountability-master {
+  --accountability-color: #ffc107;
+  border-left: 6px solid #ffc107 !important;
 }

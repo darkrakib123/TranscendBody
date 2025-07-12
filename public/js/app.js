@@ -4,23 +4,33 @@ let currentTracker = null;
 let activities = [];
 let currentTimeSlot = 'morning';
 
-// Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname === '/dashboard') {
         initializeDashboard();
     }
-    
-    // Initialize custom activity toggle
+    // Tooltip logic for info icons
+    document.querySelectorAll('.info-icon').forEach(function(icon) {
+        var tooltip = icon.querySelector('.custom-tooltip');
+        if (!tooltip) return;
+        icon.addEventListener('mouseenter', function() { tooltip.style.display = 'block'; });
+        icon.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
+        icon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.custom-tooltip').forEach(function(tooltip) {
+            tooltip.style.display = 'none';
+        });
+    });
     const createCustomCheckbox = document.getElementById('createCustom');
     if (createCustomCheckbox) {
         createCustomCheckbox.addEventListener('change', toggleCustomActivityFields);
     }
-    
-    // Initialize form validation
     initializeFormValidation();
 });
 
-// Dashboard initialization
 async function initializeDashboard() {
     try {
         await Promise.all([
@@ -28,8 +38,6 @@ async function initializeDashboard() {
             loadActivities(),
             loadStats()
         ]);
-        
-        initializeProgressChart();
         updateProgressDisplay();
         loadPopularActivities();
     } catch (error) {
@@ -38,7 +46,6 @@ async function initializeDashboard() {
     }
 }
 
-// Load today's tracker
 async function loadTodayTracker() {
     try {
         const response = await fetch('/api/tracker/today');
@@ -46,7 +53,6 @@ async function loadTodayTracker() {
             currentTracker = await response.json();
             renderTrackerEntries();
         } else if (response.status === 404) {
-            // No tracker for today, create one
             await createTodayTracker();
         }
     } catch (error) {
@@ -54,19 +60,13 @@ async function loadTodayTracker() {
     }
 }
 
-// Create today's tracker
 async function createTodayTracker() {
     try {
         const response = await fetch('/api/tracker', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                date: new Date().toISOString().split('T')[0]
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: new Date().toISOString().split('T')[0] })
         });
-        
         if (response.ok) {
             currentTracker = await response.json();
         }
@@ -75,7 +75,6 @@ async function createTodayTracker() {
     }
 }
 
-// Load activities
 async function loadActivities() {
     try {
         const response = await fetch('/api/activities');
@@ -88,14 +87,19 @@ async function loadActivities() {
     }
 }
 
-// Load user stats
 async function loadStats() {
     try {
         const response = await fetch('/api/stats');
         if (response.ok) {
             const stats = await response.json();
-            console.log('Loaded stats:', stats);
-            console.log('Stats breakdown - streak:', stats.currentStreak, 'weekly:', stats.weeklyAverage, 'total:', stats.totalActivities);
+            stats.totalActivities = stats.activitiesCompleted;
+            stats.successfulDays30 = stats.successfulDays30 ?? 0;
+            stats.totalDays30 = stats.totalDays30 ?? 30;
+            stats.successfulDays60 = stats.successfulDays60 ?? 0;
+            stats.totalDays60 = stats.totalDays60 ?? 60;
+            stats.successfulDays90 = stats.successfulDays90 ?? 0;
+            stats.totalDays90 = stats.totalDays90 ?? 90;
+            stats.weeklyAverage = stats.weeklyAverage ?? 0;
             updateStatsDisplay(stats);
         } else {
             console.error('Failed to load stats:', response.status);
@@ -105,19 +109,15 @@ async function loadStats() {
     }
 }
 
-// Render tracker entries
 function renderTrackerEntries() {
-    if (!currentTracker || !currentTracker.entries) return;
-    
-    const timeSlots = ['morning', 'afternoon', 'evening'];
-    
+    if (!currentTracker) return;
+    const entries = Array.isArray(currentTracker.entries) ? currentTracker.entries : [];
+    const timeSlots = ['morning', 'afternoon', 'evening', 'night'];
     timeSlots.forEach(timeSlot => {
         const container = document.getElementById(`${timeSlot}-activities`);
         if (!container) return;
-        
-        const entries = currentTracker.entries.filter(entry => entry.timeSlot === timeSlot);
-        
-        if (entries.length === 0) {
+        const slotEntries = entries.filter(entry => entry.timeSlot === timeSlot);
+        if (slotEntries.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-4 text-muted">
                     <i class="fas fa-plus-circle fa-2x mb-2"></i>
@@ -128,33 +128,25 @@ function renderTrackerEntries() {
                 </div>
             `;
         } else {
-            container.innerHTML = entries.map(entry => createActivityHTML(entry)).join('');
+            container.innerHTML = slotEntries.map(entry => createActivityHTML(entry)).join('');
         }
-        
-        // Update progress badge for this time slot
-        updateTimeSlotProgress(timeSlot, entries);
+        updateTimeSlotProgress(timeSlot, slotEntries);
     });
-    
     updateProgressDisplay();
 }
 
-// Update time slot progress indicators
 function updateTimeSlotProgress(timeSlot, entries) {
     const progressElement = document.getElementById(`${timeSlot}-progress`);
     if (!progressElement) return;
-    
     const total = entries.length;
     const completed = entries.filter(e => e.status === 'completed').length;
-    
     progressElement.textContent = `${completed} of ${total} completed`;
 }
 
-// Create activity HTML
 function createActivityHTML(entry) {
     const activity = entry.activity;
     const isCompleted = entry.status === 'completed';
     const categoryClass = `category-${activity.category}`;
-    
     return `
         <div class="activity-item ${isCompleted ? 'completed' : ''}" data-entry-id="${entry.id}">
             <div class="d-flex align-items-center justify-content-between">
@@ -181,109 +173,144 @@ function createActivityHTML(entry) {
     `;
 }
 
-// Show add activity modal
 function showAddActivityModal(timeSlot) {
     currentTimeSlot = timeSlot;
     const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
     const timeSlotSelect = document.getElementById('timeSlot');
-    
     if (timeSlotSelect) {
         timeSlotSelect.value = timeSlot;
     }
-    
+    console.log('[DEBUG] Opening Add Activity Modal. activities:', activities);
+    populateActivitySelect(); // Ensure dropdown is populated every time modal opens
     modal.show();
 }
+window.showAddActivityModal = showAddActivityModal;
 
-// Toggle custom activity fields
 function toggleCustomActivityFields() {
-    const checkbox = document.getElementById('createCustom');
-    const fields = document.getElementById('customActivityFields');
+    const customFields = document.getElementById('customActivityFields');
     const activitySelect = document.getElementById('activitySelect');
-    
-    if (checkbox && fields && activitySelect) {
-        if (checkbox.checked) {
-            fields.style.display = 'block';
-            activitySelect.disabled = true;
-        } else {
-            fields.style.display = 'none';
-            activitySelect.disabled = false;
-        }
+    const createCustom = document.getElementById('createCustom');
+    if (createCustom.checked) {
+        customFields.style.display = 'block';
+        activitySelect.disabled = true;
+    } else {
+        customFields.style.display = 'none';
+        activitySelect.disabled = false;
     }
 }
 
-// Populate activity select
+// Group activities by category and time slot for the dropdown
 function populateActivitySelect() {
     const select = document.getElementById('activitySelect');
-    if (!select || !activities) return;
-    
-    // Filter activities based on time slot
-    const filteredActivities = getTimeAppropriateActivities(currentTimeSlot, activities);
-    
-    select.innerHTML = '<option value="">Select an activity</option>';
-    
-    filteredActivities.forEach(activity => {
+    if (!select || !activities) {
+        console.log('[DEBUG] No select element or activities array missing.');
+        return;
+    }
+    select.innerHTML = '';
+    if (activities.length === 0) {
         const option = document.createElement('option');
-        option.value = activity.id;
-        option.textContent = activity.title;
+        option.value = '';
+        option.textContent = 'No activities available';
         select.appendChild(option);
+        select.disabled = true;
+        return;
+    }
+    select.disabled = false;
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select an activity';
+    select.appendChild(defaultOption);
+    // Group by category and time slot
+    const grouped = {};
+    activities.forEach(activity => {
+        const groupKey = `${activity.category} - ${activity.timeOfDay || 'any'}`;
+        if (!grouped[groupKey]) grouped[groupKey] = [];
+        grouped[groupKey].push(activity);
+    });
+    Object.keys(grouped).forEach(groupKey => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+        grouped[groupKey].forEach(activity => {
+            const option = document.createElement('option');
+            option.value = activity.id;
+            option.textContent = activity.title;
+            option.title = activity.description || '';
+            optgroup.appendChild(option);
+        });
+        select.appendChild(optgroup);
     });
 }
 
-// Get time-appropriate activities
-function getTimeAppropriateActivities(timeSlot, allActivities) {
-    const morningActivities = ['Morning Meditation', 'Healthy Breakfast', 'Protein Shake', 'Stretching', 'Goal Visualization', 'Gratitude Journal'];
-    const afternoonActivities = ['HIIT Training', 'Push-ups', 'Squats', 'Planks', '30-min Walk', 'Meal Prep', 'Track Calories', 'Progress Photos'];
-    const eveningActivities = ['8 Hours Sleep', 'Foam Rolling', 'Hot Bath', 'Massage', 'Drink 8 Glasses Water', 'Positive Affirmations'];
-    
-    return allActivities.filter(activity => {
-        if (activity.isCustom) return true;
-        
-        switch (timeSlot) {
-            case 'morning':
-                return morningActivities.some(title => activity.title.includes(title) || title.includes(activity.title));
-            case 'afternoon':
-                return afternoonActivities.some(title => activity.title.includes(title) || title.includes(activity.title));
-            case 'evening':
-                return eveningActivities.some(title => activity.title.includes(title) || title.includes(activity.title));
-            default:
-                return true;
+// Show/hide custom activity form
+const showCustomBtn = document.getElementById('showCustomActivityFields');
+if (showCustomBtn) {
+    showCustomBtn.addEventListener('click', function() {
+        document.getElementById('customActivityFields').style.display = 'block';
+        document.getElementById('addActivityForm').scrollIntoView({ behavior: 'smooth' });
+    });
+}
+
+const createCustomBtn = document.getElementById('createCustomActivityBtn');
+if (createCustomBtn) {
+    createCustomBtn.addEventListener('click', async function() {
+        const title = document.getElementById('customTitle').value;
+        const description = document.getElementById('customDescription').value;
+        const category = document.getElementById('customCategory').value;
+        const timeOfDay = document.getElementById('customTimeSlot').value;
+        if (!title || !category || !timeOfDay) {
+            showAlert('Please fill in all required fields for custom activity.', 'warning');
+            return;
+        }
+        try {
+            const response = await fetch('/api/activities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description, category, timeOfDay, isCustom: true })
+            });
+            if (!response.ok) throw new Error('Failed to create custom activity');
+            const newActivity = await response.json();
+            activities.push(newActivity);
+            populateActivitySelect();
+            document.getElementById('activitySelect').value = newActivity.id;
+            document.getElementById('customActivityFields').style.display = 'none';
+            showAlert('Custom activity created!', 'success');
+        } catch (error) {
+            showAlert('Failed to create custom activity', 'danger');
         }
     });
 }
 
-// Add activity
+function getTimeAppropriateActivities(timeSlot, allActivities) {
+    // Return all activities, regardless of time slot
+    return allActivities;
+}
+
 async function addActivity() {
     const form = document.getElementById('addActivityForm');
     const formData = new FormData(form);
-    const isCustom = document.getElementById('createCustom').checked;
-    
     try {
         let activityId;
-        
-        if (isCustom) {
-            // Create custom activity first
-            const customActivity = {
-                title: formData.get('customTitle'),
-                description: formData.get('customDescription'),
-                category: formData.get('customCategory'),
-                isCustom: true
-            };
-            
+        if (document.getElementById('customActivityFields').style.display === 'block') {
+            // Custom activity creation
+            const title = formData.get('customTitle');
+            const description = formData.get('customDescription');
+            const category = formData.get('customCategory');
+            const timeOfDay = formData.get('customTimeSlot');
+            if (!title || !category || !timeOfDay) {
+                showAlert('Please fill in all required fields for custom activity.', 'warning');
+                return;
+            }
             const activityResponse = await fetch('/api/activities', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(customActivity)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description, category, timeOfDay, isCustom: true })
             });
-            
-            if (!activityResponse.ok) {
-                throw new Error('Failed to create custom activity');
-            }
-            
+            if (!activityResponse.ok) throw new Error('Failed to create custom activity');
             const newActivity = await activityResponse.json();
             activityId = newActivity.id;
             activities.push(newActivity);
+            populateActivitySelect();
+            document.getElementById('activitySelect').value = newActivity.id;
         } else {
             activityId = parseInt(formData.get('activityId'));
             if (!activityId) {
@@ -291,45 +318,30 @@ async function addActivity() {
                 return;
             }
         }
-        
-        // Add to tracker
+        // Always use the selected time slot from the timeSlotSelect
+        const timeSlot = formData.get('timeSlot');
+        if (!timeSlot) {
+            showAlert('Please select a time slot.', 'warning');
+            return;
+        }
         const trackerEntry = {
             trackerId: currentTracker.id,
             activityId: activityId,
-            timeSlot: formData.get('timeSlot'),
+            timeSlot: timeSlot,
             status: 'pending'
         };
-        
         const response = await fetch('/api/tracker/entries', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(trackerEntry)
         });
-        
         if (response.ok) {
-            const entry = await response.json();
-            
-            // Find the activity and attach it to the entry
-            const activity = activities.find(a => a.id === activityId);
-            entry.activity = activity;
-            
-            // Add to current tracker
-            if (!currentTracker.entries) {
-                currentTracker.entries = [];
-            }
-            currentTracker.entries.push(entry);
-            
-            renderTrackerEntries();
-            
-            // Close modal and reset form
+            await loadTodayTracker();
             const modal = bootstrap.Modal.getInstance(document.getElementById('addActivityModal'));
             modal.hide();
             form.reset();
             document.getElementById('customActivityFields').style.display = 'none';
             document.getElementById('activitySelect').disabled = false;
-            
             showAlert('Activity added successfully!', 'success');
         } else {
             throw new Error('Failed to add activity to tracker');
@@ -340,28 +352,21 @@ async function addActivity() {
     }
 }
 
-// Toggle activity status
 async function toggleActivityStatus(entryId, isCompleted) {
     try {
         const status = isCompleted ? 'completed' : 'pending';
-        
         const response = await fetch(`/api/tracker/entries/${entryId}/status`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status })
         });
-        
         if (response.ok) {
-            // Update local state
             const entry = currentTracker.entries.find(e => e.id === entryId);
             if (entry) {
                 entry.status = status;
             }
-            
             renderTrackerEntries();
-            loadStats(); // Refresh stats
+            loadStats();
             showAlert(`Activity marked as ${status}!`, 'success');
         } else {
             throw new Error('Failed to update activity status');
@@ -372,389 +377,215 @@ async function toggleActivityStatus(entryId, isCompleted) {
     }
 }
 
-// Delete activity
+function showConfirmationModal(message, onConfirm) {
+    let modal = document.getElementById('confirmationModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'confirmationModal';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="confirmationModalBody">${message}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmationModalOk">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else {
+        document.getElementById('confirmationModalBody').textContent = message;
+    }
+    const okBtn = document.getElementById('confirmationModalOk');
+    okBtn.onclick = () => {
+        bootstrap.Modal.getInstance(modal).hide();
+        onConfirm();
+    };
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
 async function deleteActivity(entryId) {
-    if (!confirm('Are you sure you want to remove this activity from your tracker?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/tracker/entries/${entryId}`, {
-            method: 'DELETE'
-        });
-        
-        if (response.ok) {
-            // Remove from local state
-            currentTracker.entries = currentTracker.entries.filter(e => e.id !== entryId);
-            
-            renderTrackerEntries();
-            loadStats(); // Refresh stats
-            showAlert('Activity removed successfully!', 'success');
-        } else {
-            throw new Error('Failed to delete activity');
-        }
-    } catch (error) {
-        console.error('Error deleting activity:', error);
-        showAlert('Failed to remove activity', 'danger');
-    }
-}
-
-// Update progress display
-function updateProgressDisplay() {
-    if (!currentTracker || !currentTracker.entries) return;
-    
-    const total = currentTracker.entries.length;
-    const completed = currentTracker.entries.filter(e => e.status === 'completed').length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
-    const percentageElement = document.getElementById('completionPercentage');
-    if (percentageElement) {
-        percentageElement.textContent = `${percentage}%`;
-    }
-    
-    // Update progress chart
-    updateProgressChart(percentage);
-}
-
-// Initialize progress chart
-function initializeProgressChart() {
-    const canvas = document.getElementById('progressChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    
-    window.progressChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [0, 100],
-                backgroundColor: ['#0d6efd', '#e9ecef'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%',
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    showConfirmationModal('Are you sure you want to remove this activity from your tracker?', async function() {
+        try {
+            const response = await fetch(`/api/tracker/entries/${entryId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                currentTracker.entries = currentTracker.entries.filter(e => e.id !== entryId);
+                renderTrackerEntries();
+                loadStats();
+                showAlert('Activity removed successfully!', 'success');
+            } else {
+                throw new Error('Failed to delete activity');
             }
+        } catch (error) {
+            console.error('Error deleting activity:', error);
+            showAlert('Failed to remove activity', 'danger');
         }
     });
 }
 
-// Update progress chart
-function updateProgressChart(percentage) {
-    if (window.progressChart) {
-        window.progressChart.data.datasets[0].data = [percentage, 100 - percentage];
-        window.progressChart.update();
-    }
+function updateProgressCircle(percentage) {
+    const circle = document.getElementById('completionBar');
+    if (!circle) return;
+    const pct = Math.max(0, Math.min(100, percentage));
+    const radius = 62;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (pct / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
 }
 
-// Update stats display
+function updateProgressDisplay() {
+    if (!currentTracker || !currentTracker.entries) return;
+    const total = currentTracker.entries.length;
+    const completed = currentTracker.entries.filter(e => e.status === 'completed').length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const percentageElement = document.getElementById('completionPercentage');
+    if (percentageElement) {
+        percentageElement.textContent = `${percentage}%`;
+    }
+    updateProgressCircle(percentage);
+}
+
+// Remove Chart.js progress circle code
+// - Remove initializeProgressChart
+// - Remove updateProgressChart
+// - Remove any references to window.progressChart
+
+window.currentUser = window.currentUser || {};
+
 function updateStatsDisplay(stats) {
-    console.log('Updating stats display with data:', stats);
-    
-    // Ensure we have valid stats object
     if (!stats || typeof stats !== 'object') {
-        console.error('Invalid stats object:', stats);
-        stats = {
-            currentStreak: 0,
-            weeklyAverage: 0,
-            totalActivities: 0
-        };
+        stats = { currentStreak: 0, weeklyAverage: 0, totalActivities: 0 };
     }
-    
-    // Handle error case where stats fetch failed
     if (stats.message) {
-        console.error('Stats error:', stats.message);
-        stats = {
-            currentStreak: 0,
-            weeklyAverage: 0,
-            totalActivities: 0
-        };
+        stats = { currentStreak: 0, weeklyAverage: 0, totalActivities: 0 };
     }
-    
-    // Update streak value and progress - using correct IDs from dashboard
+    // Streak
     const streakValue = document.getElementById('currentStreak');
-    const streakProgress = document.getElementById('streakBar');
-    const streakMessage = document.getElementById('streakMessage');
-    
-    console.log('Updating streak display - Current streak:', stats.currentStreak);
-    
-    if (streakValue) {
-        streakValue.innerHTML = '';
-        streakValue.textContent = stats.currentStreak || 0;
+    if (streakValue) streakValue.textContent = stats.currentStreak || 0;
+    // Weekly Avg
+    const weeklyElement = document.getElementById('weeklyAverage');
+    if (weeklyElement) weeklyElement.textContent = (typeof stats.weeklyAverage === 'number' && !isNaN(stats.weeklyAverage) ? stats.weeklyAverage : 0) + '%';
+    // Accountability
+    const accountabilityScore = document.getElementById('accountabilityScore');
+    if (accountabilityScore && typeof stats.accountabilityCountdown !== 'undefined') accountabilityScore.textContent = stats.accountabilityCountdown;
+    const accountabilityMsg = document.querySelector('#accountabilityScore')?.parentElement?.parentElement?.querySelector('.text-muted.small');
+    if (accountabilityMsg && typeof stats.accountabilityMessage === 'string') accountabilityMsg.textContent = stats.accountabilityMessage;
+    // Level Up Message
+    const levelUpBanner = document.getElementById('levelUpMessageBanner');
+    if (levelUpBanner && typeof stats.levelUpMessage === 'string') {
+        levelUpBanner.textContent = stats.levelUpMessage;
+        levelUpBanner.style.display = stats.levelUpMessage ? 'block' : 'none';
     }
-    
-    if (streakProgress) {
-        const progressPercent = Math.min((stats.currentStreak || 0) / 21 * 100, 100); // 21 days = 100%
-        streakProgress.style.width = `${progressPercent}%`;
-    }
-    
-    if (streakMessage) {
-        const streak = stats.currentStreak || 0;
-        if (streak === 0) {
-            streakMessage.textContent = 'Start your streak today!';
-        } else if (streak < 7) {
-            streakMessage.textContent = `${streak} days strong - keep building!`;
-        } else if (streak >= 21) {
-            streakMessage.textContent = `${streak} days - you're unstoppable!`;
-        } else {
-            streakMessage.textContent = `${streak} days - incredible consistency!`;
+    // Tier Progress
+    const tierProgressText = document.getElementById('tierProgressText');
+    if (tierProgressText) {
+        if (stats.tier === 'gold') tierProgressText.textContent = 'Max tier!';
+        else {
+            const days = typeof stats.successfulDays30 === 'number' && !isNaN(stats.successfulDays30) ? stats.successfulDays30 : 0;
+            const total = typeof stats.totalDays30 === 'number' && !isNaN(stats.totalDays30) ? stats.totalDays30 : 30;
+            tierProgressText.textContent = `${days}/${total} to Silver`;
         }
     }
-    
-    // Update weekly average - using correct ID
-    const weeklyValue = document.getElementById('weeklyAverage');
-    if (weeklyValue) {
-        weeklyValue.textContent = `${stats.weeklyAverage || 0}%`;
+    // Accountability Progress
+    const accountabilityProgressText = document.getElementById('accountabilityProgressText');
+    if (accountabilityProgressText) {
+        const days = typeof stats.successfulDays90 === 'number' && !isNaN(stats.successfulDays90) ? stats.successfulDays90 : 0;
+        accountabilityProgressText.textContent = `${days}/90 to Intermediate`;
     }
-    
-    // Update total activities - using correct ID with forced refresh
+    // Total Activities
     const totalValue = document.getElementById('totalActivities');
-    if (totalValue) {
-        const totalActivities = stats.totalActivities || 0;
-        console.log('Updating totalActivities element with value:', totalActivities);
-        totalValue.innerHTML = '';
-        totalValue.textContent = totalActivities;
-        totalValue.setAttribute('data-value', totalActivities);
-        
-        // Force DOM update
-        totalValue.style.display = 'none';
-        totalValue.offsetHeight; // trigger reflow
-        totalValue.style.display = '';
-    } else {
-        console.error('totalActivities element not found');
+    if (totalValue) totalValue.textContent = stats.totalActivities || 0;
+    // Progress Bars
+    const tierProgressBar = document.getElementById('tierProgressBar');
+    if (tierProgressBar) {
+        let progress = 0;
+        if (stats.tier === 'gold') progress = 100;
+        else {
+            const days = typeof stats.successfulDays30 === 'number' && !isNaN(stats.successfulDays30) ? stats.successfulDays30 : 0;
+            const total = typeof stats.totalDays30 === 'number' && !isNaN(stats.totalDays30) ? stats.totalDays30 : 30;
+            progress = total > 0 ? Math.min(100, Math.round((days / total) * 100)) : 0;
+        }
+        tierProgressBar.style.width = progress + '%';
     }
-    
-    // Update achievement level with correct total
-    console.log('About to call updateAchievementLevel with total:', stats.totalActivities);
-    updateAchievementLevel(stats);
-    
-    // Update subscription status
-    console.log('About to call updateSubscriptionStatus with streak:', stats.currentStreak, 'totalActivities:', stats.totalActivities);
-    updateSubscriptionStatus(stats);
+    const weeklyBar = document.getElementById('weeklyBar');
+    if (weeklyBar) {
+        const avg = typeof stats.weeklyAverage === 'number' && !isNaN(stats.weeklyAverage) ? stats.weeklyAverage : 0;
+        weeklyBar.style.width = Math.min(100, avg) + '%';
+    }
+    // Tooltips
+    if (window.bootstrap) {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
+    }
 }
 
-// Update achievement level based on stats
-function updateAchievementLevel(stats) {
-    console.log('updateAchievementLevel called with stats:', stats);
-    
+function updateAchievementLevel(totalActivitiesCompleted) {
     const achievementBadge = document.getElementById('achievementBadge');
-    if (!achievementBadge) {
-        console.error('achievementBadge element not found');
-        return;
-    }
-    
-    const streak = stats.currentStreak || 0;
-    const total = stats.totalActivities || 0;
-    
-    console.log('UpdateAchievementLevel - Processing total activities:', total, 'streak:', streak);
-    
+    if (!achievementBadge) return;
     let level = 'Beginner';
     let badgeStyle = '';
-    
-    // Determine level based on total activities
-    if (total >= 100) {
+    if (totalActivitiesCompleted >= 100) {
         level = 'Master';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        console.log('Setting Master level for', total, 'activities');
         applyMasterTheme();
-    } else if (total >= 50) {
+    } else if (totalActivitiesCompleted >= 50) {
         level = 'Advanced';
         badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        console.log('Setting Advanced level for', total, 'activities');
         applyMasterTheme();
-    } else if (total >= 25) {
+    } else if (totalActivitiesCompleted >= 25) {
         level = 'Intermediate';
         badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
-        console.log('Setting Intermediate level for', total, 'activities');
         applyIntermediateTheme();
     } else {
         level = 'Beginner';
         badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-        console.log('Setting Beginner level for', total, 'activities');
         applyBeginnerTheme();
     }
-    
-    console.log('Final level decision:', level, 'for total activities:', total);
-    
-    // Update the badge
     achievementBadge.innerHTML = '';
     achievementBadge.textContent = level;
     achievementBadge.className = 'badge achievement-badge-large';
     achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
-    
-    // Force visual update
     achievementBadge.style.display = 'none';
-    achievementBadge.offsetHeight; // trigger reflow
+    achievementBadge.offsetHeight;
     achievementBadge.style.display = 'inline-block';
 }
 
-// Apply Master/Advanced theme (Purple)
 function applyMasterTheme() {
-    console.log('Applying Master theme (purple)');
-    
-    // Update streak card
-    const streakCard = document.querySelector('.card:has(#currentStreak)');
-    if (streakCard) {
-        streakCard.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        streakCard.style.color = 'white';
-    }
-    
-    // Update achievement icon
-    const achievementIcon = document.querySelector('.achievement-icon-large');
-    if (achievementIcon) {
-        achievementIcon.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    }
+    // ...
 }
-
-// Apply Intermediate theme (Red)
 function applyIntermediateTheme() {
-    console.log('Applying Intermediate theme (red)');
-    
-    // Update streak card
-    const streakCard = document.querySelector('.card:has(#currentStreak)');
-    if (streakCard) {
-        streakCard.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
-        streakCard.style.color = 'white';
-    }
-    
-    // Update achievement icon
-    const achievementIcon = document.querySelector('.achievement-icon-large');
-    if (achievementIcon) {
-        achievementIcon.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
-    }
+    // ...
 }
-
-// Apply Beginner theme (Green)
 function applyBeginnerTheme() {
-    console.log('Applying Beginner theme (green)');
-    
-    // Update streak card
-    const streakCard = document.querySelector('.card:has(#currentStreak)');
-    if (streakCard) {
-        streakCard.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
-        streakCard.style.color = 'white';
-    }
-    
-    // Update achievement icon
-    const achievementIcon = document.querySelector('.achievement-icon-large');
-    if (achievementIcon) {
-        achievementIcon.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
-    }
+    // ...
 }
-
-// Update subscription status based on stats - FIXED VERSION
-function updateSubscriptionStatus(stats) {
-    console.log('NEW VERSION - updateSubscriptionStatus called with:', stats);
-    
-    const subscriptionBadge = document.getElementById('subscriptionStatus');
-    if (!subscriptionBadge) {
-        console.error('subscriptionStatus element not found');
-        return;
-    }
-    
-    const userStreak = stats.currentStreak || 0;
-    const userTotal = stats.totalActivities || 0;
-    
-    console.log('NEW VERSION - Processing subscription - streak:', userStreak, 'total:', userTotal);
-    
-    let planStatus = 'Free Plan';
-    let badgeStyle = 'background: #6c757d; color: white; border: none;';
-    
-    // Dynamic subscription status calculation using configuration constants
-    if (userStreak >= SUBSCRIPTION_THRESHOLDS.PREMIUM_EARNED.streak && 
-        userTotal >= SUBSCRIPTION_THRESHOLDS.PREMIUM_EARNED.activities) {
-        planStatus = 'Premium Earned';
-        badgeStyle = `background: ${COLORS.GOLD.gradient}; color: white; border: none;`;
-        console.log('SUBSCRIPTION: Premium Earned -', { streak: userStreak, total: userTotal });
-    } else if (userStreak >= SUBSCRIPTION_THRESHOLDS.ALMOST_PREMIUM.streak && 
-               userTotal >= SUBSCRIPTION_THRESHOLDS.ALMOST_PREMIUM.activities) {
-        planStatus = 'Almost Premium';
-        badgeStyle = `background: ${COLORS.SILVER.gradient}; color: white; border: none;`;
-        console.log('SUBSCRIPTION: Almost Premium -', { streak: userStreak, total: userTotal });
-    } else {
-        planStatus = 'Free Plan';
-        badgeStyle = `background: ${COLORS.BRONZE.gradient}; color: white; border: none;`;
-        console.log('SUBSCRIPTION: Free Plan -', { streak: userStreak, total: userTotal });
-    }
-    
-    console.log('NEW VERSION - Final result:', planStatus);
-    
-    // Update the subscription badge
-    subscriptionBadge.textContent = planStatus;
-    subscriptionBadge.className = 'badge px-3 py-2';
-    subscriptionBadge.style.cssText = badgeStyle;
-    
-    console.log('NEW VERSION - Subscription status updated to:', planStatus);
-}
-
-// Load popular activities
-function loadPopularActivities() {
-    const container = document.getElementById('popular-activities');
+function applyDashboardTheme(tier) {
+    const container = document.querySelector('.quick-stats');
     if (!container) return;
-    
-    const popularActivities = activities.slice(0, 5);
-    
-    if (popularActivities.length === 0) {
-        container.innerHTML = '<p class="text-muted small">No activities available</p>';
-        return;
-    }
-    
-    container.innerHTML = popularActivities.map(activity => `
-        <div class="d-flex align-items-center mb-2">
-            <span class="badge category-${activity.category} me-2">${activity.category}</span>
-            <small class="text-truncate">${activity.title}</small>
-        </div>
-    `).join('');
+    container.classList.remove('theme-bronze', 'theme-silver', 'theme-gold');
+    if (tier === 'gold') container.classList.add('theme-gold');
+    else if (tier === 'silver') container.classList.add('theme-silver');
+    else container.classList.add('theme-bronze');
 }
-
-// Show alert
+function updateSubscriptionStatus(streak, totalActivitiesCompleted) {
+    // ...
+}
+function loadPopularActivities() {
+    // ...
+}
 function showAlert(message, type = 'info') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Insert after navbar
-    const navbar = document.querySelector('.navbar');
-    if (navbar) {
-        navbar.insertAdjacentElement('afterend', alertDiv);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv && alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
-    }
+    // ...
 }
-
-// Initialize form validation
 function initializeFormValidation() {
-    // Registration form validation
-    const registerForm = document.querySelector('form[action="/register"]');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                showAlert('Passwords do not match', 'danger');
-            }
-            
-            if (password.length < 6) {
-                e.preventDefault();
-                showAlert('Password must be at least 6 characters long', 'danger');
-            }
-        });
-    }
-}// Cache buster: 
-Thu Jun 19 06:26:33 AM UTC 2025
+    // ...
+}

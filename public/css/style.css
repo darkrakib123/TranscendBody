@@ -1,474 +1,543 @@
 /* Custom CSS for Transcend Your Body */
 
 :root {
-    --primary-color: #0d6efd;
-    --success-color: #198754;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --info-color: #0dcaf0;
-    --dark-color: #212529;
-    --purple-color: #6f42c1;
+  --primary-color: #0d6efd;
+  --success-color: #198754;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #0dcaf0;
+  --dark-color: #212529;
+  --purple-color: #6f42c1;
 }
 
 /* Global Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    background-color: #f8f9fa;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: #f8f9fa;
 }
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
-    min-height: 60vh;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+  min-height: 60vh;
 }
 
 /* Feature Icons */
 .feature-icon {
-    width: 80px;
-    height: 80px;
-    font-size: 1.5rem;
+  width: 80px;
+  height: 80px;
+  font-size: 1.5rem;
 }
 
 .time-icon {
-    width: 50px;
-    height: 50px;
+  width: 50px;
+  height: 50px;
 }
 
 /* Purple Background */
 .bg-purple {
-    background-color: var(--purple-color) !important;
+  background-color: var(--purple-color) !important;
 }
 
 /* Card Hover Effects */
 .card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
 .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Activity Cards */
 .activity-item {
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    background: white;
-    transition: all 0.2s ease;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: white;
+  transition: all 0.2s ease;
 }
 
 .activity-item:hover {
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
 }
 
 .activity-item.completed {
-    background-color: #f8f9fa;
-    opacity: 0.8;
+  background-color: #f8f9fa;
+  opacity: 0.8;
 }
 
 .activity-item.completed .activity-title {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }
 
 /* Category Badges */
 .category-workout {
-    background-color: var(--success-color);
-    color: white;
+  background-color: var(--success-color);
+  color: white;
 }
 
 .category-nutrition {
-    background-color: var(--warning-color);
-    color: black;
+  background-color: var(--warning-color);
+  color: black;
 }
 
 .category-recovery {
-    background-color: var(--info-color);
-    color: black;
+  background-color: var(--info-color);
+  color: black;
 }
 
 .category-mindset {
-    background-color: var(--purple-color);
-    color: white;
+  background-color: var(--purple-color);
+  color: white;
 }
 
 /* Additional Badge Styles */
 .bg-purple {
-    background-color: var(--purple-color) !important;
+  background-color: var(--purple-color) !important;
 }
 
 .text-purple {
-    color: var(--purple-color) !important;
+  color: var(--purple-color) !important;
 }
 
 /* Progress Chart */
 .progress-circle {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 /* Stats */
 .stat-item {
-    padding: 0.5rem;
-    border-radius: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
 }
 
 .stat-item h4 {
-    font-weight: 700;
+  font-weight: 700;
 }
 
 /* Time Slot Headers */
 .time-slot-header {
-    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
-    border: none;
-    backdrop-filter: blur(10px);
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.2)
+  );
+  border: none;
+  backdrop-filter: blur(10px);
 }
 
 /* Custom Button Styles */
 .btn-floating {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 /* Loading States */
 .loading {
-    opacity: 0.6;
-    pointer-events: none;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Form Enhancements */
 .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 /* Modal Enhancements */
 .modal-content {
-    border: none;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  border: none;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
 }
 
 .modal-header {
-    border-bottom: 1px solid #e9ecef;
-    background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
 }
 
 /* Navigation Enhancements */
 .navbar-brand {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .navbar-nav .nav-link {
-    transition: color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .navbar-nav .nav-link:hover {
-    color: rgba(255, 255, 255, 0.8) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Alert Customizations */
 .alert {
-    border: none;
-    border-radius: 0.5rem;
-    margin-bottom: 0;
+  border: none;
+  border-radius: 0.5rem;
+  margin-bottom: 0;
 }
 
 /* Footer */
 footer {
-    background-color: var(--dark-color) !important;
+  background-color: var(--dark-color) !important;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .hero-section {
-        min-height: 50vh;
-    }
-    
-    .feature-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 1.25rem;
-    }
-    
-    .time-icon {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .btn-floating {
-        bottom: 1rem;
-        right: 1rem;
-        width: 50px;
-        height: 50px;
-    }
+  .hero-section {
+    min-height: 50vh;
+  }
+
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.25rem;
+  }
+
+  .time-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .btn-floating {
+    bottom: 1rem;
+    right: 1rem;
+    width: 50px;
+    height: 50px;
+  }
 }
 
 /* Animation Classes */
 .fade-in {
-    animation: fadeIn 0.5s ease-in;
+  animation: fadeIn 0.5s ease-in;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .slide-in {
-    animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.3s ease-out;
 }
 
 @keyframes slideIn {
-    from {
-        transform: translateX(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Chart Container */
 .chart-container {
-    position: relative;
-    height: 300px;
+  position: relative;
+  height: 300px;
 }
 
 /* Activity List */
 .activity-list {
-    max-height: 400px;
-    overflow-y: auto;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 /* Custom Scrollbar */
 .activity-list::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .activity-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+  background: #f1f1f1;
+  border-radius: 3px;
 }
 
 .activity-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+  background: #c1c1c1;
+  border-radius: 3px;
 }
 
 .activity-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+  background: #a8a8a8;
 }
 
 /* Delete Button */
 .btn-delete {
-    opacity: 0;
-    transition: opacity 0.2s ease;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .activity-item:hover .btn-delete {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* Progress Bar Enhancements */
 .progress {
-    height: 6px;
-    border-radius: 3px;
+  height: 6px;
+  border-radius: 3px;
 }
 
 .progress-bar {
-    border-radius: 3px;
+  border-radius: 3px;
 }
 
 /* Table Enhancements */
 .table th {
-    border-top: none;
-    font-weight: 600;
-    color: var(--dark-color);
+  border-top: none;
+  font-weight: 600;
+  color: var(--dark-color);
 }
 
 /* Badge Enhancements */
 .badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
 }
 
 /* Button Group */
 .btn-group .btn {
-    border-color: rgba(0, 0, 0, 0.125);
+  border-color: rgba(0, 0, 0, 0.125);
 }
 
 /* Custom Toggle */
 .form-check-input:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* Tooltip Enhancements */
 .tooltip .tooltip-inner {
-    background-color: var(--dark-color);
-    font-size: 0.8rem;
+  background-color: var(--dark-color);
+  font-size: 0.8rem;
 }
 
 /* Dropdown Enhancements */
 .dropdown-menu {
-    border: none;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    border-radius: 0.5rem;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
 }
 
 .dropdown-item:hover {
-    background-color: var(--primary-color);
-    color: white;
+  background-color: var(--primary-color);
+  color: white;
 }
 
 /* Progress Dashboard Styles */
 .progress-dashboard {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
 }
 
 .progress-card {
-    background: white;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 .progress-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .progress-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-    font-size: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 14px;
 }
 
 .streak-icon {
-    background: linear-gradient(135deg, #ff6b35, #f7931e);
-    color: white;
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: white;
 }
 
 .weekly-icon {
-    background: linear-gradient(135deg, #4ecdc4, #44a08d);
-    color: white;
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
 }
 
 .total-icon {
-    background: linear-gradient(135deg, #ffd700, #ffb347);
-    color: white;
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+  color: white;
 }
 
 .progress-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
 }
 
 .progress-value {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
 }
 
 .progress-bar-container {
-    width: 100%;
-    height: 6px;
-    background: #e9ecef;
-    border-radius: 3px;
-    overflow: hidden;
-    margin: 8px 0 4px 0;
+  width: 100%;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0 4px 0;
 }
 
 .progress-bar {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s ease;
-    position: relative;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  position: relative;
 }
 
 .streak-bar {
-    background: linear-gradient(90deg, #ff6b35, #f7931e);
+  background: linear-gradient(90deg, #ff6b35, #f7931e);
 }
 
 .weekly-bar {
-    background: linear-gradient(90deg, #4ecdc4, #44a08d);
+  background: linear-gradient(90deg, #4ecdc4, #44a08d);
 }
 
 .progress-message {
-    font-size: 11px;
-    color: #666;
-    font-weight: 500;
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
 }
 
 .achievement-level {
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #ffd700, #ffb347);
-    color: white;
-    font-weight: 600;
-    text-align: center;
-    margin-top: 4px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 4px;
 }
 
 @keyframes progressGlow {
-    0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.3); }
-    50% { box-shadow: 0 0 10px rgba(255, 107, 53, 0.6); }
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.6);
+  }
 }
 
 /* Activity Library Styles */
 .activity-library-item {
-    transition: all 0.2s ease;
-    cursor: pointer;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .activity-library-item:hover {
-    background-color: #f8f9fa !important;
-    transform: translateY(-1px);
+  background-color: #f8f9fa !important;
+  transform: translateY(-1px);
+}
+
+.custom-tooltip {
+  display: none;
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  z-index: 10;
+  white-space: pre-line;
+  min-width: 220px;
+}
+
+/* === Level (Header) Color Schemes === */
+.level-bronze {
+  background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%) !important;
+  color: #fff !important;
+}
+.level-silver {
+  background: linear-gradient(135deg, #c0c0c0 0%, #afafaf 100%) !important;
+  color: #333 !important;
+}
+.level-gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffc300 100%) !important;
+  color: #333 !important;
+}
+.level-platinum {
+  background: linear-gradient(135deg, #e5e4e2 0%, #b3b3b3 100%) !important;
+  color: #333 !important;
+}
+.level-master {
+  background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%) !important;
+  color: #fff !important;
+}
+
+/* === Tier (Quick Stats) Color Schemes === */
+.tier-bronze {
+  background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%) !important;
+  color: #fff !important;
+}
+.tier-silver {
+  background: linear-gradient(135deg, #c0c0c0 0%, #afafaf 100%) !important;
+  color: #333 !important;
+}
+.tier-gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffc300 100%) !important;
+  color: #333 !important;
+}
+.tier-platinum {
+  background: linear-gradient(135deg, #e5e4e2 0%, #b3b3b3 100%) !important;
+  color: #333 !important;
+}
+.tier-master {
+  background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%) !important;
+  color: #fff !important;
 }
