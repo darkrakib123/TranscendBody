@@ -134,11 +134,24 @@ tracker_entries (
    ```
 
 4. **Database Setup**
+
+   ✅ **Recommended for full demo setup**
    ```bash
-   # Push database schema
+   # Check PostgreSQL connection
+   pg_isready
+
+   # Clean and reseed the database with master activities and demo users
+   npx tsx scripts/cleanAndSeed.ts
+   # OR (depending on config)
+   node --loader ts-node/esm scripts/cleanAndSeed.ts
+   ```
+
+   🔁 **Alternative (use only if the above is not viable)**
+   ```bash
+   # Push database schema (optional)
    npm run db:push
-   
-   # Seed initial data
+
+   # Seed initial data (optional)
    npm run seed
    ```
 
@@ -151,17 +164,15 @@ tracker_entries (
    - Main app: http://localhost:5050
    - Admin panel: http://localhost:5050/admin
 
-### Demo Accounts
+## Demo Accounts
 
 For testing purposes, the following demo accounts are available:
 
-| Email | Password | Tier | Level | Plan |
-|-------|----------|------|-------|------|
-| admin@demo.com | test | Gold | Master | Pro |
-| master@demo.com | test | Bronze | Master | Pro |
-| bronze@demo.com | test | Bronze | Beginner | Basic |
-| gold@demo.com | test | Gold | Beginner | Basic |
-| silver@demo.com | test | Silver | Intermediate | Pro |
+| Email             | Password | Tier   | Level      | Plan  |
+|------------------|----------|--------|------------|-------|
+| admin@demo.com   | test     | Gold   | Master     | Pro   |
+| bronze@demo.com  | test     | Bronze | Beginner   | Basic |
+| silver@demo.com  | test     | Silver | Intermediate | Pro |
 
 ## 📁 Project Structure
 
