@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
 import type { Express, RequestHandler } from 'express';
-import { storage } from './storage';
+import { storage } from './storage.js';
 
 export function setupAuthentication(app: Express) {
   // Session configuration

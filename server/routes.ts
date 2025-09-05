@@ -23,13 +23,13 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import { eq, and, desc } from "drizzle-orm";
-import { db } from "./db";
+import { db } from "./db.js";
 import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
-import { isValidPlan } from "./validators"; // Plan validation utility
-import { setFlash } from "./auth"; // Flash message middleware
+import { isValidPlan } from "./validators.js"; // Plan validation utility
+import { setFlash } from "./auth.js"; // Flash message middleware
 import crypto from "crypto";
 import { sql } from "drizzle-orm";
-import { computeUserProgress } from './progress';
+import { computeUserProgress } from './progress.js';
 import { inArray } from 'drizzle-orm';
 
 const router = express.Router();
