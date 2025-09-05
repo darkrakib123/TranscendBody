@@ -1,42 +1,53 @@
 /**
  * TranscendBody - Database Connection and ORM Setup
  * 
- * This file configures the database connection using SQLite for local development
+ * This file configures the database connection using PostgreSQL
  * and Drizzle ORM for the personal transformation tracking application.
  * 
  * Features:
- * - SQLite connection for local development (no external database required)
+ * - PostgreSQL connection with environment-based configuration
  * - Drizzle ORM configuration with schema
- * - Environment-based database URL configuration
  * - Type-safe database operations
+ * - Connection pooling and error handling
  * - Graceful shutdown handling
  */
 
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { drizzleSchema } from '../shared/schema.ts';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { drizzleSchema } from '../shared/schema.js';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Load .env
+dotenv.config();
 
-// Create SQLite connection for local development
-const sqlite = new Database('./local.db');
+// Create PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 // Create Drizzle instance
-export const db = drizzle(sqlite, {
+export const db = drizzle(pool, {
   schema: drizzleSchema,
   logger: process.env.NODE_ENV === 'development',
+});
+
+// Test connection
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL database');
+});
+
+pool.on('error', (err) => {
+  console.error('PostgreSQL connection error:', err);
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Closing database connection...');
-  sqlite.close();
+  await pool.end();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('Closing database connection...');
-  sqlite.close();
+  await pool.end();
   process.exit(0);
 });

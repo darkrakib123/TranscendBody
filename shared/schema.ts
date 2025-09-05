@@ -20,63 +20,65 @@
  */
 
 import {
-  sqliteTable,
+  pgTable,
   text,
-  integer,
+  serial,
   boolean,
-} from "drizzle-orm/better-sqlite3";
+  timestamp,
+  integer,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
-export const sessions = sqliteTable(
+// Session storage table (required for authentication)
+export const sessions = pgTable(
   "sessions",
   {
     sid: text("sid").primaryKey(),
     sess: text("sess").notNull(),
-    expire: integer("expire").notNull(),
+    expire: timestamp("expire").notNull(),
   },
 );
 
 // User storage table for traditional authentication
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey().notNull(),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
   preferredName: text("preferred_name"),
-  gender: text("gender"),               // ⬅️ new field
-  age: integer("age"),                                     // ⬅️ new field
+  gender: text("gender"),
+  age: integer("age"),
   role: text("role").notNull().default("user"),
-  plan: text("plan"), // 'basic' or 'pro'
+  plan: text("plan"),
   accountabilityLevel: text("accountability_level"),
   tier: text("tier"),
-  isAdmin: boolean("is_admin").notNull().default(false), // <-- NEW FIELD
+  isAdmin: boolean("is_admin").notNull().default(false),
   activitiesCount: integer("activities_count"),
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
 // Activities table
-export const activities = sqliteTable("activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  category: text("category").notNull(), // 'workout', 'nutrition', 'recovery', 'mindset'
-  timeOfDay: text("time_of_day"), // 'morning', 'afternoon', 'evening', 'night'
+  category: text("category").notNull(),
+  timeOfDay: text("time_of_day"),
   isCustom: boolean("is_custom").notNull().default(false),
-  isGlobal: boolean("is_global").notNull().default(false), // <-- NEW FIELD
-  difficulty: text("difficulty").notNull().default('easy'), // 'easy', 'medium', 'hard'
-  createdBy: text("created_by"), // FK to users.id, null if preloaded
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  isGlobal: boolean("is_global").notNull().default(false),
+  difficulty: text("difficulty").notNull().default('easy'),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 // Global Activities table (canonical, admin-managed)
-export const globalActivities = sqliteTable("global_activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const globalActivities = pgTable("global_activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -84,12 +86,12 @@ export const globalActivities = sqliteTable("global_activities", {
   isCustom: boolean("is_custom").notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 // Demo Activities table (for demo/test accounts only)
-export const demoActivities = sqliteTable("demo_activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const demoActivities = pgTable("demo_activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -97,27 +99,27 @@ export const demoActivities = sqliteTable("demo_activities", {
   isCustom: boolean("is_custom").notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 // Daily trackers table
-export const dailyTrackers = sqliteTable("daily_trackers", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const dailyTrackers = pgTable("daily_trackers", {
+  id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
   date: text("date").notNull(),
-  completionRate: integer("completion_rate").notNull().default(0), // percentage
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  completionRate: integer("completion_rate").notNull().default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 // Tracker entries table
-export const trackerEntries = sqliteTable("tracker_entries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const trackerEntries = pgTable("tracker_entries", {
+  id: serial("id").primaryKey(),
   trackerId: integer("tracker_id").notNull(),
   activityId: integer("activity_id").notNull(),
-  timeSlot: text("time_slot").notNull(), // 'morning', 'afternoon', 'evening', 'night'
-  status: text("status").notNull().default("pending"), // 'pending', 'completed'
-  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  timeSlot: text("time_slot").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
 // Relations
@@ -188,6 +190,7 @@ export type TrackerEntryWithActivity = TrackerEntry & {
 export type DailyTrackerWithEntries = DailyTracker & {
   entries: TrackerEntryWithActivity[];
 };
+
 // User Registration Schema
 export const insertUserSchema = z.object({
   email: z.string().email(),
@@ -198,10 +201,10 @@ export const insertUserSchema = z.object({
   gender: z.enum(["male", "female", "nonbinary", "other"]).optional(),
   age: z.number().optional(),
   role: z.string().optional().default("user"),
-  plan: z.enum(["basic", "pro"]).optional().default("basic"), // <-- Only basic/pro
+  plan: z.enum(["basic", "pro"]).optional().default("basic"),
   tier: z.enum(["bronze", "silver", "gold"]).optional().default("bronze"),
   accountabilityLevel: z.enum(["beginner", "intermediate", "master"]).optional().default("beginner"),
-  isAdmin: z.boolean().optional().default(false), // <-- NEW FIELD
+  isAdmin: z.boolean().optional().default(false),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
