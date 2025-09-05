@@ -12,8 +12,8 @@
  * - Graceful shutdown handling
  */
 
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import { drizzleSchema } from '../shared/schema.ts';
 import dotenv from 'dotenv';
 
@@ -24,11 +24,11 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set in .env");
 }
 
-// Create SQLite connection
-const sqlite = new Database('./database.db');
+// Create PostgreSQL connection
+const sql = neon(process.env.DATABASE_URL);
 
 // Create Drizzle instance
-export const db = drizzle(sqlite, {
+export const db = drizzle(sql, {
   schema: drizzleSchema,
   logger: process.env.NODE_ENV === 'development',
 });
@@ -36,12 +36,10 @@ export const db = drizzle(sqlite, {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Closing database connection...');
-  sqlite.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('Closing database connection...');
-  sqlite.close();
   process.exit(0);
 });
