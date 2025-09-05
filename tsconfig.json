@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    },
     "module": "NodeNext",
     "target": "ES2020",
     "moduleResolution": "NodeNext",
