@@ -59,7 +59,7 @@ export const users = pgTable("users", {
   plan: text("plan"), // 'basic' or 'pro'
   accountabilityLevel: text("accountability_level"),
   tier: text("tier"),
-  isAdmin: integer("is_admin", { mode: 'boolean' }).notNull().default(false), // <-- NEW FIELD
+  isAdmin: boolean("is_admin").notNull().default(false), // <-- NEW FIELD
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
@@ -71,8 +71,8 @@ export const activities = pgTable("activities", {
   description: text("description"),
   category: text("category").notNull(), // 'workout', 'nutrition', 'recovery', 'mindset'
   timeOfDay: text("time_of_day"), // 'morning', 'afternoon', 'evening', 'night'
-  isCustom: integer("is_custom", { mode: 'boolean' }).notNull().default(false),
-  isGlobal: integer("is_global", { mode: 'boolean' }).notNull().default(false), // <-- NEW FIELD
+  isCustom: boolean("is_custom").notNull().default(false),
+  isGlobal: boolean("is_global").notNull().default(false), // <-- NEW FIELD
   difficulty: text("difficulty").notNull().default('easy'), // 'easy', 'medium', 'hard'
   createdBy: text("created_by"), // FK to users.id, null if preloaded
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
@@ -88,7 +88,7 @@ export const globalActivities = pgTable("global_activities", {
   description: text("description"),
   category: text("category").notNull(),
   timeOfDay: text("time_of_day"),
-  isCustom: integer("is_custom", { mode: 'boolean' }).notNull().default(false),
+  isCustom: boolean("is_custom").notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
@@ -103,7 +103,7 @@ export const demoActivities = pgTable("demo_activities", {
   description: text("description"),
   category: text("category").notNull(),
   timeOfDay: text("time_of_day"),
-  isCustom: integer("is_custom", { mode: 'boolean' }).notNull().default(false),
+  isCustom: boolean("is_custom").notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
