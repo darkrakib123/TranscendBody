@@ -28,7 +28,6 @@ import { users, insertUserSchema, globalActivities, demoActivities, dailyTracker
 import { isValidPlan } from "./validators.js"; // Plan validation utility
 import { setFlash } from "./auth.js"; // Flash message middleware
 import crypto from "crypto";
-import { sql } from "drizzle-orm";
 import { computeUserProgress } from './progress.js';
 import { inArray } from 'drizzle-orm';
 
