@@ -12,7 +12,7 @@ export function setupAuthentication(app: Express) {
   
   app.use(session({
     store: new pgSession({
-      conString: process.env.DATABASE_URL,
+      conString: String(process.env.DATABASE_URL),
       createTableIfMissing: true,
       tableName: 'sessions'
     }),
