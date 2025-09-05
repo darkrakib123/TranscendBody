@@ -14,7 +14,7 @@
 
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
-import { drizzleSchema } from '../shared/schema.js';
+import { drizzleSchema } from '../shared/schema.ts';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import path from 'path';
 import { fileURLToPath } from 'url';
