@@ -288,10 +288,14 @@ router.get("/api/tracker/today", async (req, res) => {
 router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
   const { entryId } = req.params;
+  const entryIdInt = parseInt(entryId);
+  if (isNaN(entryIdInt)) {
+    return res.status(400).json({ error: 'Invalid entry ID' });
+  }
   const { status } = req.body;
   try {
     // Check ownership or admin
-    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryId) });
+    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryIdInt) });
     if (!entry) return res.status(404).json({ error: 'Entry not found' });
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
     if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
@@ -299,7 +303,7 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
     if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden' });
     }
-    await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryId));
+    await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryIdInt));
     res.json({ success: true });
   } catch (err) {
     console.error('Error updating tracker entry status:', String(err));
@@ -311,9 +315,13 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
 router.delete('/api/tracker/entries/:entryId', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
   const { entryId } = req.params;
+  const entryIdInt = parseInt(entryId);
+  if (isNaN(entryIdInt)) {
+    return res.status(400).json({ error: 'Invalid entry ID' });
+  }
   try {
     // Check ownership or admin
-    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryId) });
+    const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryIdInt) });
     if (!entry) return res.status(404).json({ error: 'Entry not found' });
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
     if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
@@ -321,7 +329,7 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
     if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden' });
     }
-    await db.delete(trackerEntries).where(eq(trackerEntries.id, entryId));
+    await db.delete(trackerEntries).where(eq(trackerEntries.id, entryIdInt));
     res.json({ success: true });
   } catch (err) {
     console.error('Error deleting tracker entry:', String(err));
@@ -333,18 +341,23 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
 router.post('/api/tracker/entries', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
   const { trackerId, activityId, timeSlot, status } = req.body;
+  const trackerIdInt = parseInt(trackerId);
+  const activityIdInt = parseInt(activityId);
+  if (isNaN(trackerIdInt) || isNaN(activityIdInt)) {
+    return res.status(400).json({ error: 'Invalid tracker ID or activity ID' });
+  }
   if (!trackerId || !activityId || !timeSlot) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
   try {
     // Optionally: check that tracker belongs to user
-    const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerId) });
+    const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerIdInt) });
     if (!tracker || tracker.userId !== req.session.userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     const [entry] = await db.insert(trackerEntries).values({
-      trackerId,
-      activityId,
+      trackerId: trackerIdInt,
+      activityId: activityIdInt,
       timeSlot,
       status: status || 'pending',
       createdAt: new Date(),
@@ -527,7 +540,11 @@ router.post('/api/admin/activities', requireAdmin, async (req, res) => {
 router.delete('/api/admin/activities/:activityId', requireAdmin, async (req, res) => {
   try {
     const { activityId } = req.params;
-    await db.delete(globalActivities).where(eq(globalActivities.id, activityId));
+    const activityIdInt = parseInt(activityId);
+    if (isNaN(activityIdInt)) {
+      return res.status(400).json({ error: 'Invalid activity ID' });
+    }
+    await db.delete(globalActivities).where(eq(globalActivities.id, activityIdInt));
     res.json({ success: true });
   } catch (err) {
     console.error('Error deleting activity:', String(err));
@@ -539,11 +556,15 @@ router.delete('/api/admin/activities/:activityId', requireAdmin, async (req, res
 router.patch('/api/admin/activities/:activityId', requireAdmin, async (req, res) => {
   try {
     const { activityId } = req.params;
+    const activityIdInt = parseInt(activityId);
+    if (isNaN(activityIdInt)) {
+      return res.status(400).json({ error: 'Invalid activity ID' });
+    }
     const { title, description, category, difficulty } = req.body;
     // Check for duplicate (title + category), excluding this activity
     if (title && category) {
       const existing = await db.select().from(globalActivities)
-        .where(and(eq(globalActivities.title, title), eq(globalActivities.category, category), sql`id != ${activityId}`));
+        .where(and(eq(globalActivities.title, title), eq(globalActivities.category, category), sql`id != ${activityIdInt}`));
       if (existing.length > 0) {
         return res.status(400).json({ error: 'An activity with this title and category already exists.' });
       }
@@ -553,7 +574,7 @@ router.patch('/api/admin/activities/:activityId', requireAdmin, async (req, res)
     if (description !== undefined) updateData.description = description;
     if (category !== undefined) updateData.category = category;
     if (difficulty !== undefined) updateData.difficulty = difficulty;
-    const [updated] = await db.update(globalActivities).set(updateData).where(eq(globalActivities.id, activityId)).returning();
+    const [updated] = await db.update(globalActivities).set(updateData).where(eq(globalActivities.id, activityIdInt)).returning();
     if (!updated) return res.status(404).json({ error: 'Activity not found' });
     res.json({ success: true, activity: updated });
   } catch (err) {
