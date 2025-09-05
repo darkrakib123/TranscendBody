@@ -197,7 +197,7 @@ router.get("/dashboard", async (req, res) => {
       // Add any other fields needed by the dashboard
     });
   } catch (err) {
-    console.error("Error fetching user progress for dashboard:", err);
+    console.error("Error fetching user progress for dashboard:", String(err));
     // Fallback with default values
     res.render("dashboard_modern", { 
       user, 
@@ -214,7 +214,7 @@ router.get("/api/activities", async (req, res) => {
     const globalActivitiesList = await db.select().from(globalActivities);
     res.json(globalActivitiesList);
   } catch (err) {
-    console.error("Error fetching activities:", err);
+    console.error("Error fetching activities:", String(err));
     res.status(500).json({ error: "Failed to fetch activities" });
   }
 });
@@ -238,7 +238,7 @@ router.get("/api/stats", async (req, res) => {
     const progress = computeUserProgress(user, trackers, entries);
     res.json(progress);
   } catch (err) {
-    console.error("Error fetching stats:", err);
+    console.error("Error fetching stats:", String(err));
     res.status(500).json({ error: "Failed to fetch stats" });
   }
 });
@@ -279,7 +279,7 @@ router.get("/api/tracker/today", async (req, res) => {
 
     res.json({ ...tracker, entries });
   } catch (err) {
-    console.error("Error fetching today's tracker:", err);
+    console.error("Error fetching today's tracker:", String(err));
     res.status(500).json({ error: "Failed to fetch today's tracker" });
   }
 });
@@ -302,7 +302,7 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
     await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error updating tracker entry status:', err);
+    console.error('Error updating tracker entry status:', String(err));
     res.status(500).json({ error: 'Failed to update tracker entry status' });
   }
 });
@@ -324,7 +324,7 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
     await db.delete(trackerEntries).where(eq(trackerEntries.id, entryId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error deleting tracker entry:', err);
+    console.error('Error deleting tracker entry:', String(err));
     res.status(500).json({ error: 'Failed to delete tracker entry' });
   }
 });
@@ -352,7 +352,7 @@ router.post('/api/tracker/entries', async (req, res) => {
     }).returning();
     res.json(entry);
   } catch (err) {
-    console.error('Error adding tracker entry:', err);
+    console.error('Error adding tracker entry:', String(err));
     res.status(500).json({ error: 'Failed to add tracker entry' });
   }
 });
@@ -395,7 +395,7 @@ router.get('/api/admin/users', requireAdmin, async (req, res) => {
     }));
     res.json(userProgressList);
   } catch (err) {
-    console.error('Error fetching users:', err);
+    console.error('Error fetching users:', String(err));
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
@@ -407,7 +407,7 @@ router.delete('/api/admin/users/:userId', requireAdmin, async (req, res) => {
     await db.delete(users).where(eq(users.id, userId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error deleting user:', err);
+    console.error('Error deleting user:', String(err));
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
@@ -420,7 +420,7 @@ router.patch('/api/admin/users/:userId/role', requireAdmin, async (req, res) => 
     await db.update(users).set({ role }).where(eq(users.id, userId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error updating user role:', err);
+    console.error('Error updating user role:', String(err));
     res.status(500).json({ error: 'Failed to update user role' });
   }
 });
@@ -433,7 +433,7 @@ router.get('/api/admin/users/:userId', requireAdmin, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (err) {
-    console.error('Error fetching user:', err);
+    console.error('Error fetching user:', String(err));
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 });
@@ -456,7 +456,7 @@ router.patch('/api/admin/users/:userId', requireAdmin, async (req, res) => {
     await db.update(users).set(updateData).where(eq(users.id, userId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error updating user:', err);
+    console.error('Error updating user:', String(err));
     res.status(500).json({ error: 'Failed to update user' });
   }
 });
@@ -490,7 +490,7 @@ router.get('/api/admin/user-stats/:userId', requireAdmin, async (req, res) => {
     const currentStreak = streakResult.rows?.[0]?.streak || 0;
     res.json({ totalActivities, currentStreak });
   } catch (err) {
-    console.error('Error fetching user stats:', err);
+    console.error('Error fetching user stats:', String(err));
     res.status(500).json({ error: 'Failed to fetch user stats' });
   }
 });
@@ -501,7 +501,7 @@ router.get('/api/admin/activities', requireAdmin, async (req, res) => {
     const allActivities = await db.select().from(globalActivities);
     res.json(allActivities);
   } catch (err) {
-    console.error('Error fetching activities:', err);
+    console.error('Error fetching activities:', String(err));
     res.status(500).json({ error: 'Failed to fetch activities' });
   }
 });
@@ -518,7 +518,7 @@ router.post('/api/admin/activities', requireAdmin, async (req, res) => {
     const [activity] = await db.insert(globalActivities).values({ title, description, category, difficulty }).returning();
     res.json(activity);
   } catch (err) {
-    console.error('Error adding activity:', err);
+    console.error('Error adding activity:', String(err));
     res.status(500).json({ error: 'Failed to add activity' });
   }
 });
@@ -530,7 +530,7 @@ router.delete('/api/admin/activities/:activityId', requireAdmin, async (req, res
     await db.delete(globalActivities).where(eq(globalActivities.id, activityId));
     res.json({ success: true });
   } catch (err) {
-    console.error('Error deleting activity:', err);
+    console.error('Error deleting activity:', String(err));
     res.status(500).json({ error: 'Failed to delete activity' });
   }
 });
@@ -557,7 +557,7 @@ router.patch('/api/admin/activities/:activityId', requireAdmin, async (req, res)
     if (!updated) return res.status(404).json({ error: 'Activity not found' });
     res.json({ success: true, activity: updated });
   } catch (err) {
-    console.error('Error updating activity:', err);
+    console.error('Error updating activity:', String(err));
     res.status(500).json({ error: 'Failed to update activity' });
   }
 });
@@ -590,7 +590,7 @@ router.get('/api/admin/user-stats', requireAdmin, async (req, res) => {
     });
     res.json(userStats);
   } catch (err) {
-    console.error('Error fetching all user stats:', err);
+    console.error('Error fetching all user stats:', String(err));
     res.status(500).json({ error: 'Failed to fetch user stats' });
   }
 });
@@ -605,7 +605,7 @@ router.post('/api/admin/reset-demo-data', requireAdmin, async (req, res) => {
       res.status(500).json({ success: false, error: result.error });
     }
   } catch (err) {
-    console.error('Error resetting demo data:', err);
+    console.error('Error resetting demo data:', String(err));
     res.status(500).json({ success: false, error: err });
   }
 });
@@ -633,7 +633,7 @@ router.post('/api/activities', async (req, res) => {
     }).returning();
     res.json(activity);
   } catch (err) {
-    console.error('Error adding activity:', err);
+    console.error('Error adding activity:', String(err));
     res.status(500).json({ error: 'Failed to add activity' });
   }
 });
