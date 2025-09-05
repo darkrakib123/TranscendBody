@@ -150,8 +150,22 @@ router.post("/login", async (req, res) => {
     });
   }
 
-  req.session.userId = user.id;
-  res.redirect("/dashboard");
+  // Use Passport.js login method to properly authenticate the user
+  req.login(user, (err) => {
+    if (err) {
+      console.error('Login error:', err);
+      return res.status(500).render("landing", {
+        tab: "signin",
+        signinError: "Login failed. Please try again.",
+        signupError: null,
+        signinData: { email },
+        signupData: {},
+        validationErrors: {},
+        successMessage: null,
+      });
+    }
+    res.redirect("/dashboard");
+  });
 });
 
 // ---------- Logout ----------
@@ -163,17 +177,11 @@ router.get("/logout", (req, res) => {
 
 // ---------- Dashboard ----------
 router.get("/dashboard", async (req, res) => {
-  if (!req.session.userId) {
+  if (!req.isAuthenticated()) {
     return res.redirect("/login");
   }
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, req.session.userId),
-  });
-
-  if (!user) {
-    return res.redirect("/login");
-  }
+  const user = req.user as any;
 
   // Get user's progress data for template rendering
   try {
@@ -220,7 +228,7 @@ router.get("/api/activities", async (req, res) => {
 
 // ---------- API: Get User Stats ----------
 router.get("/api/stats", async (req, res) => {
-  let targetUserId = (req.session as any).userId;
+  let targetUserId = req.user?.id;
   if (req.query.userId && req.user && req.user.role === 'admin') {
     targetUserId = req.query.userId;
   }
@@ -244,7 +252,7 @@ router.get("/api/stats", async (req, res) => {
 
 // ---------- API: Get Today's Tracker ----------
 router.get("/api/tracker/today", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -252,7 +260,7 @@ router.get("/api/tracker/today", async (req, res) => {
     // Find today's tracker
     const tracker = await db.query.dailyTrackers.findFirst({
       where: and(
-        eq(dailyTrackers.userId, req.session.userId),
+        eq(dailyTrackers.userId, req.user.id),
         eq(dailyTrackers.date, today)
       ),
       orderBy: [desc(dailyTrackers.id)],
