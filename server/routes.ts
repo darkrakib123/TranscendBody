@@ -293,7 +293,7 @@ router.get("/api/tracker/today", async (req, res) => {
 
 // PATCH: Update tracker entry status
 router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
   const { entryId } = req.params;
   const entryIdInt = parseInt(entryId);
   if (isNaN(entryIdInt)) {
@@ -306,8 +306,8 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Entry not found' });
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
     if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
-    const user = req.user as any;
-    if (!user || (tracker.userId !== user.id && user.role !== 'admin')) {
+    const user = await db.query.users.findFirst({ where: eq(users.id, req.session.userId) });
+    if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryIdInt));
@@ -668,13 +668,11 @@ router.post('/api/activities', async (req, res) => {
 
 // Admin panel page (UI)
 router.get("/admin", async (req, res) => {
-  if (!req.session.userId) {
+  if (!req.isAuthenticated()) {
     return res.redirect("/login");
   }
   
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, req.session.userId),
-  });
+  const user = req.user as any;
   
   if (!user || user.role !== "admin") {
     return res.status(403).render("landing", { 
