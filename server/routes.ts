@@ -661,7 +661,7 @@ router.post('/api/activities', async (req, res) => {
       timeOfDay: timeSlot,
       isCustom: isCustom ?? true,
       difficulty: difficulty || 'easy',
-      createdBy: req.user?.id || null
+      createdBy: (req.user as any)?.id || null
     }).returning();
     res.json(activity);
   } catch (err) {
