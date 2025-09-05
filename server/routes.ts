@@ -365,7 +365,7 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
 
 // ---------- API: Add Tracker Entry ----------
 router.post('/api/tracker/entries', async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
   const { trackerId, activityId, timeSlot, status } = req.body;
   const trackerIdInt = parseInt(trackerId);
   const activityIdInt = parseInt(activityId);
@@ -378,7 +378,7 @@ router.post('/api/tracker/entries', async (req, res) => {
   try {
     // Optionally: check that tracker belongs to user
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerIdInt) });
-    if (!tracker || tracker.userId !== req.session.userId) {
+    if (!tracker || tracker.userId !== req.user.id) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     const [entry] = await db.insert(trackerEntries).values({
@@ -398,12 +398,12 @@ router.post('/api/tracker/entries', async (req, res) => {
 
 // Middleware to check admin
 async function requireAdmin(req, res, next) {
-  if (!req.isAuthenticated()) {
+  if (!req.session.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   
   const user = await db.query.users.findFirst({
-    where: eq(users.id, req.user.id),
+    where: eq(users.id, req.session.userId),
   });
   
   if (!user || user.role !== 'admin') {
