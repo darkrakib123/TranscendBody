@@ -22,7 +22,7 @@
 
 import express from "express";
 import bcrypt from "bcryptjs";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db.js";
 import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
 import { isValidPlan } from "./validators.js"; // Plan validation utility
