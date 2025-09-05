@@ -12,8 +12,8 @@
  * - Graceful shutdown handling
  */
 
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { drizzleSchema } from '../shared/schema.ts';
 import dotenv from 'dotenv';
 
@@ -24,26 +24,24 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set in .env");
 }
 
-// Create PostgreSQL connection pool
-export const pool = new Pool({
-  connectionString: String(process.env.DATABASE_URL),
-});
+// Create SQLite connection
+const sqlite = new Database('./database.db');
 
-// Create Drizzle instance with only table definitions
-export const db = drizzle(pool, {
+// Create Drizzle instance
+export const db = drizzle(sqlite, {
   schema: drizzleSchema,
   logger: process.env.NODE_ENV === 'development',
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('Closing database pool...');
-  await pool.end();
+  console.log('Closing database connection...');
+  sqlite.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  console.log('Closing database pool...');
-  await pool.end();
+  console.log('Closing database connection...');
+  sqlite.close();
   process.exit(0);
 });
