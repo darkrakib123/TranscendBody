@@ -27,7 +27,7 @@ async function seedAllData() {
   
   // Step 1: Seed master activities first
   console.log('\n📋 Step 1: Seeding master activities...');
-  const masterResult = spawnSync('node', ['--loader', 'ts-node/esm', 'scripts/seedMasterActivities.ts'], { stdio: 'inherit' });
+  const masterResult = spawnSync('tsx', ['scripts/seedMasterActivities.ts'], { stdio: 'inherit' });
   
   if (masterResult.error) {
     console.error('❌ Failed to spawn master activities process:', masterResult.error.message);
@@ -42,7 +42,7 @@ async function seedAllData() {
   
   // Step 2: Seed demo data (users, demo activities, tracker data)
   console.log('\n👥 Step 2: Seeding demo data...');
-  const demoResult = spawnSync('node', ['--loader', 'ts-node/esm', 'scripts/seedDemoData.ts'], { stdio: 'inherit' });
+  const demoResult = spawnSync('tsx', ['scripts/seedDemoData.ts'], { stdio: 'inherit' });
   
   if (demoResult.error) {
     console.error('❌ Failed to spawn demo data process:', demoResult.error.message);
