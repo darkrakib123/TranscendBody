@@ -23,9 +23,8 @@ import {
   sqliteTable,
   text,
   integer,
-  timestamp,
   boolean,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/better-sqlite3";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
