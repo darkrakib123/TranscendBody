@@ -21,7 +21,7 @@
  */
 
 import express from "express";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db.js";
 import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
