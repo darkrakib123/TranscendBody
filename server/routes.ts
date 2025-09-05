@@ -96,6 +96,11 @@ router.post("/register", async (req, res) => {
     accountabilityLevel: parsed.data.accountabilityLevel || "beginner",
   };
 
+  // Remove isAdmin field to let database default handle it
+  if ('isAdmin' in userData) {
+    delete userData.isAdmin;
+  }
+
   // Generate a unique id for the new user
   const userId = crypto.randomUUID();
 
