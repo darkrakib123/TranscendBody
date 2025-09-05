@@ -47,7 +47,7 @@ export const sessions = pgTable(
 
 // User storage table for traditional authentication
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: text("id").primaryKey().notNull(),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
   firstName: text("first_name"),
@@ -60,6 +60,7 @@ export const users = pgTable("users", {
   accountabilityLevel: text("accountability_level"),
   tier: text("tier"),
   isAdmin: boolean("is_admin").notNull().default(false), // <-- NEW FIELD
+  activitiesCount: integer("activities_count"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
