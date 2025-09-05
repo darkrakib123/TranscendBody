@@ -1,6 +1,6 @@
 import {
   users,
-  activities,
+  globalActivities,
   dailyTrackers,
   trackerEntries,
   type User,
@@ -93,17 +93,17 @@ export class DatabaseStorage implements IStorage {
 
   // Activity operations
   async getActivities(): Promise<Activity[]> {
-    return await db.select().from(activities).orderBy(activities.title);
+    return await db.select().from(globalActivities).orderBy(globalActivities.title);
   }
 
   async getActivityById(id: number): Promise<Activity | undefined> {
-    const [activity] = await db.select().from(activities).where(eq(activities.id, id));
+    const [activity] = await db.select().from(globalActivities).where(eq(globalActivities.id, id));
     return activity;
   }
 
   async createActivity(activity: InsertActivity): Promise<Activity> {
     const [newActivity] = await db
-      .insert(activities)
+      .insert(globalActivities)
       .values(activity)
       .returning();
     return newActivity;
@@ -111,15 +111,15 @@ export class DatabaseStorage implements IStorage {
 
   async updateActivity(id: number, activity: Partial<InsertActivity>): Promise<Activity> {
     const [updatedActivity] = await db
-      .update(activities)
+      .update(globalActivities)
       .set(activity)
-      .where(eq(activities.id, id))
+      .where(eq(globalActivities.id, id))
       .returning();
     return updatedActivity;
   }
 
   async deleteActivity(id: number): Promise<boolean> {
-    const result = await db.delete(activities).where(eq(activities.id, id));
+    const result = await db.delete(globalActivities).where(eq(globalActivities.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -141,10 +141,10 @@ export class DatabaseStorage implements IStorage {
         status: trackerEntries.status,
         createdAt: trackerEntries.createdAt,
         updatedAt: trackerEntries.updatedAt,
-        activity: activities,
+        activity: globalActivities,
       })
       .from(trackerEntries)
-      .innerJoin(activities, eq(trackerEntries.activityId, activities.id))
+      .innerJoin(globalActivities, eq(trackerEntries.activityId, globalActivities.id))
       .where(eq(trackerEntries.trackerId, tracker.id));
 
     return {
