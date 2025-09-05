@@ -398,12 +398,12 @@ router.post('/api/tracker/entries', async (req, res) => {
 
 // Middleware to check admin
 async function requireAdmin(req, res, next) {
-  if (!req.session.userId) {
+  if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   
   const user = await db.query.users.findFirst({
-    where: eq(users.id, req.session.userId),
+    where: eq(users.id, req.user.id),
   });
   
   if (!user || user.role !== 'admin') {
