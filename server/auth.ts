@@ -2,19 +2,17 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
 import session from 'express-session';
-import connectPg from 'connect-pg-simple';
+import MemoryStore from 'memorystore';
 import type { Express, RequestHandler } from 'express';
 import { storage } from './storage.js';
 
 export function setupAuthentication(app: Express) {
   // Session configuration
-  const pgSession = connectPg(session);
+  const MemoryStoreSession = MemoryStore(session);
   
   app.use(session({
-    store: new pgSession({
-      conString: String(process.env.DATABASE_URL),
-      createTableIfMissing: true,
-      tableName: 'sessions'
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000 // prune expired entries every 24h
     }),
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
