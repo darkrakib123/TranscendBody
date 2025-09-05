@@ -53,12 +53,16 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations (required for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
+    console.log('Storage: Getting user with ID:', id);
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    console.log('Storage: User found:', user ? user.email : 'None');
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
+    console.log('Storage: Getting user with email:', email);
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    console.log('Storage: User found:', user ? user.email : 'None');
     return user;
   }
 

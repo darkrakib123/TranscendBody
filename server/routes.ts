@@ -134,11 +134,17 @@ router.post("/register", async (req, res) => {
 // ---------- Login POST ----------
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  
+  console.log('Login attempt for:', email);
+  
   const user = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
 
+  console.log('User found:', user ? 'Yes' : 'No');
+  
   if (!user || !(await bcrypt.compare(password, user.password))) {
+    console.log('Authentication failed');
     return res.status(401).render("landing", {
       tab: "signin",
       signinError: "Invalid credentials.",
@@ -151,6 +157,7 @@ router.post("/login", async (req, res) => {
   }
 
   // Use Passport.js login method to properly authenticate the user
+  console.log('Attempting to log in user:', user.email);
   req.login(user, (err) => {
     if (err) {
       console.error('Login error:', err);
@@ -164,6 +171,7 @@ router.post("/login", async (req, res) => {
         successMessage: null,
       });
     }
+    console.log('Login successful, redirecting to dashboard');
     res.redirect("/dashboard");
   });
 });
@@ -177,11 +185,17 @@ router.get("/logout", (req, res) => {
 
 // ---------- Dashboard ----------
 router.get("/dashboard", async (req, res) => {
+  console.log('Dashboard route accessed');
+  console.log('Is authenticated:', req.isAuthenticated());
+  console.log('User:', req.user ? req.user.email : 'None');
+  
   if (!req.isAuthenticated()) {
+    console.log('Not authenticated, redirecting to login');
     return res.redirect("/login");
   }
 
   const user = req.user as any;
+  console.log('Rendering dashboard for user:', user.email);
 
   // Get user's progress data for template rendering
   try {

@@ -70,7 +70,7 @@ export function setupAuthentication(app: Express) {
       }
     } catch (error) {
       console.error('Deserialize user error:', error);
-      done(null, false);
+      done(error, false);
     }
   });
 
