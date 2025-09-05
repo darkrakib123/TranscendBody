@@ -279,7 +279,7 @@ router.get("/api/tracker/today", async (req, res) => {
     // Find today's tracker
     const tracker = await db.query.dailyTrackers.findFirst({
       where: and(
-        eq(dailyTrackers.userId, req.user.id),
+        eq(dailyTrackers.userId, (req.user as any).id),
         eq(dailyTrackers.date, today)
       ),
       orderBy: [desc(dailyTrackers.id)],
