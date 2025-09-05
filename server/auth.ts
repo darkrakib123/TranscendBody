@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import session from 'express-session';
 import MemoryStore from 'memorystore';
 import type { Express, RequestHandler } from 'express';
