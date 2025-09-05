@@ -28,8 +28,14 @@ async function seedAllData() {
   // Step 1: Seed master activities first
   console.log('\n📋 Step 1: Seeding master activities...');
   const masterResult = spawnSync('node', ['--loader', 'ts-node/esm', 'scripts/seedMasterActivities.ts'], { stdio: 'inherit' });
+  
+  if (masterResult.error) {
+    console.error('❌ Failed to spawn master activities process:', masterResult.error.message);
+    process.exit(1);
+  }
+  
   if (masterResult.status !== 0) {
-    console.error('❌ Failed to seed master activities. Exiting.');
+    console.error('❌ Failed to seed master activities. Exit code:', masterResult.status);
     process.exit(1);
   }
   console.log('✅ Master activities seeded successfully');
@@ -37,8 +43,14 @@ async function seedAllData() {
   // Step 2: Seed demo data (users, demo activities, tracker data)
   console.log('\n👥 Step 2: Seeding demo data...');
   const demoResult = spawnSync('node', ['--loader', 'ts-node/esm', 'scripts/seedDemoData.ts'], { stdio: 'inherit' });
+  
+  if (demoResult.error) {
+    console.error('❌ Failed to spawn demo data process:', demoResult.error.message);
+    process.exit(1);
+  }
+  
   if (demoResult.status !== 0) {
-    console.error('❌ Failed to seed demo data. Exiting.');
+    console.error('❌ Failed to seed demo data. Exit code:', demoResult.status);
     process.exit(1);
   }
   console.log('✅ Demo data seeded successfully');
