@@ -24,14 +24,9 @@ import {
   text,
   integer,
   index,
-} from "drizzle-orm/pg-core";
-import {
-  sqliteTable,
-  text,
-  integer,
-  index,
 } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
