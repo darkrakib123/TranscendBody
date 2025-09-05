@@ -1,1 +1,0 @@
-ALTER TABLE "activities" ADD COLUMN "difficulty" varchar(10) DEFAULT 'easy' NOT NULL;
