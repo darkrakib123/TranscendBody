@@ -20,18 +20,22 @@
  */
 
 import {
-  sqliteTable,
+  pgTable,
   text,
   integer,
   index,
-} from "drizzle-orm/sqlite-core";
+  timestamp,
+  uuid,
+  boolean,
+  serial,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Session storage table (required for Replit Auth)
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   "sessions",
   {
     sid: text("sid").primaryKey(),
@@ -42,8 +46,8 @@ export const sessions = sqliteTable(
 );
 
 // User storage table for traditional authentication
-export const users = sqliteTable("users", {
-  id: text("id").primaryKey().notNull(),
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
   firstName: text("first_name"),
@@ -56,13 +60,13 @@ export const users = sqliteTable("users", {
   accountabilityLevel: text("accountability_level"),
   tier: text("tier"),
   isAdmin: integer("is_admin", { mode: 'boolean' }).notNull().default(false), // <-- NEW FIELD
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Activities table
-export const activities = sqliteTable("activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(), // 'workout', 'nutrition', 'recovery', 'mindset'
@@ -71,15 +75,15 @@ export const activities = sqliteTable("activities", {
   isGlobal: integer("is_global", { mode: 'boolean' }).notNull().default(false), // <-- NEW FIELD
   difficulty: text("difficulty").notNull().default('easy'), // 'easy', 'medium', 'hard'
   createdBy: text("created_by"), // FK to users.id, null if preloaded
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   // Add unique constraint on (title, category)
   index("IDX_activities_title_category").on(table.title, table.category),
 ]);
 
 // Global Activities table (canonical, admin-managed)
-export const globalActivities = sqliteTable("global_activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const globalActivities = pgTable("global_activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -87,14 +91,14 @@ export const globalActivities = sqliteTable("global_activities", {
   isCustom: integer("is_custom", { mode: 'boolean' }).notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   index("IDX_global_activities_title_category").on(table.title, table.category),
 ]);
 
 // Demo Activities table (for demo/test accounts only)
-export const demoActivities = sqliteTable("demo_activities", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const demoActivities = pgTable("demo_activities", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -102,29 +106,29 @@ export const demoActivities = sqliteTable("demo_activities", {
   isCustom: integer("is_custom", { mode: 'boolean' }).notNull().default(false),
   difficulty: text("difficulty").notNull().default('easy'),
   createdBy: text("created_by"),
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   index("IDX_demo_activities_title_category").on(table.title, table.category),
 ]);
 
 // Daily trackers table
-export const dailyTrackers = sqliteTable("daily_trackers", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const dailyTrackers = pgTable("daily_trackers", {
+  id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
   date: text("date").notNull(),
   completionRate: integer("completion_rate").notNull().default(0), // percentage
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Tracker entries table
-export const trackerEntries = sqliteTable("tracker_entries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const trackerEntries = pgTable("tracker_entries", {
+  id: serial("id").primaryKey(),
   trackerId: integer("tracker_id").notNull(),
   activityId: integer("activity_id").notNull(),
   timeSlot: text("time_slot").notNull(), // 'morning', 'afternoon', 'evening', 'night'
   status: text("status").notNull().default("pending"), // 'pending', 'completed'
-  createdAt: integer("created_at").default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at").default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Relations
