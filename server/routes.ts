@@ -312,7 +312,7 @@ router.get("/api/tracker/today", async (req, res) => {
 
 // PATCH: Update tracker entry status
 router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
   const { entryId } = req.params;
   const entryIdInt = parseInt(entryId);
   if (isNaN(entryIdInt)) {
@@ -325,8 +325,8 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Entry not found' });
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
     if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
-    const user = await db.query.users.findFirst({ where: eq(users.id, req.session.userId) });
-    if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
+    const user = req.user as any;
+    if (!user || (tracker.userId !== user.id && user.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryIdInt));
@@ -339,7 +339,7 @@ router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
 
 // DELETE: Remove tracker entry
 router.delete('/api/tracker/entries/:entryId', async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
   const { entryId } = req.params;
   const entryIdInt = parseInt(entryId);
   if (isNaN(entryIdInt)) {
@@ -351,8 +351,8 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Entry not found' });
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
     if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
-    const user = await db.query.users.findFirst({ where: eq(users.id, req.session.userId) });
-    if (!user || (tracker.userId !== req.session.userId && user.role !== 'admin')) {
+    const user = req.user as any;
+    if (!user || (tracker.userId !== user.id && user.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     await db.delete(trackerEntries).where(eq(trackerEntries.id, entryIdInt));
@@ -365,7 +365,7 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
 
 // ---------- API: Add Tracker Entry ----------
 router.post('/api/tracker/entries', async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
   const { trackerId, activityId, timeSlot, status } = req.body;
   const trackerIdInt = parseInt(trackerId);
   const activityIdInt = parseInt(activityId);
@@ -378,7 +378,7 @@ router.post('/api/tracker/entries', async (req, res) => {
   try {
     // Optionally: check that tracker belongs to user
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerIdInt) });
-    if (!tracker || tracker.userId !== req.session.userId) {
+    if (!tracker || tracker.userId !== (req.user as any).id) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     const [entry] = await db.insert(trackerEntries).values({
@@ -393,6 +393,44 @@ router.post('/api/tracker/entries', async (req, res) => {
   } catch (err) {
     console.error('Error adding tracker entry:', String(err));
     res.status(500).json({ error: 'Failed to add tracker entry' });
+  }
+});
+
+// ---------- API: Create Daily Tracker ----------
+router.post('/api/tracker', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
+  
+  const { date } = req.body;
+  const user = req.user as any;
+  
+  if (!date) {
+    return res.status(400).json({ error: 'Date is required' });
+  }
+  
+  try {
+    // Check if tracker already exists for this date
+    const existing = await db.query.dailyTrackers.findFirst({
+      where: and(
+        eq(dailyTrackers.userId, user.id),
+        eq(dailyTrackers.date, date)
+      ),
+    });
+    
+    if (existing) {
+      return res.json(existing);
+    }
+    
+    // Create new tracker
+    const [tracker] = await db.insert(dailyTrackers).values({
+      userId: user.id,
+      date,
+      completionRate: 0,
+    }).returning();
+    
+    res.json({ ...tracker, entries: [] });
+  } catch (err) {
+    console.error('Error creating tracker:', String(err));
+    res.status(500).json({ error: 'Failed to create tracker' });
   }
 });
 
