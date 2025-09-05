@@ -26,7 +26,7 @@ if (!process.env.DATABASE_URL) {
 
 // Create PostgreSQL connection pool
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: String(process.env.DATABASE_URL),
 });
 
 // Create Drizzle instance with only table definitions
