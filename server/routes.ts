@@ -270,26 +270,6 @@ router.get("/api/stats", async (req, res) => {
 });
 
 // ---------- API: Get Today's Tracker ----------
-router.post("/api/tracker", async (req, res) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
-
-  const { date } = req.body;
-  const userId = (req.user as any).id;
-
-  try {
-    const [tracker] = await db.insert(dailyTrackers).values({
-      userId,
-      date: date || new Date().toISOString().slice(0, 10),
-      completionRate: 0,
-    }).returning();
-
-    res.json(tracker);
-  } catch (err) {
-    console.error("Error creating tracker:", String(err));
-    res.status(500).json({ error: "Failed to create tracker" });
-  }
-});
-
 router.get("/api/tracker/today", async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
 
@@ -422,15 +402,12 @@ async function requireAdmin(req, res, next) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, req.user.id),
-  });
+  const user = req.user as any;
   
   if (!user || user.role !== 'admin') {
     return res.status(403).json({ error: 'Forbidden' });
   }
   
-  req.user = user; // Add user to request for convenience
   next();
 }
 
