@@ -1,49 +1,26 @@
 /**
- * TranscendBody - Database Schema Definition
+ * TranscendBody - Database Schema
  * 
- * This file defines the complete database schema for the personal transformation
- * tracking application using Drizzle ORM and PostgreSQL.
- * 
- * Database Tables:
- * - users: User accounts and profiles
- * - global_activities: System-wide activities available to all users
- * - daily_trackers: Daily completion tracking for each user
- * - tracker_entries: Individual activity entries within daily trackers
- * - sessions: User session data for authentication
- * 
- * Features:
- * - Type-safe database operations with TypeScript
- * - Zod validation schemas for input validation
- * - Proper foreign key relationships
- * - Indexed columns for performance
- * - Comprehensive type definitions
+ * This file defines the database schema using Drizzle ORM for SQLite.
+ * It includes all tables and relationships for the personal transformation
+ * tracking application.
  */
 
-import {
-  pgTable,
-  text,
-  serial,
-  boolean,
-  timestamp,
-  integer,
-} from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for authentication)
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: text("sid").primaryKey(),
-    sess: text("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-);
+// Session storage table for express-session
+const sessions = sqliteTable("sessions", {
+  sid: text("sid").primaryKey(),
+  sess: text("sess").notNull(),
+  expire: integer("expire").notNull(),
+});
 
-// User storage table for traditional authentication
-export const users = pgTable("users", {
+// Users table - core user information and gamification data
+const users = sqliteTable("users", {
   id: text("id").primaryKey().notNull(),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
@@ -56,87 +33,60 @@ export const users = pgTable("users", {
   plan: text("plan"),
   accountabilityLevel: text("accountability_level"),
   tier: text("tier"),
-  isAdmin: boolean("is_admin").notNull().default(false),
-  activitiesCount: integer("activities_count"),
-  createdAt: timestamp("created_at").default(sql`now()`),
-  updatedAt: timestamp("updated_at").default(sql`now()`),
+  isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
+  activitiesCount: integer("activities_count").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
-// Activities table
-export const activities = pgTable("activities", {
-  id: serial("id").primaryKey(),
+// Global activities table - master list of all available activities
+const globalActivities = sqliteTable("global_activities", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   description: text("description"),
-  category: text("category").notNull(),
-  timeOfDay: text("time_of_day"),
-  isCustom: boolean("is_custom").notNull().default(false),
-  isGlobal: boolean("is_global").notNull().default(false),
-  difficulty: text("difficulty").notNull().default('easy'),
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at").default(sql`now()`),
+  category: text("category").notNull(), // workout, nutrition, recovery, mindset
+  timeOfDay: text("time_of_day").notNull(), // morning, afternoon, evening, night
+  isCustom: integer("is_custom", { mode: "boolean" }).default(false),
+  difficulty: text("difficulty"), // easy, medium, hard
+  createdBy: text("created_by").references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
-// Global Activities table (canonical, admin-managed)
-export const globalActivities = pgTable("global_activities", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  category: text("category").notNull(),
-  timeOfDay: text("time_of_day"),
-  isCustom: boolean("is_custom").notNull().default(false),
-  difficulty: text("difficulty").notNull().default('easy'),
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at").default(sql`now()`),
+// Daily trackers table - one record per user per day
+const dailyTrackers = sqliteTable("daily_trackers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => users.id),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  completionRate: integer("completion_rate").default(0), // 0-100
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
-// Demo Activities table (for demo/test accounts only)
-export const demoActivities = pgTable("demo_activities", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  category: text("category").notNull(),
-  timeOfDay: text("time_of_day"),
-  isCustom: boolean("is_custom").notNull().default(false),
-  difficulty: text("difficulty").notNull().default('easy'),
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at").default(sql`now()`),
+// Tracker entries table - individual activity assignments and completions
+const trackerEntries = sqliteTable("tracker_entries", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  trackerId: integer("tracker_id").notNull().references(() => dailyTrackers.id),
+  activityId: integer("activity_id").notNull().references(() => globalActivities.id),
+  timeSlot: text("time_slot").notNull(), // morning, afternoon, evening, night
+  status: text("status").notNull().default("pending"), // pending, completed
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
-// Daily trackers table
-export const dailyTrackers = pgTable("daily_trackers", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  date: text("date").notNull(),
-  completionRate: integer("completion_rate").notNull().default(0),
-  createdAt: timestamp("created_at").default(sql`now()`),
-});
-
-// Tracker entries table
-export const trackerEntries = pgTable("tracker_entries", {
-  id: serial("id").primaryKey(),
-  trackerId: integer("tracker_id").notNull(),
-  activityId: integer("activity_id").notNull(),
-  timeSlot: text("time_slot").notNull(),
-  status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").default(sql`now()`),
-  updatedAt: timestamp("updated_at").default(sql`now()`),
-});
-
-// Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  customActivities: many(activities),
+// Define relationships
+const usersRelations = relations(users, ({ many }) => ({
   dailyTrackers: many(dailyTrackers),
+  createdActivities: many(globalActivities),
 }));
 
-export const activitiesRelations = relations(activities, ({ one, many }) => ({
+const globalActivitiesRelations = relations(globalActivities, ({ one, many }) => ({
   creator: one(users, {
-    fields: [activities.createdBy],
+    fields: [globalActivities.createdBy],
     references: [users.id],
   }),
   trackerEntries: many(trackerEntries),
 }));
 
-export const dailyTrackersRelations = relations(dailyTrackers, ({ one, many }) => ({
+const dailyTrackersRelations = relations(dailyTrackers, ({ one, many }) => ({
   user: one(users, {
     fields: [dailyTrackers.userId],
     references: [users.id],
@@ -144,69 +94,51 @@ export const dailyTrackersRelations = relations(dailyTrackers, ({ one, many }) =
   entries: many(trackerEntries),
 }));
 
-export const trackerEntriesRelations = relations(trackerEntries, ({ one }) => ({
+const trackerEntriesRelations = relations(trackerEntries, ({ one }) => ({
   tracker: one(dailyTrackers, {
     fields: [trackerEntries.trackerId],
     references: [dailyTrackers.id],
   }),
-  activity: one(activities, {
+  activity: one(globalActivities, {
     fields: [trackerEntries.activityId],
-    references: [activities.id],
+    references: [globalActivities.id],
   }),
 }));
 
-// Types and schemas
-export type UpsertUser = typeof users.$inferInsert;
+// Export schema for Drizzle
+export const drizzleSchema = {
+  sessions,
+  users,
+  globalActivities,
+  dailyTrackers,
+  trackerEntries,
+  usersRelations,
+  globalActivitiesRelations,
+  dailyTrackersRelations,
+  trackerEntriesRelations,
+};
+
+// Export tables for direct use
+export {
+  sessions,
+  users,
+  globalActivities,
+  dailyTrackers,
+  trackerEntries,
+};
+
+// Validation schemas using Zod
+export const insertUserSchema = createInsertSchema(users);
+export const insertGlobalActivitySchema = createInsertSchema(globalActivities);
+export const insertDailyTrackerSchema = createInsertSchema(dailyTrackers);
+export const insertTrackerEntrySchema = createInsertSchema(trackerEntries);
+
+// Type exports
 export type User = typeof users.$inferSelect;
-
-export const insertActivitySchema = createInsertSchema(activities).omit({
-  id: true,
-  createdAt: true,
-});
-export type InsertActivity = z.infer<typeof insertActivitySchema>;
-export type Activity = typeof activities.$inferSelect;
-
-export const insertDailyTrackerSchema = createInsertSchema(dailyTrackers).omit({
-  id: true,
-  createdAt: true,
-  completionRate: true,
-});
-export type InsertDailyTracker = z.infer<typeof insertDailyTrackerSchema>;
+export type NewUser = typeof users.$inferInsert;
+export type GlobalActivity = typeof globalActivities.$inferSelect;
+export type NewGlobalActivity = typeof globalActivities.$inferInsert;
 export type DailyTracker = typeof dailyTrackers.$inferSelect;
-
-export const insertTrackerEntrySchema = createInsertSchema(trackerEntries).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertTrackerEntry = z.infer<typeof insertTrackerEntrySchema>;
+export type NewDailyTracker = typeof dailyTrackers.$inferInsert;
 export type TrackerEntry = typeof trackerEntries.$inferSelect;
-
-// Extended types for API responses
-export type TrackerEntryWithActivity = TrackerEntry & {
-  activity: Activity;
-};
-
-export type DailyTrackerWithEntries = DailyTracker & {
-  entries: TrackerEntryWithActivity[];
-};
-
-// User Registration Schema
-export const insertUserSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  preferredName: z.string().optional(),
-  gender: z.enum(["male", "female", "nonbinary", "other"]).optional(),
-  age: z.number().optional(),
-  role: z.string().optional().default("user"),
-  plan: z.enum(["basic", "pro"]).optional().default("basic"),
-  tier: z.enum(["bronze", "silver", "gold"]).optional().default("bronze"),
-  accountabilityLevel: z.enum(["beginner", "intermediate", "master"]).optional().default("beginner"),
-  isAdmin: z.boolean().optional().default(false),
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-
-export const drizzleSchema = { users, activities, dailyTrackers, trackerEntries, sessions };
+export type NewTrackerEntry = typeof trackerEntries.$inferInsert;

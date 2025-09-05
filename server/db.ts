@@ -1,53 +1,58 @@
 /**
  * TranscendBody - Database Connection and ORM Setup
  * 
- * This file configures the database connection using PostgreSQL
+ * This file configures the database connection using SQLite
  * and Drizzle ORM for the personal transformation tracking application.
  * 
  * Features:
- * - PostgreSQL connection with environment-based configuration
+ * - SQLite connection with better-sqlite3
  * - Drizzle ORM configuration with schema
  * - Type-safe database operations
- * - Connection pooling and error handling
+ * - Automatic database file creation
  * - Graceful shutdown handling
  */
 
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
 import { drizzleSchema } from '../shared/schema.js';
-import dotenv from 'dotenv';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Create PostgreSQL connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// Create SQLite database connection
+const sqlite = new Database('transcendbody.db');
+
+// Enable WAL mode for better performance
+sqlite.pragma('journal_mode = WAL');
 
 // Create Drizzle instance
-export const db = drizzle(pool, {
+export const db = drizzle(sqlite, {
   schema: drizzleSchema,
   logger: process.env.NODE_ENV === 'development',
 });
 
-// Test connection
-pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database');
-});
+// Run migrations on startup
+try {
+  migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
+  console.log('Database migrations completed successfully');
+} catch (error) {
+  console.log('No migrations to run or migrations already applied');
+}
 
-pool.on('error', (err) => {
-  console.error('PostgreSQL connection error:', err);
-});
+console.log('Connected to SQLite database');
 
 // Graceful shutdown
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   console.log('Closing database connection...');
-  await pool.end();
+  sqlite.close();
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.log('Closing database connection...');
-  await pool.end();
+  sqlite.close();
   process.exit(0);
 });

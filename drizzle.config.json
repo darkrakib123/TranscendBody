@@ -1,8 +1,8 @@
 {
   "schema": "./shared/schema.ts",
   "out": "./drizzle",
-  "dialect": "postgresql",
+  "dialect": "sqlite",
   "dbCredentials": {
-    "url": "postgresql://postgres:password@localhost:5432/transcendbody"
+    "url": "transcendbody.db"
   }
 }
