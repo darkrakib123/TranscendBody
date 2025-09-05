@@ -55,7 +55,11 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        try {
+          logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        } catch (error) {
+          logLine += ` :: [Response body could not be serialized]`;
+        }
       }
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
