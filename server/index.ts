@@ -19,12 +19,24 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import { setupAuthentication } from "./auth.js";
 import router from "./routes.js";
+import { db } from "./db.js";
 
 // Load environment variables
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize database connection
+async function initializeDatabase() {
+  try {
+    // Test database connection
+    await db.select().from({ users: 'users' }).limit(1);
+    log('✅ Database connection established');
+  } catch (error) {
+    log('⚠️ Database connection issue, but continuing...');
+  }
+}
 
 function log(message: string) {
   const timestamp = new Date().toLocaleTimeString();
@@ -91,11 +103,16 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 // Start server
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5050;
 
-const server = app.listen(port, "0.0.0.0", () => {
-  log(`🚀 Server running on http://localhost:${port}`);
+const server = app.listen(port, "0.0.0.0", async () => {
+  await initializeDatabase();
+  log(`🚀 TranscendBody Server running on http://localhost:${port}`);
   log(`📊 Dashboard: http://localhost:${port}/dashboard`);
   log(`⚙️  Admin Panel: http://localhost:${port}/admin`);
-  log(`🎯 Demo Accounts: admin@demo.com, bronze@demo.com, silver@demo.com (password: test)`);
+  log(`🎯 Demo Accounts (password: test):`);
+  log(`   👑 Admin: admin@demo.com`);
+  log(`   🥉 Bronze: bronze@demo.com`);
+  log(`   🥈 Silver: silver@demo.com`);
+  log(`✨ Application ready!`);
 });
 
 // Handle server errors
