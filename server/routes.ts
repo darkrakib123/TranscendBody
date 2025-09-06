@@ -237,6 +237,7 @@ router.post("/login", rateLimit(10, 15 * 60 * 1000), validateBody(loginSchema), 
   console.log('User found:', user ? 'Yes' : 'No');
   
   if (!user || !user.isActive || !(await bcryptjs.compare(password, user.password))) {
+  }
   if (!user || !user.isActive || !(await bcrypt.compare(password, user.password))) {
     console.log('Authentication failed');
     return res.status(401).render("landing", {
