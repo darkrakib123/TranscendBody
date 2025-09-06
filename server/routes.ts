@@ -21,7 +21,7 @@
  */
 
 import express from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db.js";
 import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
@@ -287,7 +287,7 @@ router.get("/api/tracker/today", async (req, res) => {
 
     if (!tracker) return res.status(404).json({ error: "No tracker for today" });
 
-    // Always join trackerEntries with globalActivities for all users
+    // Get tracker entries with activities
     const entries = await db
       .select({
         id: trackerEntries.id,
@@ -303,7 +303,19 @@ router.get("/api/tracker/today", async (req, res) => {
       .innerJoin(globalActivities, eq(trackerEntries.activityId, globalActivities.id))
       .where(eq(trackerEntries.trackerId, tracker.id));
 
-    res.json({ ...tracker, entries });
+    // Calculate completion rate
+    const completionRate = entries.length > 0 
+      ? Math.round((entries.filter(e => e.status === 'completed').length / entries.length) * 100)
+      : 0;
+    
+    // Update tracker completion rate if it's different
+    if (tracker.completionRate !== completionRate) {
+      await db.update(dailyTrackers)
+        .set({ completionRate })
+        .where(eq(dailyTrackers.id, tracker.id));
+    }
+
+    res.json({ ...tracker, entries, completionRate });
   } catch (err) {
     console.error("Error fetching today's tracker:", String(err));
     res.status(500).json({ error: "Failed to fetch today's tracker" });
@@ -366,21 +378,50 @@ router.delete('/api/tracker/entries/:entryId', async (req, res) => {
 // ---------- API: Add Tracker Entry ----------
 router.post('/api/tracker/entries', async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
+  
   const { trackerId, activityId, timeSlot, status } = req.body;
   const trackerIdInt = parseInt(trackerId);
   const activityIdInt = parseInt(activityId);
+  
   if (isNaN(trackerIdInt) || isNaN(activityIdInt)) {
     return res.status(400).json({ error: 'Invalid tracker ID or activity ID' });
   }
+  
   if (!trackerId || !activityId || !timeSlot) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
+  
+  // Validate time slot
+  if (!['morning', 'afternoon', 'evening', 'night'].includes(timeSlot)) {
+    return res.status(400).json({ error: 'Invalid time slot' });
+  }
+  
   try {
-    // Optionally: check that tracker belongs to user
+    // Check that tracker belongs to user
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, trackerIdInt) });
     if (!tracker || tracker.userId !== (req.user as any).id) {
       return res.status(403).json({ error: 'Forbidden' });
     }
+    
+    // Check that activity exists
+    const activity = await db.query.globalActivities.findFirst({ where: eq(globalActivities.id, activityIdInt) });
+    if (!activity) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+    
+    // Check for duplicate entries (same activity in same time slot for same day)
+    const existingEntry = await db.query.trackerEntries.findFirst({
+      where: and(
+        eq(trackerEntries.trackerId, trackerIdInt),
+        eq(trackerEntries.activityId, activityIdInt),
+        eq(trackerEntries.timeSlot, timeSlot)
+      )
+    });
+    
+    if (existingEntry) {
+      return res.status(409).json({ error: 'Activity already exists in this time slot' });
+    }
+    
     const [entry] = await db.insert(trackerEntries).values({
       trackerId: trackerIdInt,
       activityId: activityIdInt,
@@ -389,6 +430,7 @@ router.post('/api/tracker/entries', async (req, res) => {
       createdAt: new Date(),
       updatedAt: new Date()
     }).returning();
+    
     res.json(entry);
   } catch (err) {
     console.error('Error adding tracker entry:', String(err));

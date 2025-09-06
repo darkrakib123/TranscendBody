@@ -2,7 +2,7 @@
 import { db } from '../server/db.ts';
 import { users, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
 import { sql } from 'drizzle-orm';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { format, subDays } from 'date-fns';
 
 // Demo users with hardcoded values

@@ -91,6 +91,8 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 // Start server
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5050;
 app.listen(port, "0.0.0.0", () => {
-  log(`serving on port ${port}`);
+  log(`🚀 Server running on http://localhost:${port}`);
+  log(`📊 Dashboard: http://localhost:${port}/dashboard`);
+  log(`⚙️  Admin Panel: http://localhost:${port}/admin`);
 });
 

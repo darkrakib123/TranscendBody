@@ -12,6 +12,14 @@ import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Define allowed values for validation
+export const allowedPlans = ['trial', 'basic', 'pro'] as const;
+export const allowedTiers = ['bronze', 'silver', 'gold'] as const;
+export const allowedAccountabilityLevels = ['beginner', 'intermediate', 'master'] as const;
+export const allowedCategories = ['workout', 'nutrition', 'recovery', 'mindset'] as const;
+export const allowedTimeSlots = ['morning', 'afternoon', 'evening', 'night'] as const;
+export const allowedDifficulties = ['easy', 'medium', 'hard'] as const;
+
 // Session storage table for express-session
 const sessions = sqliteTable("sessions", {
   sid: text("sid").primaryKey(),
@@ -128,7 +136,17 @@ export {
 };
 
 // Validation schemas using Zod
-export const insertUserSchema = createInsertSchema(users);
+export const insertUserSchema = createInsertSchema(users, {
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  age: z.number().min(13).max(120).optional(),
+  plan: z.enum(allowedPlans).optional(),
+  tier: z.enum(allowedTiers).optional(),
+  accountabilityLevel: z.enum(allowedAccountabilityLevels).optional(),
+});
+
 export const insertGlobalActivitySchema = createInsertSchema(globalActivities);
 export const insertDailyTrackerSchema = createInsertSchema(dailyTrackers);
 export const insertTrackerEntrySchema = createInsertSchema(trackerEntries);
@@ -142,3 +160,10 @@ export type DailyTracker = typeof dailyTrackers.$inferSelect;
 export type NewDailyTracker = typeof dailyTrackers.$inferInsert;
 export type TrackerEntry = typeof trackerEntries.$inferSelect;
 export type NewTrackerEntry = typeof trackerEntries.$inferInsert;
+
+// Additional type exports for better type safety
+export type Activity = GlobalActivity;
+export type InsertActivity = NewGlobalActivity;
+export type UpsertUser = Partial<User> & { id: string };
+export type TrackerEntryWithActivity = TrackerEntry & { activity: GlobalActivity };
+export type DailyTrackerWithEntries = DailyTracker & { entries: TrackerEntryWithActivity[] };

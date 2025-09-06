@@ -40,7 +40,8 @@ function getFirstNDays(trackers: DailyTracker[], n: number) {
 
 // Helper function to check if a day is successful (≥80% completion)
 function isSuccessfulDay(tracker: DailyTracker, entries: TrackerEntry[]) {
-  return getDayCompletionRate(tracker, entries) >= 0.8;
+  const rate = getDayCompletionRate(tracker, entries);
+  return rate >= 0.8;
 }
 
 // --- Updated streak reset logic ---
@@ -49,18 +50,31 @@ function calculateCurrentStreak(trackers: DailyTracker[], entries: TrackerEntry[
   const sortedTrackers = [...trackers].sort((a, b) => b.date.localeCompare(a.date));
   const todayStr = new Date().toISOString().slice(0, 10);
   let startIndex = 0;
+  
+  // Skip today's tracker if it exists (don't count incomplete day)
   if (sortedTrackers[0]?.date === todayStr) startIndex = 1;
+  
   let missed = 0;
+  let consecutiveMissed = 0;
+  
   for (let i = startIndex; i < sortedTrackers.length; i++) {
     const tracker = sortedTrackers[i];
     if (isSuccessfulDay(tracker, entries)) {
       streak++;
+      consecutiveMissed = 0; // Reset consecutive missed counter
     } else {
       missed++;
-      if (missed > 2) break; // Reset streak if more than 2 missed in 30 days
+      consecutiveMissed++;
+      
+      // Break streak if 3 consecutive days missed OR more than 2 missed in last 7 days
+      if (consecutiveMissed >= 3) break;
+      if (i < 7 && missed > 2) break;
     }
-    if (streak >= 30) break;
+    
+    // Don't count beyond reasonable streak calculation window
+    if (i >= 90) break;
   }
+  
   return streak;
 }
 

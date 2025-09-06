@@ -38,20 +38,20 @@ try {
   await migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
   console.log('Database migrations completed successfully');
 } catch (error) {
-  console.log('No migrations to run or migrations already applied');
+  console.log('No migrations to run or migrations already applied:', error.message);
 }
 
-console.log('Connected to libsql database');
+console.log('✅ Connected to libsql database successfully');
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('Closing database connection...');
+  console.log('🔄 Gracefully closing database connection...');
   client.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
-  console.log('Closing database connection...');
+  console.log('🔄 Gracefully closing database connection...');
   client.close();
   process.exit(0);
 });

@@ -152,9 +152,14 @@ tracker_entries (
    ```
 
 3. **Environment Setup**
-   Create a `.env` file in the root directory:
+   Copy the example environment file and configure:
    ```env
-   DATABASE_URL=postgresql://username:password@localhost:5432/transcendbody
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
+   DATABASE_URL=file:transcendbody.db
    SESSION_SECRET=your-super-secret-key
    PORT=5050
    ```
@@ -163,13 +168,8 @@ tracker_entries (
 
    ✅ **Recommended for full demo setup**
    ```bash
-   # Check PostgreSQL connection
-   pg_isready
-
    # Clean and reseed the database with master activities and demo users
    npx tsx scripts/cleanAndSeed.ts
-   # OR (depending on config)
-   node --loader ts-node/esm scripts/cleanAndSeed.ts
    ```
 
    🔁 **Alternative (use only if the above is not viable)**

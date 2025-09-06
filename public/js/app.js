@@ -3,11 +3,21 @@
 let currentTracker = null;
 let activities = [];
 let currentTimeSlot = 'morning';
+let isLoading = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname === '/dashboard') {
         initializeDashboard();
     }
+    
+    // Initialize tooltips
+    if (window.bootstrap && typeof bootstrap.Tooltip !== 'undefined') {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
     // Tooltip logic for info icons
     document.querySelectorAll('.info-icon').forEach(function(icon) {
         var tooltip = icon.querySelector('.custom-tooltip');
@@ -32,6 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeDashboard() {
+    if (isLoading) return;
+    isLoading = true;
+    
     try {
         await Promise.all([
             loadTodayTracker(),
@@ -43,6 +56,8 @@ async function initializeDashboard() {
     } catch (error) {
         console.error('Dashboard initialization error:', error);
         showAlert('Failed to load dashboard data', 'danger');
+    } finally {
+        isLoading = false;
     }
 }
 
@@ -353,7 +368,10 @@ async function addActivity() {
 }
 
 async function toggleActivityStatus(entryId, isCompleted) {
+    if (isLoading) return;
+    
     try {
+        isLoading = true;
         const status = isCompleted ? 'completed' : 'pending';
         const response = await fetch(`/api/tracker/entries/${entryId}/status`, {
             method: 'PATCH',
@@ -374,6 +392,8 @@ async function toggleActivityStatus(entryId, isCompleted) {
     } catch (error) {
         console.error('Error updating activity status:', error);
         showAlert('Failed to update activity', 'danger');
+    } finally {
+        isLoading = false;
     }
 }
 
@@ -584,8 +604,65 @@ function loadPopularActivities() {
     // ...
 }
 function showAlert(message, type = 'info') {
-    // ...
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert.position-fixed');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+    alertDiv.innerHTML = `
+        <i class="fas fa-${getAlertIcon(type)} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.classList.remove('show');
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 150);
+        }
+    }, 5000);
+}
+
+function getAlertIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'danger': 'exclamation-triangle',
+        'warning': 'exclamation-circle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
 }
 function initializeFormValidation() {
-    // ...
+    const forms = document.querySelectorAll('form[data-validate]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                showAlert('Please fill in all required fields correctly.', 'warning');
+            }
+            form.classList.add('was-validated');
+        });
+    });
+    
+    // Real-time validation for email fields
+    const emailInputs = document.querySelectorAll('input[type="email"]');
+    emailInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !this.checkValidity()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
 }

@@ -8,6 +8,12 @@
   --info-color: #0dcaf0;
   --dark-color: #212529;
   --purple-color: #6f42c1;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
 }
 
 /* Global Styles */
@@ -42,12 +48,12 @@ body {
 
 /* Card Hover Effects */
 .card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .hover-lift {
@@ -159,6 +165,27 @@ body {
 .loading {
   opacity: 0.6;
   pointer-events: none;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 1000;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .spinner-border-sm {
@@ -205,7 +232,23 @@ body {
 .alert {
   border: none;
   border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.alert.position-fixed {
   margin-bottom: 0;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Footer */
