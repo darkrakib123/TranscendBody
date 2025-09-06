@@ -21,7 +21,7 @@
  */
 
 import express from "express";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db.js";
 import { 
@@ -181,7 +181,7 @@ router.post("/register", rateLimit(5, 15 * 60 * 1000), asyncHandler(async (req, 
   const userId = crypto.randomUUID();
 
   // Hash password and try to insert
-  const hashedPassword = await bcryptjs.hash(req.body.password, 12);
+  const hashedPassword = await bcrypt.hash(req.body.password, 12);
   
   try {
     await db.insert(users).values({
@@ -237,6 +237,7 @@ router.post("/login", rateLimit(10, 15 * 60 * 1000), validateBody(loginSchema), 
   console.log('User found:', user ? 'Yes' : 'No');
   
   if (!user || !user.isActive || !(await bcryptjs.compare(password, user.password))) {
+  if (!user || !user.isActive || !(await bcrypt.compare(password, user.password))) {
     console.log('Authentication failed');
     return res.status(401).render("landing", {
       tab: "signin",

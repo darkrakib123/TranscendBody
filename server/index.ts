@@ -90,9 +90,30 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 // Start server
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5050;
-app.listen(port, "0.0.0.0", () => {
+
+const server = app.listen(port, "0.0.0.0", () => {
   log(`🚀 Server running on http://localhost:${port}`);
   log(`📊 Dashboard: http://localhost:${port}/dashboard`);
   log(`⚙️  Admin Panel: http://localhost:${port}/admin`);
+  log(`🎯 Demo Accounts: admin@demo.com, bronze@demo.com, silver@demo.com (password: test)`);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${port} is already in use. Try a different port.`);
+    process.exit(1);
+  } else {
+    console.error('❌ Server error:', error);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🔄 Received SIGTERM, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
 

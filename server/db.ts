@@ -34,12 +34,17 @@ export const db = drizzle(client, {
 });
 
 // Run migrations on startup
-try {
-  await migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
-  console.log('Database migrations completed successfully');
-} catch (error) {
-  console.log('No migrations to run or migrations already applied:', error.message);
+async function runMigrations() {
+  try {
+    await migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
+    console.log('✅ Database migrations completed successfully');
+  } catch (error) {
+    console.log('ℹ️ No migrations to run or migrations already applied');
+  }
 }
+
+// Run migrations
+runMigrations();
 
 console.log('✅ Connected to libsql database successfully');
 

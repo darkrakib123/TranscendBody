@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 import session from 'express-session';
 import MemoryStore from 'memorystore';
 import type { Express, RequestHandler } from 'express';
@@ -39,6 +39,7 @@ export function setupAuthentication(app: Express) {
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
+        const isValidPassword = await bcryptjs.compare(password, user.password);
         if (!isValidPassword) {
           return done(null, false, { message: 'Invalid email or password' });
         }
