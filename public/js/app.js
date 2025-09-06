@@ -1,668 +1,1039 @@
-// Transcend Your Body - Main JavaScript
+// TranscendBody - Enhanced Main JavaScript with Bug Fixes and Improvements
 
 let currentTracker = null;
 let activities = [];
 let currentTimeSlot = 'morning';
 let isLoading = false;
+let loadingStates = new Set();
 
+// Enhanced error handling and logging
+const logger = {
+  info: (message, data = null) => {
+    console.log(`[INFO] ${message}`, data || '');
+  },
+  error: (message, error = null) => {
+    console.error(`[ERROR] ${message}`, error || '');
+  },
+  warn: (message, data = null) => {
+    console.warn(`[WARN] ${message}`, data || '');
+  }
+};
+
+// API helper with proper error handling
+const api = {
+  async request(url, options = {}) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      
+      return data.success !== false ? (data.data || data) : data;
+    } catch (error) {
+      logger.error(`API request failed: ${url}`, error);
+      throw error;
+    }
+  },
+
+  get(url) {
+    return this.request(url);
+  },
+
+  post(url, body) {
+    return this.request(url, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+  },
+
+  patch(url, body) {
+    return this.request(url, {
+      method: 'PATCH',
+      body: JSON.stringify(body)
+    });
+  },
+
+  delete(url) {
+    return this.request(url, {
+      method: 'DELETE'
+    });
+  }
+};
+
+// Enhanced loading state management
+const loadingManager = {
+  show(element, text = 'Loading...') {
+    if (element) {
+      element.disabled = true;
+      element.classList.add('loading');
+      const originalText = element.textContent;
+      element.dataset.originalText = originalText;
+      element.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${text}`;
+    }
+  },
+
+  hide(element) {
+    if (element) {
+      element.disabled = false;
+      element.classList.remove('loading');
+      const originalText = element.dataset.originalText;
+      if (originalText) {
+        element.textContent = originalText;
+        delete element.dataset.originalText;
+      }
+    }
+  },
+
+  setGlobal(loading) {
+    isLoading = loading;
+    const body = document.body;
+    if (loading) {
+      body.classList.add('loading');
+    } else {
+      body.classList.remove('loading');
+    }
+  }
+};
+
+// Enhanced DOM ready handler
 document.addEventListener('DOMContentLoaded', function() {
+  logger.info('DOM loaded, initializing application');
+  
+  try {
+    // Initialize based on current page
     if (window.location.pathname === '/dashboard') {
-        initializeDashboard();
+      initializeDashboard();
     }
     
-    // Initialize tooltips
-    if (window.bootstrap && typeof bootstrap.Tooltip !== 'undefined') {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
-    
-    // Tooltip logic for info icons
-    document.querySelectorAll('.info-icon').forEach(function(icon) {
-        var tooltip = icon.querySelector('.custom-tooltip');
-        if (!tooltip) return;
-        icon.addEventListener('mouseenter', function() { tooltip.style.display = 'block'; });
-        icon.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
-        icon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-    document.addEventListener('click', function() {
-        document.querySelectorAll('.custom-tooltip').forEach(function(tooltip) {
-            tooltip.style.display = 'none';
-        });
-    });
-    const createCustomCheckbox = document.getElementById('createCustom');
-    if (createCustomCheckbox) {
-        createCustomCheckbox.addEventListener('change', toggleCustomActivityFields);
-    }
+    // Initialize global components
+    initializeTooltips();
     initializeFormValidation();
+    initializeCustomActivityToggle();
+    initializeGlobalEventListeners();
+    
+    // Set current date in header
+    updateCurrentDate();
+    
+    logger.info('Application initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize application', error);
+    showAlert('Failed to initialize application. Please refresh the page.', 'danger');
+  }
 });
 
+// Enhanced dashboard initialization
 async function initializeDashboard() {
-    if (isLoading) return;
-    isLoading = true;
+  if (isLoading) {
+    logger.warn('Dashboard initialization already in progress');
+    return;
+  }
+  
+  loadingManager.setGlobal(true);
+  
+  try {
+    logger.info('Initializing dashboard');
     
-    try {
-        await Promise.all([
-            loadTodayTracker(),
-            loadActivities(),
-            loadStats()
-        ]);
-        updateProgressDisplay();
-        loadPopularActivities();
-    } catch (error) {
-        console.error('Dashboard initialization error:', error);
-        showAlert('Failed to load dashboard data', 'danger');
-    } finally {
-        isLoading = false;
-    }
-}
-
-async function loadTodayTracker() {
-    try {
-        const response = await fetch('/api/tracker/today');
-        if (response.ok) {
-            currentTracker = await response.json();
-            renderTrackerEntries();
-        } else if (response.status === 404) {
-            await createTodayTracker();
-        }
-    } catch (error) {
-        console.error('Error loading tracker:', error);
-    }
-}
-
-async function createTodayTracker() {
-    try {
-        const response = await fetch('/api/tracker', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date: new Date().toISOString().split('T')[0] })
-        });
-        if (response.ok) {
-            currentTracker = await response.json();
-        }
-    } catch (error) {
-        console.error('Error creating tracker:', error);
-    }
-}
-
-async function loadActivities() {
-    try {
-        const response = await fetch('/api/activities');
-        if (response.ok) {
-            activities = await response.json();
-            populateActivitySelect();
-        }
-    } catch (error) {
-        console.error('Error loading activities:', error);
-    }
-}
-
-async function loadStats() {
-    try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-            const stats = await response.json();
-            stats.totalActivities = stats.activitiesCompleted;
-            stats.successfulDays30 = stats.successfulDays30 ?? 0;
-            stats.totalDays30 = stats.totalDays30 ?? 30;
-            stats.successfulDays60 = stats.successfulDays60 ?? 0;
-            stats.totalDays60 = stats.totalDays60 ?? 60;
-            stats.successfulDays90 = stats.successfulDays90 ?? 0;
-            stats.totalDays90 = stats.totalDays90 ?? 90;
-            stats.weeklyAverage = stats.weeklyAverage ?? 0;
-            updateStatsDisplay(stats);
-        } else {
-            console.error('Failed to load stats:', response.status);
-        }
-    } catch (error) {
-        console.error('Error loading stats:', error);
-    }
-}
-
-function renderTrackerEntries() {
-    if (!currentTracker) return;
-    const entries = Array.isArray(currentTracker.entries) ? currentTracker.entries : [];
-    const timeSlots = ['morning', 'afternoon', 'evening', 'night'];
-    timeSlots.forEach(timeSlot => {
-        const container = document.getElementById(`${timeSlot}-activities`);
-        if (!container) return;
-        const slotEntries = entries.filter(entry => entry.timeSlot === timeSlot);
-        if (slotEntries.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                    <p class="mb-0">No activities scheduled for ${timeSlot}</p>
-                    <button class="btn btn-link btn-sm" onclick="showAddActivityModal('${timeSlot}')">
-                        Add your first activity
-                    </button>
-                </div>
-            `;
-        } else {
-            container.innerHTML = slotEntries.map(entry => createActivityHTML(entry)).join('');
-        }
-        updateTimeSlotProgress(timeSlot, slotEntries);
-    });
+    // Load all dashboard data in parallel
+    const promises = [
+      loadTodayTracker(),
+      loadActivities(),
+      loadStats()
+    ];
+    
+    await Promise.allSettled(promises);
+    
+    // Update UI components
     updateProgressDisplay();
+    
+    logger.info('Dashboard initialized successfully');
+  } catch (error) {
+    logger.error('Dashboard initialization failed', error);
+    showAlert('Failed to load dashboard data. Please refresh the page.', 'danger');
+  } finally {
+    loadingManager.setGlobal(false);
+  }
 }
 
-function updateTimeSlotProgress(timeSlot, entries) {
-    const progressElement = document.getElementById(`${timeSlot}-progress`);
-    if (!progressElement) return;
-    const total = entries.length;
-    const completed = entries.filter(e => e.status === 'completed').length;
-    progressElement.textContent = `${completed} of ${total} completed`;
-}
-
-function createActivityHTML(entry) {
-    const activity = entry.activity;
-    const isCompleted = entry.status === 'completed';
-    const categoryClass = `category-${activity.category}`;
-    return `
-        <div class="activity-item ${isCompleted ? 'completed' : ''}" data-entry-id="${entry.id}">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="checkbox" ${isCompleted ? 'checked' : ''} 
-                               onchange="toggleActivityStatus(${entry.id}, this.checked)">
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="activity-title mb-1">${activity.title}</h6>
-                        <p class="text-muted mb-0 small">${activity.description}</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="badge ${categoryClass} me-2">${activity.category}</span>
-                    <button class="btn btn-sm btn-outline-danger btn-delete" 
-                            onclick="deleteActivity(${entry.id})" 
-                            title="Remove activity">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function showAddActivityModal(timeSlot) {
-    currentTimeSlot = timeSlot;
-    const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
-    const timeSlotSelect = document.getElementById('timeSlot');
-    if (timeSlotSelect) {
-        timeSlotSelect.value = timeSlot;
+// Enhanced tracker loading with better error handling
+async function loadTodayTracker() {
+  try {
+    logger.info('Loading today\'s tracker');
+    
+    const response = await api.get('/api/tracker/today');
+    currentTracker = response;
+    renderTrackerEntries();
+    
+    logger.info('Today\'s tracker loaded successfully');
+  } catch (error) {
+    if (error.message.includes('404')) {
+      logger.info('No tracker for today, creating new one');
+      await createTodayTracker();
+    } else {
+      logger.error('Failed to load today\'s tracker', error);
+      showAlert('Failed to load today\'s activities', 'warning');
     }
-    console.log('[DEBUG] Opening Add Activity Modal. activities:', activities);
-    populateActivitySelect(); // Ensure dropdown is populated every time modal opens
-    modal.show();
+  }
 }
+
+// Enhanced tracker creation
+async function createTodayTracker() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const response = await api.post('/api/tracker', { date: today });
+    currentTracker = response;
+    renderTrackerEntries();
+    
+    logger.info('New tracker created for today');
+  } catch (error) {
+    logger.error('Failed to create today\'s tracker', error);
+    showAlert('Failed to create today\'s tracker', 'danger');
+  }
+}
+
+// Enhanced activities loading
+async function loadActivities() {
+  try {
+    logger.info('Loading activities');
+    
+    const response = await api.get('/api/activities');
+    activities = Array.isArray(response) ? response : (response.data || []);
+    
+    populateActivitySelect();
+    
+    logger.info(`Loaded ${activities.length} activities`);
+  } catch (error) {
+    logger.error('Failed to load activities', error);
+    showAlert('Failed to load activities', 'warning');
+    activities = [];
+  }
+}
+
+// Enhanced stats loading
+async function loadStats() {
+  try {
+    logger.info('Loading user stats');
+    
+    const response = await api.get('/api/stats');
+    const stats = response.data || response;
+    
+    // Ensure stats have default values
+    const normalizedStats = {
+      currentStreak: 0,
+      weeklyAverage: 0,
+      totalActivities: 0,
+      activitiesCompleted: 0,
+      completionRate: 0,
+      accountabilityCountdown: 0,
+      accountabilityMessage: '',
+      ...stats
+    };
+    
+    updateStatsDisplay(normalizedStats);
+    
+    logger.info('User stats loaded successfully');
+  } catch (error) {
+    logger.error('Failed to load stats', error);
+    // Don't show error alert for stats as it's not critical
+    updateStatsDisplay({
+      currentStreak: 0,
+      weeklyAverage: 0,
+      totalActivities: 0,
+      activitiesCompleted: 0,
+      completionRate: 0
+    });
+  }
+}
+
+// Enhanced tracker entries rendering
+function renderTrackerEntries() {
+  if (!currentTracker) {
+    logger.warn('No current tracker to render');
+    return;
+  }
+  
+  const entries = Array.isArray(currentTracker.entries) ? currentTracker.entries : [];
+  const timeSlots = ['morning', 'afternoon', 'evening', 'night'];
+  
+  timeSlots.forEach(timeSlot => {
+    const container = document.getElementById(`${timeSlot}-activities`);
+    if (!container) {
+      logger.warn(`Container not found for time slot: ${timeSlot}`);
+      return;
+    }
+    
+    const slotEntries = entries.filter(entry => entry.timeSlot === timeSlot);
+    
+    if (slotEntries.length === 0) {
+      container.innerHTML = createEmptySlotHTML(timeSlot);
+    } else {
+      container.innerHTML = slotEntries.map(entry => createActivityHTML(entry)).join('');
+    }
+    
+    updateTimeSlotProgress(timeSlot, slotEntries);
+  });
+  
+  updateProgressDisplay();
+}
+
+// Create empty slot HTML
+function createEmptySlotHTML(timeSlot) {
+  const timeSlotNames = {
+    morning: 'Morning',
+    afternoon: 'Afternoon', 
+    evening: 'Evening',
+    night: 'Night'
+  };
+  
+  return `
+    <div class="text-center py-4 text-muted empty-slot">
+      <i class="fas fa-plus-circle fa-2x mb-2 opacity-50"></i>
+      <p class="mb-2">No activities scheduled for ${timeSlotNames[timeSlot]}</p>
+      <button class="btn btn-outline-primary btn-sm" onclick="showAddActivityModal('${timeSlot}')">
+        <i class="fas fa-plus me-1"></i>Add Activity
+      </button>
+    </div>
+  `;
+}
+
+// Enhanced activity HTML creation
+function createActivityHTML(entry) {
+  if (!entry || !entry.activity) {
+    logger.warn('Invalid entry data', entry);
+    return '';
+  }
+  
+  const activity = entry.activity;
+  const isCompleted = entry.status === 'completed';
+  const isSkipped = entry.status === 'skipped';
+  const categoryClass = `category-${activity.category}`;
+  const statusClass = isCompleted ? 'completed' : (isSkipped ? 'skipped' : '');
+  
+  return `
+    <div class="activity-item ${statusClass}" data-entry-id="${entry.id}">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center flex-grow-1">
+          <div class="form-check me-3">
+            <input class="form-check-input" type="checkbox" 
+                   ${isCompleted ? 'checked' : ''} 
+                   onchange="toggleActivityStatus(${entry.id}, this.checked)"
+                   id="activity-${entry.id}">
+            <label class="form-check-label" for="activity-${entry.id}"></label>
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <h6 class="activity-title mb-1 text-truncate">${escapeHtml(activity.title)}</h6>
+            <p class="text-muted mb-0 small text-truncate">${escapeHtml(activity.description || '')}</p>
+            ${entry.notes ? `<p class="text-info mb-0 small"><i class="fas fa-sticky-note me-1"></i>${escapeHtml(entry.notes)}</p>` : ''}
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge ${categoryClass}">${activity.category}</span>
+          ${activity.difficulty ? `<span class="badge bg-secondary">${activity.difficulty}</span>` : ''}
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" onclick="markAsSkipped(${entry.id})">
+                <i class="fas fa-forward me-2"></i>Mark as Skipped
+              </button></li>
+              <li><button class="dropdown-item" onclick="addNoteToActivity(${entry.id})">
+                <i class="fas fa-sticky-note me-2"></i>Add Note
+              </button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item text-danger" onclick="deleteActivity(${entry.id})">
+                <i class="fas fa-trash me-2"></i>Remove
+              </button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Enhanced time slot progress update
+function updateTimeSlotProgress(timeSlot, entries) {
+  const progressElement = document.getElementById(`${timeSlot}-progress`);
+  if (!progressElement) return;
+  
+  const total = entries.length;
+  const completed = entries.filter(e => e.status === 'completed').length;
+  const skipped = entries.filter(e => e.status === 'skipped').length;
+  
+  let progressText = `${completed} of ${total} completed`;
+  if (skipped > 0) {
+    progressText += ` (${skipped} skipped)`;
+  }
+  
+  progressElement.textContent = progressText;
+  
+  // Update progress color based on completion rate
+  const completionRate = total > 0 ? (completed / total) * 100 : 0;
+  progressElement.className = 'badge ';
+  
+  if (completionRate >= 80) {
+    progressElement.className += 'bg-success';
+  } else if (completionRate >= 50) {
+    progressElement.className += 'bg-warning text-dark';
+  } else {
+    progressElement.className += 'bg-light text-dark';
+  }
+}
+
+// Enhanced activity modal
+function showAddActivityModal(timeSlot) {
+  currentTimeSlot = timeSlot;
+  
+  const modal = document.getElementById('addActivityModal');
+  const timeSlotSelect = document.getElementById('timeSlot');
+  
+  if (!modal) {
+    logger.error('Add activity modal not found');
+    return;
+  }
+  
+  if (timeSlotSelect) {
+    timeSlotSelect.value = timeSlot;
+  }
+  
+  // Reset form
+  const form = document.getElementById('addActivityForm');
+  if (form) {
+    form.reset();
+  }
+  
+  // Hide custom fields
+  const customFields = document.getElementById('customActivityFields');
+  if (customFields) {
+    customFields.style.display = 'none';
+  }
+  
+  populateActivitySelect();
+  
+  const bsModal = new bootstrap.Modal(modal);
+  bsModal.show();
+  
+  logger.info(`Opened add activity modal for ${timeSlot}`);
+}
+
+// Make function globally available
 window.showAddActivityModal = showAddActivityModal;
 
-function toggleCustomActivityFields() {
-    const customFields = document.getElementById('customActivityFields');
-    const activitySelect = document.getElementById('activitySelect');
-    const createCustom = document.getElementById('createCustom');
-    if (createCustom.checked) {
-        customFields.style.display = 'block';
-        activitySelect.disabled = true;
-    } else {
-        customFields.style.display = 'none';
-        activitySelect.disabled = false;
-    }
-}
-
-// Group activities by category and time slot for the dropdown
+// Enhanced activity selection population
 function populateActivitySelect() {
-    const select = document.getElementById('activitySelect');
-    if (!select || !activities) {
-        console.log('[DEBUG] No select element or activities array missing.');
-        return;
+  const select = document.getElementById('activitySelect');
+  if (!select) {
+    logger.warn('Activity select element not found');
+    return;
+  }
+  
+  select.innerHTML = '';
+  
+  if (!activities || activities.length === 0) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No activities available';
+    select.appendChild(option);
+    select.disabled = true;
+    return;
+  }
+  
+  select.disabled = false;
+  
+  // Add default option
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = 'Select an activity';
+  select.appendChild(defaultOption);
+  
+  // Group activities by category
+  const grouped = activities.reduce((acc, activity) => {
+    const category = activity.category || 'other';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    select.innerHTML = '';
-    if (activities.length === 0) {
+    acc[category].push(activity);
+    return acc;
+  }, {});
+  
+  // Create optgroups
+  Object.entries(grouped).forEach(([category, categoryActivities]) => {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+    
+    categoryActivities
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .forEach(activity => {
         const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'No activities available';
-        select.appendChild(option);
-        select.disabled = true;
-        return;
-    }
-    select.disabled = false;
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Select an activity';
-    select.appendChild(defaultOption);
-    // Group by category and time slot
-    const grouped = {};
-    activities.forEach(activity => {
-        const groupKey = `${activity.category} - ${activity.timeOfDay || 'any'}`;
-        if (!grouped[groupKey]) grouped[groupKey] = [];
-        grouped[groupKey].push(activity);
-    });
-    Object.keys(grouped).forEach(groupKey => {
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
-        grouped[groupKey].forEach(activity => {
-            const option = document.createElement('option');
-            option.value = activity.id;
-            option.textContent = activity.title;
-            option.title = activity.description || '';
-            optgroup.appendChild(option);
-        });
-        select.appendChild(optgroup);
-    });
+        option.value = activity.id;
+        option.textContent = activity.title;
+        option.title = activity.description || '';
+        optgroup.appendChild(option);
+      });
+    
+    select.appendChild(optgroup);
+  });
 }
 
-// Show/hide custom activity form
-const showCustomBtn = document.getElementById('showCustomActivityFields');
-if (showCustomBtn) {
+// Enhanced custom activity toggle
+function initializeCustomActivityToggle() {
+  const showCustomBtn = document.getElementById('showCustomActivityFields');
+  const customFields = document.getElementById('customActivityFields');
+  const activitySelect = document.getElementById('activitySelect');
+  
+  if (showCustomBtn && customFields) {
     showCustomBtn.addEventListener('click', function() {
-        document.getElementById('customActivityFields').style.display = 'block';
-        document.getElementById('addActivityForm').scrollIntoView({ behavior: 'smooth' });
+      const isVisible = customFields.style.display === 'block';
+      
+      if (isVisible) {
+        customFields.style.display = 'none';
+        showCustomBtn.innerHTML = '<i class="fas fa-plus me-1"></i>Create Custom Activity';
+        if (activitySelect) activitySelect.disabled = false;
+      } else {
+        customFields.style.display = 'block';
+        showCustomBtn.innerHTML = '<i class="fas fa-minus me-1"></i>Use Existing Activity';
+        if (activitySelect) activitySelect.disabled = true;
+        customFields.scrollIntoView({ behavior: 'smooth' });
+      }
     });
+  }
 }
 
-const createCustomBtn = document.getElementById('createCustomActivityBtn');
-if (createCustomBtn) {
-    createCustomBtn.addEventListener('click', async function() {
-        const title = document.getElementById('customTitle').value;
-        const description = document.getElementById('customDescription').value;
-        const category = document.getElementById('customCategory').value;
-        const timeOfDay = document.getElementById('customTimeSlot').value;
-        if (!title || !category || !timeOfDay) {
-            showAlert('Please fill in all required fields for custom activity.', 'warning');
-            return;
-        }
-        try {
-            const response = await fetch('/api/activities', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, description, category, timeOfDay, isCustom: true })
-            });
-            if (!response.ok) throw new Error('Failed to create custom activity');
-            const newActivity = await response.json();
-            activities.push(newActivity);
-            populateActivitySelect();
-            document.getElementById('activitySelect').value = newActivity.id;
-            document.getElementById('customActivityFields').style.display = 'none';
-            showAlert('Custom activity created!', 'success');
-        } catch (error) {
-            showAlert('Failed to create custom activity', 'danger');
-        }
-    });
-}
-
-function getTimeAppropriateActivities(timeSlot, allActivities) {
-    // Return all activities, regardless of time slot
-    return allActivities;
-}
-
+// Enhanced activity addition
 async function addActivity() {
-    const form = document.getElementById('addActivityForm');
+  const form = document.getElementById('addActivityForm');
+  const submitBtn = document.querySelector('#addActivityModal .btn-primary');
+  
+  if (!form) {
+    logger.error('Add activity form not found');
+    return;
+  }
+  
+  loadingManager.show(submitBtn, 'Adding...');
+  
+  try {
     const formData = new FormData(form);
-    try {
-        let activityId;
-        if (document.getElementById('customActivityFields').style.display === 'block') {
-            // Custom activity creation
-            const title = formData.get('customTitle');
-            const description = formData.get('customDescription');
-            const category = formData.get('customCategory');
-            const timeOfDay = formData.get('customTimeSlot');
-            if (!title || !category || !timeOfDay) {
-                showAlert('Please fill in all required fields for custom activity.', 'warning');
-                return;
-            }
-            const activityResponse = await fetch('/api/activities', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, description, category, timeOfDay, isCustom: true })
-            });
-            if (!activityResponse.ok) throw new Error('Failed to create custom activity');
-            const newActivity = await activityResponse.json();
-            activityId = newActivity.id;
-            activities.push(newActivity);
-            populateActivitySelect();
-            document.getElementById('activitySelect').value = newActivity.id;
-        } else {
-            activityId = parseInt(formData.get('activityId'));
-            if (!activityId) {
-                showAlert('Please select an activity', 'warning');
-                return;
-            }
-        }
-        // Always use the selected time slot from the timeSlotSelect
-        const timeSlot = formData.get('timeSlot');
-        if (!timeSlot) {
-            showAlert('Please select a time slot.', 'warning');
-            return;
-        }
-        const trackerEntry = {
-            trackerId: currentTracker.id,
-            activityId: activityId,
-            timeSlot: timeSlot,
-            status: 'pending'
-        };
-        const response = await fetch('/api/tracker/entries', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(trackerEntry)
-        });
-        if (response.ok) {
-            await loadTodayTracker();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addActivityModal'));
-            modal.hide();
-            form.reset();
-            document.getElementById('customActivityFields').style.display = 'none';
-            document.getElementById('activitySelect').disabled = false;
-            showAlert('Activity added successfully!', 'success');
-        } else {
-            throw new Error('Failed to add activity to tracker');
-        }
-    } catch (error) {
-        console.error('Error adding activity:', error);
-        showAlert('Failed to add activity', 'danger');
+    const customFields = document.getElementById('customActivityFields');
+    const isCustom = customFields && customFields.style.display === 'block';
+    
+    let activityId;
+    
+    if (isCustom) {
+      // Create custom activity
+      const customData = {
+        title: formData.get('customTitle'),
+        description: formData.get('customDescription'),
+        category: formData.get('customCategory'),
+        timeOfDay: formData.get('customTimeSlot'),
+        isCustom: true,
+        difficulty: 'medium'
+      };
+      
+      // Validate custom activity data
+      if (!customData.title || !customData.category || !customData.timeOfDay) {
+        throw new Error('Please fill in all required fields for custom activity');
+      }
+      
+      const newActivity = await api.post('/api/activities', customData);
+      activityId = newActivity.id;
+      
+      // Add to activities array
+      activities.push(newActivity);
+      populateActivitySelect();
+      
+      logger.info('Custom activity created', newActivity);
+    } else {
+      // Use existing activity
+      activityId = parseInt(formData.get('activityId'));
+      if (!activityId) {
+        throw new Error('Please select an activity');
+      }
     }
+    
+    const timeSlot = formData.get('timeSlot');
+    if (!timeSlot) {
+      throw new Error('Please select a time slot');
+    }
+    
+    // Add to tracker
+    const trackerEntry = {
+      trackerId: currentTracker.id,
+      activityId: activityId,
+      timeSlot: timeSlot,
+      status: 'pending'
+    };
+    
+    await api.post('/api/tracker/entries', trackerEntry);
+    
+    // Reload tracker and close modal
+    await loadTodayTracker();
+    await loadStats();
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addActivityModal'));
+    modal.hide();
+    
+    // Reset form
+    form.reset();
+    if (customFields) {
+      customFields.style.display = 'none';
+    }
+    
+    showAlert('Activity added successfully!', 'success');
+    logger.info('Activity added to tracker successfully');
+    
+  } catch (error) {
+    logger.error('Failed to add activity', error);
+    showAlert(error.message || 'Failed to add activity', 'danger');
+  } finally {
+    loadingManager.hide(submitBtn);
+  }
 }
 
+// Make function globally available
+window.addActivity = addActivity;
+
+// Enhanced activity status toggle
 async function toggleActivityStatus(entryId, isCompleted) {
-    if (isLoading) return;
+  if (loadingStates.has(entryId)) {
+    logger.warn(`Status update already in progress for entry ${entryId}`);
+    return;
+  }
+  
+  loadingStates.add(entryId);
+  
+  try {
+    const status = isCompleted ? 'completed' : 'pending';
+    await api.patch(`/api/tracker/entries/${entryId}/status`, { status });
     
-    try {
-        isLoading = true;
-        const status = isCompleted ? 'completed' : 'pending';
-        const response = await fetch(`/api/tracker/entries/${entryId}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status })
-        });
-        if (response.ok) {
-            const entry = currentTracker.entries.find(e => e.id === entryId);
-            if (entry) {
-                entry.status = status;
-            }
-            renderTrackerEntries();
-            loadStats();
-            showAlert(`Activity marked as ${status}!`, 'success');
-        } else {
-            throw new Error('Failed to update activity status');
+    // Update local state
+    if (currentTracker && currentTracker.entries) {
+      const entry = currentTracker.entries.find(e => e.id === entryId);
+      if (entry) {
+        entry.status = status;
+        if (status === 'completed') {
+          entry.completedAt = new Date().toISOString();
         }
-    } catch (error) {
-        console.error('Error updating activity status:', error);
-        showAlert('Failed to update activity', 'danger');
-    } finally {
-        isLoading = false;
+      }
     }
+    
+    // Re-render and update stats
+    renderTrackerEntries();
+    loadStats();
+    
+    const statusText = status === 'completed' ? 'completed' : 'pending';
+    showAlert(`Activity marked as ${statusText}!`, 'success');
+    
+    logger.info(`Activity ${entryId} status updated to ${status}`);
+    
+  } catch (error) {
+    logger.error(`Failed to update activity status for entry ${entryId}`, error);
+    
+    // Revert checkbox state
+    const checkbox = document.querySelector(`input[onchange*="${entryId}"]`);
+    if (checkbox) {
+      checkbox.checked = !isCompleted;
+    }
+    
+    showAlert('Failed to update activity status', 'danger');
+  } finally {
+    loadingStates.delete(entryId);
+  }
 }
 
-function showConfirmationModal(message, onConfirm) {
-    let modal = document.getElementById('confirmationModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.id = 'confirmationModal';
-        modal.innerHTML = `
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Action</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body" id="confirmationModalBody">${message}</div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmationModalOk">OK</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    } else {
-        document.getElementById('confirmationModalBody').textContent = message;
+// Make function globally available
+window.toggleActivityStatus = toggleActivityStatus;
+
+// New function to mark activity as skipped
+async function markAsSkipped(entryId) {
+  if (loadingStates.has(entryId)) return;
+  
+  loadingStates.add(entryId);
+  
+  try {
+    await api.patch(`/api/tracker/entries/${entryId}/status`, { status: 'skipped' });
+    
+    // Update local state
+    if (currentTracker && currentTracker.entries) {
+      const entry = currentTracker.entries.find(e => e.id === entryId);
+      if (entry) {
+        entry.status = 'skipped';
+      }
     }
-    const okBtn = document.getElementById('confirmationModalOk');
-    okBtn.onclick = () => {
-        bootstrap.Modal.getInstance(modal).hide();
-        onConfirm();
-    };
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
+    
+    renderTrackerEntries();
+    loadStats();
+    
+    showAlert('Activity marked as skipped', 'info');
+    logger.info(`Activity ${entryId} marked as skipped`);
+    
+  } catch (error) {
+    logger.error(`Failed to skip activity ${entryId}`, error);
+    showAlert('Failed to skip activity', 'danger');
+  } finally {
+    loadingStates.delete(entryId);
+  }
 }
 
+// Make function globally available
+window.markAsSkipped = markAsSkipped;
+
+// New function to add notes to activity
+async function addNoteToActivity(entryId) {
+  const currentEntry = currentTracker?.entries?.find(e => e.id === entryId);
+  const currentNote = currentEntry?.notes || '';
+  
+  const note = prompt('Add a note to this activity:', currentNote);
+  
+  if (note === null) return; // User cancelled
+  
+  try {
+    await api.patch(`/api/tracker/entries/${entryId}/status`, { 
+      status: currentEntry?.status || 'pending',
+      notes: note 
+    });
+    
+    // Update local state
+    if (currentEntry) {
+      currentEntry.notes = note;
+    }
+    
+    renderTrackerEntries();
+    showAlert('Note added successfully!', 'success');
+    
+  } catch (error) {
+    logger.error(`Failed to add note to activity ${entryId}`, error);
+    showAlert('Failed to add note', 'danger');
+  }
+}
+
+// Make function globally available
+window.addNoteToActivity = addNoteToActivity;
+
+// Enhanced activity deletion
 async function deleteActivity(entryId) {
-    showConfirmationModal('Are you sure you want to remove this activity from your tracker?', async function() {
-        try {
-            const response = await fetch(`/api/tracker/entries/${entryId}`, {
-                method: 'DELETE'
-            });
-            if (response.ok) {
-                currentTracker.entries = currentTracker.entries.filter(e => e.id !== entryId);
-                renderTrackerEntries();
-                loadStats();
-                showAlert('Activity removed successfully!', 'success');
-            } else {
-                throw new Error('Failed to delete activity');
-            }
-        } catch (error) {
-            console.error('Error deleting activity:', error);
-            showAlert('Failed to remove activity', 'danger');
-        }
-    });
+  const entry = currentTracker?.entries?.find(e => e.id === entryId);
+  const activityName = entry?.activity?.title || 'this activity';
+  
+  if (!confirm(`Are you sure you want to remove "${activityName}" from your tracker?`)) {
+    return;
+  }
+  
+  try {
+    await api.delete(`/api/tracker/entries/${entryId}`);
+    
+    // Update local state
+    if (currentTracker && currentTracker.entries) {
+      currentTracker.entries = currentTracker.entries.filter(e => e.id !== entryId);
+    }
+    
+    renderTrackerEntries();
+    loadStats();
+    
+    showAlert('Activity removed successfully!', 'success');
+    logger.info(`Activity ${entryId} deleted successfully`);
+    
+  } catch (error) {
+    logger.error(`Failed to delete activity ${entryId}`, error);
+    showAlert('Failed to remove activity', 'danger');
+  }
 }
 
-function updateProgressCircle(percentage) {
-    const circle = document.getElementById('completionBar');
-    if (!circle) return;
-    const pct = Math.max(0, Math.min(100, percentage));
-    const radius = 62;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (pct / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
-}
+// Make function globally available
+window.deleteActivity = deleteActivity;
 
+// Enhanced progress display update
 function updateProgressDisplay() {
-    if (!currentTracker || !currentTracker.entries) return;
-    const total = currentTracker.entries.length;
-    const completed = currentTracker.entries.filter(e => e.status === 'completed').length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    const percentageElement = document.getElementById('completionPercentage');
-    if (percentageElement) {
-        percentageElement.textContent = `${percentage}%`;
-    }
-    updateProgressCircle(percentage);
+  if (!currentTracker || !currentTracker.entries) {
+    updateProgressCircle(0);
+    return;
+  }
+  
+  const total = currentTracker.entries.length;
+  const completed = currentTracker.entries.filter(e => e.status === 'completed').length;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  
+  // Update percentage text
+  const percentageElement = document.getElementById('completionPercentage');
+  if (percentageElement) {
+    percentageElement.textContent = `${percentage}%`;
+  }
+  
+  // Update progress circle
+  updateProgressCircle(percentage);
+  
+  // Update completion rate in tracker
+  if (currentTracker.completionRate !== percentage) {
+    currentTracker.completionRate = percentage;
+  }
 }
 
-// Remove Chart.js progress circle code
-// - Remove initializeProgressChart
-// - Remove updateProgressChart
-// - Remove any references to window.progressChart
+// Enhanced progress circle update
+function updateProgressCircle(percentage) {
+  const circle = document.getElementById('completionBar');
+  if (!circle) return;
+  
+  const pct = Math.max(0, Math.min(100, percentage));
+  const radius = 62;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (pct / 100) * circumference;
+  
+  circle.style.strokeDashoffset = offset;
+  
+  // Update color based on completion rate
+  if (pct >= 80) {
+    circle.style.stroke = '#28a745'; // Success green
+  } else if (pct >= 50) {
+    circle.style.stroke = '#ffc107'; // Warning yellow
+  } else {
+    circle.style.stroke = '#2563eb'; // Primary blue
+  }
+}
 
-window.currentUser = window.currentUser || {};
-
+// Enhanced stats display update
 function updateStatsDisplay(stats) {
-    if (!stats || typeof stats !== 'object') {
-        stats = { currentStreak: 0, weeklyAverage: 0, totalActivities: 0 };
-    }
-    if (stats.message) {
-        stats = { currentStreak: 0, weeklyAverage: 0, totalActivities: 0 };
-    }
-    // Streak
-    const streakValue = document.getElementById('currentStreak');
-    if (streakValue) streakValue.textContent = stats.currentStreak || 0;
-    // Weekly Avg
-    const weeklyElement = document.getElementById('weeklyAverage');
-    if (weeklyElement) weeklyElement.textContent = (typeof stats.weeklyAverage === 'number' && !isNaN(stats.weeklyAverage) ? stats.weeklyAverage : 0) + '%';
-    // Accountability
-    const accountabilityScore = document.getElementById('accountabilityScore');
-    if (accountabilityScore && typeof stats.accountabilityCountdown !== 'undefined') accountabilityScore.textContent = stats.accountabilityCountdown;
-    const accountabilityMsg = document.querySelector('#accountabilityScore')?.parentElement?.parentElement?.querySelector('.text-muted.small');
-    if (accountabilityMsg && typeof stats.accountabilityMessage === 'string') accountabilityMsg.textContent = stats.accountabilityMessage;
-    // Level Up Message
-    const levelUpBanner = document.getElementById('levelUpMessageBanner');
-    if (levelUpBanner && typeof stats.levelUpMessage === 'string') {
-        levelUpBanner.textContent = stats.levelUpMessage;
-        levelUpBanner.style.display = stats.levelUpMessage ? 'block' : 'none';
-    }
-    // Tier Progress
-    const tierProgressText = document.getElementById('tierProgressText');
-    if (tierProgressText) {
-        if (stats.tier === 'gold') tierProgressText.textContent = 'Max tier!';
-        else {
-            const days = typeof stats.successfulDays30 === 'number' && !isNaN(stats.successfulDays30) ? stats.successfulDays30 : 0;
-            const total = typeof stats.totalDays30 === 'number' && !isNaN(stats.totalDays30) ? stats.totalDays30 : 30;
-            tierProgressText.textContent = `${days}/${total} to Silver`;
-        }
-    }
-    // Accountability Progress
-    const accountabilityProgressText = document.getElementById('accountabilityProgressText');
-    if (accountabilityProgressText) {
-        const days = typeof stats.successfulDays90 === 'number' && !isNaN(stats.successfulDays90) ? stats.successfulDays90 : 0;
-        accountabilityProgressText.textContent = `${days}/90 to Intermediate`;
-    }
-    // Total Activities
-    const totalValue = document.getElementById('totalActivities');
-    if (totalValue) totalValue.textContent = stats.totalActivities || 0;
-    // Progress Bars
-    const tierProgressBar = document.getElementById('tierProgressBar');
-    if (tierProgressBar) {
-        let progress = 0;
-        if (stats.tier === 'gold') progress = 100;
-        else {
-            const days = typeof stats.successfulDays30 === 'number' && !isNaN(stats.successfulDays30) ? stats.successfulDays30 : 0;
-            const total = typeof stats.totalDays30 === 'number' && !isNaN(stats.totalDays30) ? stats.totalDays30 : 30;
-            progress = total > 0 ? Math.min(100, Math.round((days / total) * 100)) : 0;
-        }
-        tierProgressBar.style.width = progress + '%';
-    }
-    const weeklyBar = document.getElementById('weeklyBar');
-    if (weeklyBar) {
-        const avg = typeof stats.weeklyAverage === 'number' && !isNaN(stats.weeklyAverage) ? stats.weeklyAverage : 0;
-        weeklyBar.style.width = Math.min(100, avg) + '%';
-    }
-    // Tooltips
-    if (window.bootstrap) {
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-            new bootstrap.Tooltip(el);
-        });
-    }
-}
-
-function updateAchievementLevel(totalActivitiesCompleted) {
-    const achievementBadge = document.getElementById('achievementBadge');
-    if (!achievementBadge) return;
-    let level = 'Beginner';
-    let badgeStyle = '';
-    if (totalActivitiesCompleted >= 100) {
-        level = 'Master';
-        badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        applyMasterTheme();
-    } else if (totalActivitiesCompleted >= 50) {
-        level = 'Advanced';
-        badgeStyle = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;';
-        applyMasterTheme();
-    } else if (totalActivitiesCompleted >= 25) {
-        level = 'Intermediate';
-        badgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;';
-        applyIntermediateTheme();
-    } else {
-        level = 'Beginner';
-        badgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;';
-        applyBeginnerTheme();
-    }
-    achievementBadge.innerHTML = '';
-    achievementBadge.textContent = level;
-    achievementBadge.className = 'badge achievement-badge-large';
-    achievementBadge.style.cssText = `font-size: 18px; padding: 12px 24px; ${badgeStyle}`;
-    achievementBadge.style.display = 'none';
-    achievementBadge.offsetHeight;
-    achievementBadge.style.display = 'inline-block';
-}
-
-function applyMasterTheme() {
-    // ...
-}
-function applyIntermediateTheme() {
-    // ...
-}
-function applyBeginnerTheme() {
-    // ...
-}
-function applyDashboardTheme(tier) {
-    const container = document.querySelector('.quick-stats');
-    if (!container) return;
-    container.classList.remove('theme-bronze', 'theme-silver', 'theme-gold');
-    if (tier === 'gold') container.classList.add('theme-gold');
-    else if (tier === 'silver') container.classList.add('theme-silver');
-    else container.classList.add('theme-bronze');
-}
-function updateSubscriptionStatus(streak, totalActivitiesCompleted) {
-    // ...
-}
-function loadPopularActivities() {
-    // ...
-}
-function showAlert(message, type = 'info') {
-    // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert.position-fixed');
-    existingAlerts.forEach(alert => alert.remove());
-    
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
-    alertDiv.innerHTML = `
-        <i class="fas fa-${getAlertIcon(type)} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.classList.remove('show');
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 150);
-        }
-    }, 5000);
-}
-
-function getAlertIcon(type) {
-    const icons = {
-        'success': 'check-circle',
-        'danger': 'exclamation-triangle',
-        'warning': 'exclamation-circle',
-        'info': 'info-circle'
+  if (!stats || typeof stats !== 'object') {
+    logger.warn('Invalid stats data received', stats);
+    stats = {
+      currentStreak: 0,
+      weeklyAverage: 0,
+      totalActivities: 0,
+      activitiesCompleted: 0,
+      accountabilityCountdown: 0,
+      accountabilityMessage: ''
     };
-    return icons[type] || 'info-circle';
+  }
+  
+  // Update streak
+  const streakElement = document.getElementById('currentStreak');
+  if (streakElement) {
+    streakElement.textContent = stats.currentStreak || 0;
+  }
+  
+  // Update weekly average
+  const weeklyElement = document.getElementById('weeklyAverage');
+  if (weeklyElement) {
+    const avg = stats.weeklyAverage || 0;
+    weeklyElement.textContent = `${avg}%`;
+  }
+  
+  // Update total activities
+  const totalElement = document.getElementById('totalActivities');
+  if (totalElement) {
+    totalElement.textContent = stats.activitiesCompleted || stats.totalActivities || 0;
+  }
+  
+  // Update accountability score
+  const accountabilityElement = document.getElementById('accountabilityScore');
+  if (accountabilityElement) {
+    accountabilityElement.textContent = stats.accountabilityCountdown || 0;
+  }
+  
+  // Update accountability message
+  const messageElements = document.querySelectorAll('.text-muted.small');
+  messageElements.forEach(el => {
+    if (el.textContent.includes('more days') || el.textContent.includes('level')) {
+      el.textContent = stats.accountabilityMessage || 'Keep going!';
+    }
+  });
+  
+  logger.info('Stats display updated', stats);
 }
+
+// Enhanced alert system
+function showAlert(message, type = 'info', duration = 5000) {
+  // Remove existing alerts
+  const existingAlerts = document.querySelectorAll('.alert.position-fixed');
+  existingAlerts.forEach(alert => alert.remove());
+  
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+  alertDiv.style.cssText = `
+    top: 20px; 
+    right: 20px; 
+    z-index: 9999; 
+    min-width: 300px; 
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  `;
+  
+  const icon = getAlertIcon(type);
+  alertDiv.innerHTML = `
+    <div class="d-flex align-items-center">
+      <i class="fas fa-${icon} me-2"></i>
+      <div class="flex-grow-1">${message}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  `;
+  
+  document.body.appendChild(alertDiv);
+  
+  // Auto-remove after specified duration
+  setTimeout(() => {
+    if (alertDiv.parentNode) {
+      alertDiv.classList.remove('show');
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.parentNode.removeChild(alertDiv);
+        }
+      }, 150);
+    }
+  }, duration);
+  
+  logger.info(`Alert shown: ${type} - ${message}`);
+}
+
+// Get appropriate icon for alert type
+function getAlertIcon(type) {
+  const icons = {
+    'success': 'check-circle',
+    'danger': 'exclamation-triangle',
+    'warning': 'exclamation-circle',
+    'info': 'info-circle'
+  };
+  return icons[type] || 'info-circle';
+}
+
+// Enhanced tooltip initialization
+function initializeTooltips() {
+  try {
+    if (window.bootstrap && typeof bootstrap.Tooltip !== 'undefined') {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+          trigger: 'hover focus',
+          delay: { show: 500, hide: 100 }
+        });
+      });
+      
+      logger.info(`Initialized ${tooltipTriggerList.length} tooltips`);
+    }
+  } catch (error) {
+    logger.error('Failed to initialize tooltips', error);
+  }
+}
+
+// Enhanced form validation
 function initializeFormValidation() {
-    const forms = document.querySelectorAll('form[data-validate]');
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            if (!form.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-                showAlert('Please fill in all required fields correctly.', 'warning');
-            }
-            form.classList.add('was-validated');
-        });
+  const forms = document.querySelectorAll('form[data-validate]');
+  
+  forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+        showAlert('Please fill in all required fields correctly.', 'warning');
+      }
+      form.classList.add('was-validated');
     });
-    
-    // Real-time validation for email fields
-    const emailInputs = document.querySelectorAll('input[type="email"]');
-    emailInputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.value && !this.checkValidity()) {
-                this.classList.add('is-invalid');
-            } else {
-                this.classList.remove('is-invalid');
-            }
-        });
+  });
+  
+  // Real-time validation for email fields
+  const emailInputs = document.querySelectorAll('input[type="email"]');
+  emailInputs.forEach(input => {
+    input.addEventListener('blur', function() {
+      if (this.value && !this.checkValidity()) {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+      } else if (this.value) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+      }
     });
+  });
+  
+  logger.info(`Initialized validation for ${forms.length} forms`);
+}
+
+// Initialize global event listeners
+function initializeGlobalEventListeners() {
+  // Handle clicks outside of dropdowns to close them
+  document.addEventListener('click', function(e) {
+    const dropdowns = document.querySelectorAll('.dropdown-menu.show');
+    dropdowns.forEach(dropdown => {
+      if (!dropdown.contains(e.target) && !dropdown.previousElementSibling?.contains(e.target)) {
+        const bsDropdown = bootstrap.Dropdown.getInstance(dropdown.previousElementSibling);
+        if (bsDropdown) {
+          bsDropdown.hide();
+        }
+      }
+    });
+  });
+  
+  // Handle escape key to close modals
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const openModals = document.querySelectorAll('.modal.show');
+      openModals.forEach(modal => {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+          bsModal.hide();
+        }
+      });
+    }
+  });
+}
+
+// Update current date in header
+function updateCurrentDate() {
+  const dateElement = document.getElementById('currentDate');
+  if (dateElement) {
+    const today = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    dateElement.textContent = `- ${today.toLocaleDateString('en-US', options)}`;
+  }
+}
+
+// Utility function to debounce function calls
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Enhanced error boundary for unhandled errors
+window.addEventListener('error', function(e) {
+  logger.error('Unhandled error', e.error);
+  showAlert('An unexpected error occurred. Please refresh the page if problems persist.', 'danger');
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  logger.error('Unhandled promise rejection', e.reason);
+  showAlert('An unexpected error occurred. Please refresh the page if problems persist.', 'danger');
+});
+
+// Export functions for testing (if needed)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    api,
+    loadingManager,
+    showAlert,
+    logger
+  };
 }

@@ -8,9 +8,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <link href="/css/themes.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <meta name="description" content="Track your daily fitness activities across workout, nutrition, recovery, and mindset dimensions.">
+    <meta name="theme-color" content="#667eea">
 </head>
-<body>
+<body class="bg-light">
 <script>
   window.currentUser = {
     id: '<%= user.id %>',
@@ -20,274 +24,300 @@
     role: '<%= user.role %>'
   };
 </script>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay d-none">
+  <div class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading your dashboard...</p>
+  </div>
+</div>
+
 <div class="container mx-auto py-4" style="max-width: 1200px;">
-  <!-- LOGOUT BUTTON: Floating, never overlaps -->
-  <a href="/logout" class="btn btn-outline-primary btn-sm px-4 rounded-pill shadow-sm position-absolute top-0 end-0 m-4 z-3" style="backdrop-filter: blur(6px);">
-    <i class="fas fa-sign-out-alt me-1"></i> Logout
-  </a>
+  <!-- Enhanced Header with Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-4 shadow-sm mb-4 px-4 py-3">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold text-primary" href="/dashboard">
+        <i class="fas fa-dumbbell me-2"></i>TranscendBody
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/dashboard">
+              <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+            </a>
+          </li>
+        </ul>
+        
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+              <div class="avatar-circle me-2">
+                <%= (user.preferredName || user.firstName || user.email).charAt(0).toUpperCase() %>
+              </div>
+              <%= user.preferredName || user.firstName || 'User' %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">
+                <%= user.email %>
+                <br><small class="text-muted"><%= user.tier %> • <%= user.accountabilityLevel %></small>
+              </h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <% if (user.role === 'admin') { %>
+                <li><a class="dropdown-item" href="/admin">
+                  <i class="fas fa-cog me-2"></i>Admin Panel
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+              <% } %>
+              <li><a class="dropdown-item" href="#" onclick="showSettingsModal()">
+                <i class="fas fa-cog me-2"></i>Settings
+              </a></li>
+              <li><a class="dropdown-item text-danger" href="/logout">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+              </a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
   <!-- Header -->
-  <div class="card shadow-lg rounded-4 mb-4 p-4 bg-purple position-relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; min-height: 220px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
+  <div class="hero-card card shadow-lg rounded-4 mb-4 p-4 position-relative overflow-hidden">
     <div class="row align-items-center g-0 flex-column flex-md-row">
       <div class="col-md-7 d-flex flex-column justify-content-center align-items-start text-white">
-        <h1 class="display-3 fw-bold mb-2">Welcome back, <%= user.preferredName || user.firstName || 'User' %>!</h1>
-        <div class="fs-4 text-white-50 mb-3">Your Daily Activities Dashboard <span id="currentDate"></span></div>
-        <% if (user.role === 'admin') { %>
-          <div class="mb-2">
-            <a href="/admin" class="admin-link me-3 text-white-50 text-decoration-none fs-5">
-              <i class="fas fa-users me-1"></i> Manage Users
-            </a>
-            <a href="/admin?tab=activities" class="admin-link text-white-50 text-decoration-none fs-5">
-              <i class="fas fa-cog me-1"></i> Manage Activities
-            </a>
+        <div class="welcome-text">
+          <h1 class="display-4 fw-bold mb-2 animate-fade-in">
+            Welcome back, <%= user.preferredName || user.firstName || 'User' %>!
+          </h1>
+          <div class="fs-5 text-white-75 mb-3 animate-fade-in-delay">
+            Your Daily Activities Dashboard <span id="currentDate" class="fw-medium"></span>
           </div>
-        <% } %>
+          
+          <!-- Quick Stats Preview -->
+          <div class="row g-3 mt-2">
+            <div class="col-6 col-md-4">
+              <div class="stat-preview text-center">
+                <div class="stat-number" id="headerStreak">0</div>
+                <div class="stat-label">Day Streak</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="stat-preview text-center">
+                <div class="stat-number" id="headerCompletion">0%</div>
+                <div class="stat-label">Today</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="stat-preview text-center">
+                <div class="stat-number" id="headerTotal">0</div>
+                <div class="stat-label">Total Activities</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+      
       <div class="col-md-5 d-flex flex-column align-items-center justify-content-center mt-4 mt-md-0">
-        <!-- Modern Progressive Daily Completion Rate Card -->
-        <div class="card border-0 shadow-lg p-4 mb-2 bg-white bg-opacity-75 position-relative mx-auto" style="width: 260px; border-radius: 2rem; backdrop-filter: blur(8px);">
-          <div class="text-center fw-bold fs-4 mb-3 text-dark daily-completion-title" style="white-space:normal; overflow:hidden; text-overflow:ellipsis; font-size: 1.5rem;">
+        <!-- Enhanced Daily Completion Rate Card -->
+        <div class="completion-card card border-0 shadow-lg p-4 mb-2 bg-white position-relative mx-auto">
+          <div class="text-center fw-bold fs-5 mb-3 text-dark">
             Daily Completion Rate
-            <span class="ms-1 align-middle" data-bs-toggle="tooltip" title="The percentage of today's assigned activities you've completed. Complete at least 80% to keep your streak going!"><i class="fas fa-info-circle text-primary small"></i></span>
+            <i class="fas fa-info-circle text-primary ms-1" data-bs-toggle="tooltip" 
+               title="Complete at least 80% of today's activities to maintain your streak!"></i>
           </div>
+          
           <div class="d-flex justify-content-center align-items-center">
-            <div class="progress-circle position-relative d-flex flex-column justify-content-center align-items-center" style="width: 140px; height: 140px;">
-              <svg width="140" height="140" viewBox="0 0 140 140" style="display:block;">
-                <circle cx="70" cy="70" r="62" stroke="#e0e7ef" stroke-width="12" fill="none"/>
-                <circle id="completionBar" cx="70" cy="70" r="62" stroke="#2563eb" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="389.6" stroke-dashoffset="389.6"/>
+            <div class="progress-circle position-relative d-flex flex-column justify-content-center align-items-center">
+              <svg width="160" height="160" viewBox="0 0 160 160" class="progress-svg">
+                <circle cx="80" cy="80" r="70" stroke="#e9ecef" stroke-width="8" fill="none"/>
+                <circle id="completionBar" cx="80" cy="80" r="70" stroke="#2563eb" stroke-width="8" 
+                        fill="none" stroke-linecap="round" stroke-dasharray="439.8" stroke-dashoffset="439.8"
+                        class="progress-circle-bar"/>
               </svg>
-              <div class="position-absolute top-50 start-50 translate-middle text-center w-100 d-flex flex-column align-items-center justify-content-center" style="pointer-events:none;">
-                <span class="display-5 fw-bold text-primary completion-percentage" id="completionPercentage" style="line-height:1;"></span>
-                <div class="fs-5 text-dark completion-label">Complete</div>
+              
+              <div class="position-absolute top-50 start-50 translate-middle text-center">
+                <div class="completion-percentage display-4 fw-bold text-primary" id="completionPercentage">0%</div>
+                <div class="completion-label text-muted">Complete</div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events:none; background: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.08) 0%, rgba(102,126,234,0.05) 100%);"></div>
+    
+    <!-- Animated background elements -->
+    <div class="hero-bg-elements">
+      <div class="bg-element bg-element-1"></div>
+      <div class="bg-element bg-element-2"></div>
+      <div class="bg-element bg-element-3"></div>
+    </div>
   </div>
-  <style>
-    .completion-circle {
-      border-radius: 50%;
-      background: #fff;
-      border: 5px solid #2563eb;
-      box-shadow: 0 0 24px 0 rgba(102,126,234,0.10);
-      transition: border-color 0.3s;
-    }
-    .completion-circle:hover {
-      border-color: #764ba2;
-    }
-    @media (max-width: 767px) {
-      .completion-circle { width: 90px; height: 90px; }
-      .display-3 { font-size: 2.2rem; }
-    }
-  </style>
-  <!-- LEVEL & TIER CARDS: Responsive row, side by side on desktop, stacked on mobile -->
-<div class="row g-4 mb-4">
-  <% if (user.role === 'admin' && user.tier === 'gold' && user.accountabilityLevel === 'master') { %>
+
+  <!-- Enhanced Level & Tier Cards -->
+  <div class="row g-4 mb-4">
+    <!-- Accountability Level Card -->
     <div class="col-12 col-md-6">
-      <div class="card shadow-sm rounded-4 p-4 text-center bg-primary bg-opacity-10 position-relative w-100 h-100">
-        <div class="d-flex flex-column align-items-center justify-content-center">
-          <i class="fas fa-crown level-trophy mb-2" style="color: #2563eb; font-size: 3.5rem;" data-bs-toggle="tooltip" title="You are at the Master level! Keep your streak to maintain your status."></i>
-          <h2 class="fw-bold mb-1">Master</h2>
-          <div class="fw-semibold"><%= streak %>/90 – Max Level!</div>
+      <div class="level-card card shadow-sm rounded-4 p-4 text-center h-100 level-<%= user.accountabilityLevel %>">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+          <div class="level-icon mb-3">
+            <% if (user.accountabilityLevel === 'master') { %>
+              <i class="fas fa-crown"></i>
+            <% } else if (user.accountabilityLevel === 'intermediate') { %>
+              <i class="fas fa-medal"></i>
+            <% } else { %>
+              <i class="fas fa-star"></i>
+            <% } %>
+          </div>
+          <h3 class="fw-bold mb-2 text-capitalize"><%= user.accountabilityLevel %></h3>
+          <p class="text-muted mb-0">
+            <% if (user.accountabilityLevel === 'master') { %>
+              You've mastered the system!
+            <% } else if (user.accountabilityLevel === 'intermediate') { %>
+              Making great progress!
+            <% } else { %>
+              Building strong habits!
+            <% } %>
+          </p>
         </div>
       </div>
     </div>
+
+    <!-- Tier Card -->
     <div class="col-12 col-md-6">
-      <div class="card shadow-sm rounded-4 p-4 text-center bg-warning bg-opacity-75 position-relative w-100 h-100">
-        <div class="d-flex flex-column align-items-center justify-content-center">
-          <i class="fas fa-trophy tier-trophy mb-2" data-bs-toggle="tooltip" title="Gold is the highest tier. Maintain your streak to stay at the top!"></i>
-          <h2 class="fw-bold mb-1 d-inline-block">Gold</h2>
-          <div class="fw-semibold">Highest Tier!</div>
-        </div>
-      </div>
-    </div>
-  <% } else { %>
-    <% if (user.accountabilityLevel === 'beginner') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center bg-info bg-opacity-10 position-relative w-100 h-100">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-star level-trophy mb-2" style="color: #ffc107;" data-bs-toggle="tooltip" title="Beginner level: Build your habits and keep going!"></i>
-            <h2 class="fw-bold mb-1">Beginner</h2>
-            <div class="fw-semibold">Keep building your habits!</div>
+      <div class="tier-card card shadow-sm rounded-4 p-4 text-center h-100 tier-<%= user.tier %>">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+          <div class="tier-icon mb-3">
+            <i class="fas fa-trophy"></i>
           </div>
+          <h3 class="fw-bold mb-2 text-capitalize"><%= user.tier %> Tier</h3>
+          <p class="text-muted mb-0">
+            <% if (user.tier === 'gold') { %>
+              Highest tier achieved!
+            <% } else if (user.tier === 'silver') { %>
+              Great consistency!
+            <% } else { %>
+              Keep building momentum!
+            <% } %>
+          </p>
         </div>
-      </div>
-    <% } %>
-    <% if (user.accountabilityLevel === 'intermediate') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center bg-secondary bg-opacity-10 position-relative w-100 h-100">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-medal level-trophy mb-2" style="color: #6c757d;" data-bs-toggle="tooltip" title="Intermediate level: You're making great progress!"></i>
-            <h2 class="fw-bold mb-1">Intermediate</h2>
-            <div class="fw-semibold">You're making great progress!</div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-    <% if (user.accountabilityLevel === 'master') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center bg-primary bg-opacity-10 position-relative w-100 h-100">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-crown level-trophy mb-2" style="color: #2563eb; font-size: 3.5rem;" data-bs-toggle="tooltip" title="Master level: You are at the top! Keep your streak to maintain your status."></i>
-            <h2 class="fw-bold mb-1">Master</h2>
-            <div class="fw-semibold"><%= streak %>/90 – Max Level!</div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-    <% if (user.tier === 'bronze') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center" style="background: #fff7e6; border: 1px solid #cd7f32;">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-trophy tier-trophy mb-2" style="color: #cd7f32;" data-bs-toggle="tooltip" title="Bronze tier: Stay consistent and level up!"></i>
-            <h2 class="fw-bold mb-1 d-inline-block">Bronze</h2>
-            <div class="fw-semibold">Stay consistent and level up!</div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-    <% if (user.tier === 'silver') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center" style="background: #f8f9fa; border: 1px solid #adb5bd;">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-trophy tier-trophy mb-2" style="color: #adb5bd;" data-bs-toggle="tooltip" title="Silver tier: Great progress—keep going!"></i>
-            <h2 class="fw-bold mb-1 d-inline-block">Silver</h2>
-            <div class="fw-semibold">Great progress—keep going!</div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-    <% if (user.tier === 'gold') { %>
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm rounded-4 p-4 text-center bg-warning bg-opacity-75 position-relative w-100 h-100">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <i class="fas fa-trophy tier-trophy mb-2" data-bs-toggle="tooltip" title="Gold tier: Highest tier! Keep your streak to stay at the top."></i>
-            <h2 class="fw-bold mb-1 d-inline-block">Gold</h2>
-            <div class="fw-semibold">Highest Tier!</div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-  <% } %>
-</div>
-<style>
-  .level-trophy { color: #2563eb; font-size: 3.5rem; }
-  .tier-trophy { color: #ffc107; font-size: 3.5rem; }
-  .info-icon-sm { font-size: 1rem !important; vertical-align: baseline; }
-  @media (min-width: 768px) {
-    .level-trophy, .tier-trophy { font-size: 4.5rem; }
-  }
-</style>
-<!-- QUICK STATS GRID: Modern, responsive, card-based -->
-<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
-  <div class="col">
-    <div class="card border-0 shadow-sm rounded-4 p-3 text-center h-100">
-      <div class="d-flex align-items-center justify-content-center mb-2">
-        <i class="fas fa-fire fa-2x me-2 text-danger"></i>
-        <span class="fs-2 fw-bold" id="currentStreak">0</span>
-      </div>
-      <div class="fw-semibold">Streak <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" title="Number of consecutive days you've completed your daily activities."></i></div>
-      <div class="text-muted small">Consecutive days</div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card border-0 shadow-sm rounded-4 p-3 text-center h-100">
-      <div class="d-flex align-items-center justify-content-center mb-2">
-        <i class="fas fa-calendar-week fa-2x me-2 text-success"></i>
-        <span class="fs-2 fw-bold" id="weeklyAverage">0%</span>
-      </div>
-      <div class="fw-semibold">Weekly Avg <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" title="Your average daily completion rate for the past 7 days."></i></div>
-      <div class="text-muted small">Aim for 80%+</div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card border-0 shadow-sm rounded-4 p-3 text-center h-100">
-      <div class="d-flex align-items-center justify-content-center mb-2">
-        <i class="fas fa-check-circle fa-2x me-2 text-primary"></i>
-        <span class="fs-2 fw-bold" id="totalActivities">0</span>
-      </div>
-      <div class="fw-semibold">Activities Completed <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" title="Total number of activities you've completed."></i></div>
-      <div class="text-muted small">All time</div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card border-0 shadow-sm rounded-4 p-3 text-center h-100">
-      <div class="d-flex align-items-center justify-content-center mb-2">
-        <i class="fas fa-bolt fa-2x me-2 text-warning"></i>
-        <span class="fs-2 fw-bold" id="accountabilityScore"><%= accountabilityCountdown %></span>
-      </div>
-      <div class="fw-semibold">Accountability <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" title="Countdown to your next tier or level. Stay consistent to level up!"></i></div>
-      <div class="text-muted small">
-        <%= accountabilityMessage %>
       </div>
     </div>
   </div>
-</div>
-<style>
-  .progress-circle svg { display: block; }
-  .progress-circle circle { transition: stroke-dashoffset 1s cubic-bezier(.4,2,.6,1); }
-  .completion-percentage { font-size: 2.5rem; white-space: nowrap; }
-  .daily-completion-title { font-size: 1.5rem !important; white-space: normal !important; }
-  @media (max-width: 767px) {
-    .progress-circle { width: 120px !important; height: 120px !important; }
-    .progress-circle svg { width: 120px !important; height: 120px !important; }
-    .completion-percentage { font-size: 1.3rem !important; }
-    .completion-label { font-size: 1rem !important; }
-    .daily-completion-title { font-size: 1.1rem !important; white-space: nowrap !important; }
-  }
-</style>
+
+  <!-- Enhanced Quick Stats Grid -->
+  <div class="row g-4 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+        <div class="stat-icon mb-3">
+          <i class="fas fa-fire text-danger"></i>
+        </div>
+        <div class="stat-value fw-bold mb-1" id="currentStreak">0</div>
+        <div class="stat-label text-muted">Day Streak</div>
+        <div class="stat-sublabel">Consecutive days</div>
+      </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+      <div class="stat-card card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+        <div class="stat-icon mb-3">
+          <i class="fas fa-calendar-week text-success"></i>
+        </div>
+        <div class="stat-value fw-bold mb-1" id="weeklyAverage">0%</div>
+        <div class="stat-label text-muted">Weekly Avg</div>
+        <div class="stat-sublabel">Aim for 80%+</div>
+      </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+      <div class="stat-card card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+        <div class="stat-icon mb-3">
+          <i class="fas fa-check-circle text-primary"></i>
+        </div>
+        <div class="stat-value fw-bold mb-1" id="totalActivities">0</div>
+        <div class="stat-label text-muted">Completed</div>
+        <div class="stat-sublabel">All time</div>
+      </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+      <div class="stat-card card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+        <div class="stat-icon mb-3">
+          <i class="fas fa-target text-warning"></i>
+        </div>
+        <div class="stat-value fw-bold mb-1" id="accountabilityScore"><%= accountabilityCountdown || 0 %></div>
+        <div class="stat-label text-muted">Days to Next</div>
+        <div class="stat-sublabel">Level/Tier</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ACTIVITY TIME SLOTS: Responsive Add Activity button and badge -->
   <% const slots = [
-    { key: 'morning', icon: 'fa-sun', color: 'bg-warning', label: 'Morning', desc: 'Start your day right' },
-    { key: 'afternoon', icon: 'fa-sun', color: 'bg-info', label: 'Afternoon', desc: 'Keep the momentum going' },
-    { key: 'evening', icon: 'fa-moon', color: 'bg-purple', label: 'Evening', desc: 'Wind down and recover' },
-    { key: 'night', icon: 'fa-moon', color: 'bg-dark', label: 'Night', desc: 'Reflect, relax, and prepare for tomorrow' }
+    { key: 'morning', icon: 'fa-sun', color: 'morning', label: 'Morning', desc: 'Start your day right', time: '6:00 - 12:00' },
+    { key: 'afternoon', icon: 'fa-sun', color: 'afternoon', label: 'Afternoon', desc: 'Keep the momentum going', time: '12:00 - 18:00' },
+    { key: 'evening', icon: 'fa-moon', color: 'evening', label: 'Evening', desc: 'Wind down and recover', time: '18:00 - 22:00' },
+    { key: 'night', icon: 'fa-star', color: 'night', label: 'Night', desc: 'Reflect and prepare for tomorrow', time: '22:00 - 6:00' }
   ]; %>
+  
   <% slots.forEach(slot => { %>
-  <div class="card shadow-sm rounded-4 mb-4 p-4">
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-      <div class="d-flex align-items-center flex-grow-1 min-w-0">
-        <div class="rounded-circle d-flex align-items-center justify-content-center <%= slot.color %> me-3" style="width: 40px; height: 40px;">
-          <i class="fas <%= slot.icon %> text-white"></i>
+  <div class="time-slot-card card shadow-sm rounded-4 mb-4 p-4 slot-<%= slot.color %>">
+    <div class="slot-header d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+      <div class="slot-info d-flex align-items-center flex-grow-1 min-w-0">
+        <div class="slot-icon rounded-circle d-flex align-items-center justify-content-center me-3">
+          <i class="fas <%= slot.icon %>"></i>
         </div>
-        <div class="min-w-0">
-          <h4 class="mb-0 text-truncate"><%= slot.label %></h4>
-          <small class="text-muted text-truncate"><%= slot.desc %></small>
+        <div class="slot-details min-w-0">
+          <h4 class="slot-title mb-1"><%= slot.label %></h4>
+          <p class="slot-description text-muted mb-0"><%= slot.desc %></p>
+          <small class="slot-time text-muted"><%= slot.time %></small>
         </div>
       </div>
-      <div class="d-flex flex-column flex-md-row align-items-md-center align-items-stretch mt-2 mt-md-0 gap-2">
-        <span class="badge bg-light text-dark flex-shrink-0" id="<%= slot.key %>-progress">0 of 0 completed</span>
-        <button class="btn btn-primary btn-sm rounded-pill flex-shrink-0" onclick="showAddActivityModal('<%= slot.key %>')">
+      
+      <div class="slot-actions d-flex flex-column flex-md-row align-items-md-center align-items-stretch gap-2">
+        <div class="progress-badge" id="<%= slot.key %>-progress">0 of 0 completed</div>
+        <button class="btn btn-primary btn-sm rounded-pill add-activity-btn" onclick="showAddActivityModal('<%= slot.key %>')">
           <i class="fas fa-plus me-1"></i> Add Activity
         </button>
       </div>
     </div>
-    <div id="<%= slot.key %>-activities">
+    
+    <div class="slot-activities" id="<%= slot.key %>-activities">
       <!-- Activities will be loaded dynamically -->
     </div>
   </div>
   <% }); %>
 </div>
-<!-- Add Activity Modal -->
-<div class="modal fade" id="addActivityModal" tabindex="-1">
+
+<!-- Enhanced Add Activity Modal -->
+<div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add New Activity</h5>
+        <h5 class="modal-title" id="addActivityModalLabel">
+          <i class="fas fa-plus-circle me-2"></i>Add New Activity
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+      
       <div class="modal-body">
         <form id="addActivityForm">
           <div class="mb-3">
-            <label for="activitySelect" class="form-label">Choose Activity</label>
+            <label for="activitySelect" class="form-label fw-semibold">Choose Activity</label>
             <select class="form-select" id="activitySelect" name="activityId">
-              <!-- JS will populate with optgroups by category/time slot -->
+              <option value="">Loading activities...</option>
             </select>
           </div>
+          
           <div class="mb-3">
-            <label for="timeSlotSelect" class="form-label">Assign to Time Slot</label>
+            <label for="timeSlot" class="form-label fw-semibold">Assign to Time Slot</label>
             <select class="form-select" id="timeSlot" name="timeSlot" required>
               <option value="morning">Morning</option>
               <option value="afternoon">Afternoon</option>
@@ -295,50 +325,174 @@
               <option value="night">Night</option>
             </select>
           </div>
+          
           <div class="mb-3">
-            <button type="button" class="btn btn-outline-secondary w-100" id="showCustomActivityFields">
-              + Create Custom Activity
+            <button type="button" class="btn btn-outline-primary w-100" id="showCustomActivityFields">
+              <i class="fas fa-plus me-2"></i>Create Custom Activity
             </button>
           </div>
+          
           <div id="customActivityFields" style="display: none;">
+            <hr class="my-4">
+            <h6 class="fw-semibold mb-3">Custom Activity Details</h6>
+            
             <div class="mb-3">
-              <label for="customTitle" class="form-label">Title</label>
-              <input type="text" class="form-control" id="customTitle" name="customTitle" required>
+              <label for="customTitle" class="form-label fw-semibold">Activity Title *</label>
+              <input type="text" class="form-control" id="customTitle" name="customTitle" 
+                     placeholder="e.g., 30-minute walk">
             </div>
+            
             <div class="mb-3">
               <label for="customDescription" class="form-label">Description</label>
-              <textarea class="form-control" id="customDescription" name="customDescription"></textarea>
+              <textarea class="form-control" id="customDescription" name="customDescription" rows="3"
+                        placeholder="Describe your custom activity..."></textarea>
             </div>
+            
             <div class="mb-3">
-              <label for="customCategory" class="form-label">Category</label>
+              <label for="customCategory" class="form-label fw-semibold">Category *</label>
               <select class="form-select" id="customCategory" name="customCategory" required>
+                <option value="">Select category</option>
                 <option value="workout">Workout</option>
                 <option value="nutrition">Nutrition</option>
                 <option value="recovery">Recovery</option>
                 <option value="mindset">Mindset</option>
               </select>
             </div>
+            
             <div class="mb-3">
-              <label for="customTimeSlot" class="form-label">Time Slot</label>
+              <label for="customTimeSlot" class="form-label fw-semibold">Preferred Time Slot *</label>
               <select class="form-select" id="customTimeSlot" name="customTimeSlot" required>
+                <option value="">Select time slot</option>
                 <option value="morning">Morning</option>
                 <option value="afternoon">Afternoon</option>
                 <option value="evening">Evening</option>
                 <option value="night">Night</option>
               </select>
             </div>
-            <button type="button" class="btn btn-success w-100" id="createCustomActivityBtn">Add Custom Activity</button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="addActivity()">
+          <i class="fas fa-plus me-1"></i>Add Activity
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="settingsModalLabel">
+          <i class="fas fa-cog me-2"></i>Settings
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="settingsForm">
+          <div class="mb-3">
+            <label for="themeSelect" class="form-label fw-semibold">Theme</label>
+            <select class="form-select" id="themeSelect">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="notificationsToggle" checked>
+              <label class="form-check-label" for="notificationsToggle">
+                Enable Notifications
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="timezoneSelect" class="form-label fw-semibold">Timezone</label>
+            <select class="form-select" id="timezoneSelect">
+              <option value="UTC">UTC</option>
+              <option value="America/New_York">Eastern Time</option>
+              <option value="America/Chicago">Central Time</option>
+              <option value="America/Denver">Mountain Time</option>
+              <option value="America/Los_Angeles">Pacific Time</option>
+            </select>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="addActivity()">Add Activity</button>
+        <button type="button" class="btn btn-primary" onclick="saveSettings()">
+          <i class="fas fa-save me-1"></i>Save Settings
+        </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <i class="fas fa-check-circle text-success me-2"></i>
+      <strong class="me-auto">Success</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+    <div class="toast-body">
+      <!-- Toast message will be inserted here -->
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/app.js"></script>
+
+<script>
+// Settings modal functionality
+function showSettingsModal() {
+  const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+  modal.show();
+}
+
+function saveSettings() {
+  // Implementation for saving settings
+  const theme = document.getElementById('themeSelect').value;
+  const notifications = document.getElementById('notificationsToggle').checked;
+  const timezone = document.getElementById('timezoneSelect').value;
+  
+  // Save to localStorage for now (could be enhanced to save to server)
+  localStorage.setItem('userSettings', JSON.stringify({
+    theme,
+    notifications,
+    timezone
+  }));
+  
+  // Apply theme immediately
+  document.body.setAttribute('data-theme', theme);
+  
+  // Close modal and show success message
+  bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+  showAlert('Settings saved successfully!', 'success');
+}
+
+// Load saved settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedSettings = localStorage.getItem('userSettings');
+  if (savedSettings) {
+    const settings = JSON.parse(savedSettings);
+    document.getElementById('themeSelect').value = settings.theme || 'light';
+    document.getElementById('notificationsToggle').checked = settings.notifications !== false;
+    document.getElementById('timezoneSelect').value = settings.timezone || 'UTC';
+    
+    // Apply saved theme
+    document.body.setAttribute('data-theme', settings.theme || 'light');
+  }
+});
+</script>
 </body>
 </html> 

@@ -21,17 +21,76 @@
  */
 
 import express from "express";
-import bcrypt from "bcryptjs";
+import bcryptjs from "bcryptjs";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db.js";
-import { users, insertUserSchema, globalActivities, demoActivities, dailyTrackers, trackerEntries } from '../shared/schema.ts';
+import { 
+  users, 
+  insertUserSchema, 
+  loginSchema,
+  updateUserSchema,
+  globalActivities, 
+  dailyTrackers, 
+  trackerEntries,
+  userPreferences,
+  type ApiResponse,
+  type DashboardStats
+} from '../shared/schema.ts';
 import { isValidPlan } from "./validators.js"; // Plan validation utility
 import { setFlash } from "./auth.js"; // Flash message middleware
 import crypto from "crypto";
 import { computeUserProgress } from './progress.js';
 import { inArray } from 'drizzle-orm';
+import { z } from 'zod';
 
 const router = express.Router();
+
+// Enhanced error handling middleware
+const asyncHandler = (fn: Function) => (req: any, res: any, next: any) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Validation middleware
+const validateBody = (schema: z.ZodSchema) => (req: any, res: any, next: any) => {
+  try {
+    req.validatedBody = schema.parse(req.body);
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: error.errors
+      });
+    }
+    next(error);
+  }
+};
+
+// Rate limiting helper (simple in-memory implementation)
+const rateLimitMap = new Map();
+const rateLimit = (maxRequests: number, windowMs: number) => (req: any, res: any, next: any) => {
+  const key = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+  
+  if (!rateLimitMap.has(key)) {
+    rateLimitMap.set(key, []);
+  }
+  
+  const requests = rateLimitMap.get(key).filter((time: number) => time > windowStart);
+  
+  if (requests.length >= maxRequests) {
+    return res.status(429).json({
+      success: false,
+      error: "Too many requests. Please try again later."
+    });
+  }
+  
+  requests.push(now);
+  rateLimitMap.set(key, requests);
+  next();
+};
 
 // ---------- Landing Page ----------
 router.get("/", (req, res) => {
@@ -57,7 +116,7 @@ router.get("/register", (req, res) => {
 });
 
 // ---------- Registration POST ----------
-router.post("/register", async (req, res) => {
+router.post("/register", rateLimit(5, 15 * 60 * 1000), asyncHandler(async (req, res) => {
   const { confirmPassword, ...formData } = req.body;
   const parsed = insertUserSchema.safeParse(formData);
 
@@ -77,6 +136,23 @@ router.post("/register", async (req, res) => {
     return res.status(400).render("landing", {
       tab: "signup",
       signupError: "Passwords do not match.",
+      signinError: null,
+      signupData: formData,
+      signinData: {},
+      validationErrors: {},
+      successMessage: null,
+    });
+  }
+
+  // Check if user already exists
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.email, parsed.data.email),
+  });
+
+  if (existingUser) {
+    return res.status(400).render("landing", {
+      tab: "signup",
+      signupError: "An account with this email already exists.",
       signinError: null,
       signupData: formData,
       signinData: {},
@@ -105,7 +181,8 @@ router.post("/register", async (req, res) => {
   const userId = crypto.randomUUID();
 
   // Hash password and try to insert
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const hashedPassword = await bcryptjs.hash(req.body.password, 12);
+  
   try {
     await db.insert(users).values({
       id: userId,
@@ -113,6 +190,16 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       activitiesCount: 0,
     });
+    
+    // Create default user preferences
+    await db.insert(userPreferences).values({
+      userId: userId,
+      theme: "light",
+      notifications: true,
+      timezone: "UTC",
+      language: "en",
+    });
+    
     // After successful registration, show success message and switch to login tab
     return res.render("landing", {
       tab: "signin",
@@ -124,6 +211,7 @@ router.post("/register", async (req, res) => {
       successMessage: "Account created successfully! Please log in.",
     });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(400).render("landing", {
       tab: "signup",
       signupError: "User already exists or database error.",
@@ -134,10 +222,10 @@ router.post("/register", async (req, res) => {
       successMessage: null,
     });
   }
-});
+}));
 
 // ---------- Login POST ----------
-router.post("/login", async (req, res) => {
+router.post("/login", rateLimit(10, 15 * 60 * 1000), validateBody(loginSchema), asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   
   console.log('Login attempt for:', email);
@@ -148,7 +236,7 @@ router.post("/login", async (req, res) => {
 
   console.log('User found:', user ? 'Yes' : 'No');
   
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user || !user.isActive || !(await bcryptjs.compare(password, user.password))) {
     console.log('Authentication failed');
     return res.status(401).render("landing", {
       tab: "signin",
@@ -160,6 +248,11 @@ router.post("/login", async (req, res) => {
       successMessage: null,
     });
   }
+
+  // Update last login time
+  await db.update(users)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(users.id, user.id));
 
   // Use Passport.js login method to properly authenticate the user
   console.log('Attempting to log in user:', user.email);
@@ -179,7 +272,7 @@ router.post("/login", async (req, res) => {
     console.log('Login successful, redirecting to dashboard');
     res.redirect("/dashboard");
   });
-});
+}));
 
 // ---------- Logout ----------
 router.get("/logout", (req, res) => {
@@ -189,7 +282,7 @@ router.get("/logout", (req, res) => {
 });
 
 // ---------- Dashboard ----------
-router.get("/dashboard", async (req, res) => {
+router.get("/dashboard", asyncHandler(async (req, res) => {
   console.log('Dashboard route accessed');
   console.log('Is authenticated:', req.isAuthenticated());
   console.log('User:', req.user ? req.user.email : 'None');
@@ -212,8 +305,14 @@ router.get("/dashboard", async (req, res) => {
     }
     const progress = computeUserProgress(user, trackers, entries);
     
+    // Get user preferences
+    const preferences = await db.query.userPreferences.findFirst({
+      where: eq(userPreferences.userId, user.id),
+    });
+    
     res.render("dashboard_modern", { 
       user, 
+      preferences: preferences || {},
       streak: progress.currentStreak,
       completionRate: progress.completionRate,
       accountabilityCountdown: progress.accountabilityCountdown,
@@ -227,34 +326,53 @@ router.get("/dashboard", async (req, res) => {
     // Fallback with default values
     res.render("dashboard_modern", { 
       user, 
+      preferences: {},
       streak: 0,
       completionRate: 0
     });
   }
-});
+}));
 
 // ---------- API: Get All Activities ----------
-router.get("/api/activities", async (req, res) => {
+router.get("/api/activities", asyncHandler(async (req, res) => {
   try {
     // Only return global activities for all users
-    const globalActivitiesList = await db.select().from(globalActivities);
-    res.json(globalActivitiesList);
+    const globalActivitiesList = await db.select()
+      .from(globalActivities)
+      .where(eq(globalActivities.isActive, true))
+      .orderBy(globalActivities.category, globalActivities.title);
+    
+    res.json({
+      success: true,
+      data: globalActivitiesList
+    });
   } catch (err) {
     console.error("Error fetching activities:", String(err));
-    res.status(500).json({ error: "Failed to fetch activities" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch activities" 
+    });
   }
-});
+}));
 
 // ---------- API: Get User Stats ----------
-router.get("/api/stats", async (req, res) => {
+router.get("/api/stats", asyncHandler(async (req, res) => {
   let targetUserId = req.user?.id;
   if (req.query.userId && req.user && req.user.role === 'admin') {
     targetUserId = req.query.userId;
   }
-  if (!targetUserId) return res.status(401).json({ error: "Unauthorized" });
+  if (!targetUserId) return res.status(401).json({ 
+    success: false,
+    error: "Unauthorized" 
+  });
+  
   try {
     const user = await db.query.users.findFirst({ where: eq(users.id, targetUserId) });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ 
+      success: false,
+      error: "User not found" 
+    });
+    
     const trackers = await db.select().from(dailyTrackers).where(eq(dailyTrackers.userId, user.id)).orderBy(desc(dailyTrackers.date));
     const trackerIds = trackers.map(d => d.id);
     let entries = [];
@@ -262,16 +380,26 @@ router.get("/api/stats", async (req, res) => {
       entries = await db.select().from(trackerEntries).where(inArray(trackerEntries.trackerId, trackerIds));
     }
     const progress = computeUserProgress(user, trackers, entries);
-    res.json(progress);
+    
+    res.json({
+      success: true,
+      data: progress
+    });
   } catch (err) {
     console.error("Error fetching stats:", String(err));
-    res.status(500).json({ error: "Failed to fetch stats" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch stats" 
+    });
   }
-});
+}));
 
 // ---------- API: Get Today's Tracker ----------
-router.get("/api/tracker/today", async (req, res) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
+router.get("/api/tracker/today", asyncHandler(async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ 
+    success: false,
+    error: "Unauthorized" 
+  });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -285,7 +413,10 @@ router.get("/api/tracker/today", async (req, res) => {
       orderBy: [desc(dailyTrackers.id)],
     });
 
-    if (!tracker) return res.status(404).json({ error: "No tracker for today" });
+    if (!tracker) return res.status(404).json({ 
+      success: false,
+      error: "No tracker for today" 
+    });
 
     // Get tracker entries with activities
     const entries = await db
@@ -295,6 +426,8 @@ router.get("/api/tracker/today", async (req, res) => {
         activityId: trackerEntries.activityId,
         timeSlot: trackerEntries.timeSlot,
         status: trackerEntries.status,
+        completedAt: trackerEntries.completedAt,
+        notes: trackerEntries.notes,
         createdAt: trackerEntries.createdAt,
         updatedAt: trackerEntries.updatedAt,
         activity: globalActivities,
@@ -311,69 +444,166 @@ router.get("/api/tracker/today", async (req, res) => {
     // Update tracker completion rate if it's different
     if (tracker.completionRate !== completionRate) {
       await db.update(dailyTrackers)
-        .set({ completionRate })
+        .set({ 
+          completionRate,
+          completedActivities: entries.filter(e => e.status === 'completed').length,
+          totalActivities: entries.length,
+          updatedAt: new Date()
+        })
         .where(eq(dailyTrackers.id, tracker.id));
     }
 
-    res.json({ ...tracker, entries, completionRate });
+    res.json({ 
+      success: true,
+      data: { ...tracker, entries, completionRate }
+    });
   } catch (err) {
     console.error("Error fetching today's tracker:", String(err));
-    res.status(500).json({ error: "Failed to fetch today's tracker" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch today's tracker" 
+    });
   }
-});
+}));
 
 // PATCH: Update tracker entry status
-router.patch('/api/tracker/entries/:entryId/status', async (req, res) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
+router.patch('/api/tracker/entries/:entryId/status', asyncHandler(async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ 
+    success: false,
+    error: 'Unauthorized' 
+  });
+  
   const { entryId } = req.params;
   const entryIdInt = parseInt(entryId);
   if (isNaN(entryIdInt)) {
-    return res.status(400).json({ error: 'Invalid entry ID' });
+    return res.status(400).json({ 
+      success: false,
+      error: 'Invalid entry ID' 
+    });
   }
-  const { status } = req.body;
+  
+  const { status, notes } = req.body;
+  
+  if (!['pending', 'completed', 'skipped'].includes(status)) {
+    return res.status(400).json({ 
+      success: false,
+      error: 'Invalid status' 
+    });
+  }
+  
   try {
     // Check ownership or admin
     const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryIdInt) });
-    if (!entry) return res.status(404).json({ error: 'Entry not found' });
+    if (!entry) return res.status(404).json({ 
+      success: false,
+      error: 'Entry not found' 
+    });
+    
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
-    if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
+    if (!tracker) return res.status(404).json({ 
+      success: false,
+      error: 'Tracker not found' 
+    });
+    
     const user = req.user as any;
     if (!user || (tracker.userId !== user.id && user.role !== 'admin')) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ 
+        success: false,
+        error: 'Forbidden' 
+      });
     }
-    await db.update(trackerEntries).set({ status, updatedAt: new Date() }).where(eq(trackerEntries.id, entryIdInt));
-    res.json({ success: true });
+    
+    const updateData: any = { 
+      status, 
+      updatedAt: new Date() 
+    };
+    
+    if (status === 'completed') {
+      updateData.completedAt = new Date();
+    }
+    
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+    
+    await db.update(trackerEntries)
+      .set(updateData)
+      .where(eq(trackerEntries.id, entryIdInt));
+      
+    // Update activity usage count
+    if (status === 'completed') {
+      await db.update(globalActivities)
+        .set({ 
+          usageCount: sql`${globalActivities.usageCount} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(globalActivities.id, entry.activityId));
+    }
+    
+    res.json({ 
+      success: true,
+      message: `Activity marked as ${status}` 
+    });
   } catch (err) {
     console.error('Error updating tracker entry status:', String(err));
-    res.status(500).json({ error: 'Failed to update tracker entry status' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to update tracker entry status' 
+    });
   }
-});
+}));
 
 // DELETE: Remove tracker entry
-router.delete('/api/tracker/entries/:entryId', async (req, res) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Unauthorized' });
+router.delete('/api/tracker/entries/:entryId', asyncHandler(async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ 
+    success: false,
+    error: 'Unauthorized' 
+  });
+  
   const { entryId } = req.params;
   const entryIdInt = parseInt(entryId);
   if (isNaN(entryIdInt)) {
-    return res.status(400).json({ error: 'Invalid entry ID' });
+    return res.status(400).json({ 
+      success: false,
+      error: 'Invalid entry ID' 
+    });
   }
+  
   try {
     // Check ownership or admin
     const entry = await db.query.trackerEntries.findFirst({ where: eq(trackerEntries.id, entryIdInt) });
-    if (!entry) return res.status(404).json({ error: 'Entry not found' });
+    if (!entry) return res.status(404).json({ 
+      success: false,
+      error: 'Entry not found' 
+    });
+    
     const tracker = await db.query.dailyTrackers.findFirst({ where: eq(dailyTrackers.id, entry.trackerId) });
-    if (!tracker) return res.status(404).json({ error: 'Tracker not found' });
+    if (!tracker) return res.status(404).json({ 
+      success: false,
+      error: 'Tracker not found' 
+    });
+    
     const user = req.user as any;
     if (!user || (tracker.userId !== user.id && user.role !== 'admin')) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ 
+        success: false,
+        error: 'Forbidden' 
+      });
     }
+    
     await db.delete(trackerEntries).where(eq(trackerEntries.id, entryIdInt));
-    res.json({ success: true });
+    res.json({ 
+      success: true,
+      message: 'Activity removed successfully' 
+    });
   } catch (err) {
     console.error('Error deleting tracker entry:', String(err));
-    res.status(500).json({ error: 'Failed to delete tracker entry' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to delete tracker entry' 
+    });
   }
-});
+}));
 
 // ---------- API: Add Tracker Entry ----------
 router.post('/api/tracker/entries', async (req, res) => {
